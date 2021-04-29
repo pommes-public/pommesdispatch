@@ -1,0 +1,21 @@
+# Ignore (files stored at) a given path
+*/results/*.csv
+*/results/*.png
+
+# Ignore files with a special ending (or content)
+*__pycache__*
+*.ipynb_checkpoints/*
+*.idea
+*start_jupyter*
+*.aux
+*.bcf
+*.lof
+*.out
+*.run.xml
+*.toc
+*~
+*.gurobi.*
+*.pyomo.*
+*.tmp
+*.log
+*.lp
