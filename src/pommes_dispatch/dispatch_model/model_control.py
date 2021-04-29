@@ -17,7 +17,7 @@ Fabian Büllesbach, Carla Spiller, Sophie Westphal
 import logging
 import pandas as pd
 
-from functions_for_data_input_LP import nodes_from_csv, nodes_from_csv_rh
+from data_input import nodes_from_csv, nodes_from_csv_rh
 from functions_for_processing_of_outputs_LP import get_power_prices_from_duals
 from oemof.solph import (constraints, views,
                          models, network, processing)

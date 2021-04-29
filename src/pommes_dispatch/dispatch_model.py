@@ -1,26 +1,20 @@
-# %%
-
 # coding: utf-8
 
 """
 General description
 -------------------
-This is POMMES, the POwer Market Model of Energy and reSources
-Department at TU Berlin.
+This is the dispatch variant of POMMES, the POwer Market Model
+of Energy and reSources Department at TU Berlin.
 The fundamental power market model has been originally developed
 at TU Berlin and is now maintained by a developer group of alumni.
-The source code is freely available.
+The source code is freely available under MIT license.
+Usage of the model is highly encouraged. Contributing is welcome as well.
 
 Git And Documentation
 ---------------------
-All project files can be found at 
-https://git.tu-berlin.de/POMMES/POMMES.git
-
 The project files contain extensive DocString as well as inline comments.
 For additional information, see the wiki: 
 https://git.tu-berlin.de/POMMES/POMMES/wikis/home
-
-A public GitHub project is about to be set up soon.
 
 Licensing information and Disclaimer
 ------------------------------------
@@ -36,15 +30,16 @@ or its data inputs.
 
 Input Data
 ----------
-Files stored in '../data/Outputlisten/'
+Input data is read in from the repository POMMES_data using dependencies
 
 Installation requirements
 -------------------------
-Python version >= 3.7
-oemof version 0.4.1
+Python version >= 3.8
+oemof version 0.4.2
 
 
-@authors: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl, Benjamin Grosse
+@authors: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
+Benjamin Grosse
 
 Contributors:
 Sophie Westphal, Flora von Mikulicz-Radecki, Carla Spiller, Fabian Büllesbach,
@@ -52,8 +47,6 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 
 (*) Corresponding authors
 """
-
-# %%
 
 ### Package Imports
 import calendar
@@ -65,10 +58,8 @@ import pandas as pd
 
 # TODO: Generalize package structure and imports
 # Complete enumeration to check which functions are imported
-from src.pommes_dispatch.dispatch_model.functions_for_model_control_LP import (
-    build_simple_model,
-    build_RH_model, initial_states_RH, solve_RH_model,
-    dump_es)
+
+import src.pommes_dispatch.dispatch_model.model_control as model_control
 
 from src.pommes_dispatch.dispatch_model.functions_for_processing_of_outputs_LP import (
     create_aggregated_energy_source_results,
@@ -219,7 +210,7 @@ if RollingHorizon:
 
 if not RollingHorizon:
     # Build the mathematical optimization model
-    om = build_simple_model(path_folder_input,
+    om = model_control.build_simple_model(path_folder_input,
                             AggregateInput,
                             countries,
                             fuel_cost_pathway,
@@ -269,7 +260,7 @@ if RollingHorizon:
     for counter in range(amount_of_timeslices):
         # rebuild the EnergySystem in each iteration
         (om, es, timeseries_start, storage_labels,
-         datetime_index) = build_RH_model(
+         datetime_index) = model_control.build_RH_model(
             path_folder_input,
             AggregateInput,
             countries,
@@ -289,7 +280,7 @@ if RollingHorizon:
 
         # Solve RH model and return results
         (om, model_results, results, overall_objective,
-         overall_solution_time, power_prices) = solve_RH_model(
+         overall_solution_time, power_prices) = model_control.solve_RH_model(
             om,
             datetime_index,
             counter,
@@ -302,13 +293,13 @@ if RollingHorizon:
             solver=solver)
 
         # Get initial states for the next model run
-        storages_init_df = initial_states_RH(
+        storages_init_df = model_control.initial_states_RH(
             model_results,
             timeslice_length_wo_overlap_in_timesteps,
             storage_labels)
 
         if Dumps:
-            dump_es(om, es, "./dumps/", timestamp)
+            model_control.dump_es(om, es, "./dumps/", timestamp)
 
         # TODO: Get overall objective value for model comparison
         # overall_objective = reconstruct_objective_value(om)
@@ -343,32 +334,3 @@ if SaveProductionResults:
 if SavePriceResults:
     power_prices.to_csv(path_folder_output + filename + '_power-prices.csv',
                         sep=';', decimal=',')
-
-# @YW: My idea is to end here and keep visualization separate
-
-# %%
-
-### Visualize results
-
-Power = create_aggregated_energy_source_results(results)
-
-if PlotProductionResults:
-    draw_production_plot_new(Power,
-                             RollingHorizon)
-
-    if SaveProductionPlot:
-        path_folder_output = "./results/"
-        plt.savefig(path_folder_output + filename + '_production.png',
-                    dpi=150, bbox_inches="tight")
-
-    plt.show()
-
-if PlotPriceResults:
-    draw_price_plot(Power,
-                    power_prices)
-
-    if SavePricePlot:
-        plt.savefig(path_folder_output + filename + '_power-prices.png',
-                    dpi=150, bbox_inches="tight")
-
-    plt.show()
