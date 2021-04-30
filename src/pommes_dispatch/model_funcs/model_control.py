@@ -15,12 +15,14 @@ Fabian Büllesbach, Carla Spiller, Sophie Westphal
 """
 
 import logging
+
 import pandas as pd
+import pyomo.environ as po
+from oemof.solph import (constraints, views,
+                         models, network, processing)
 
 from data_input import nodes_from_csv, nodes_from_csv_rh
 from functions_for_processing_of_outputs_LP import get_power_prices_from_duals
-from oemof.solph import (constraints, views,
-                         models, network, processing)
 
 
 def add_further_constrs(om,
@@ -176,6 +178,38 @@ def build_simple_model(path_folder_input,
         emissions_limit)
 
     return om
+
+
+def get_power_prices_from_duals(om, datetime_index):
+    """ Function to obtain the power price results for a LP model formulation
+    (dispatch) from the dual value of the Bus.balance constraint of the
+    electricity bus. NOTE: Prices are other than 0 if constraint is binding
+    and equal to 0 if constraint is not binding, i.e. if plenty of production
+    surplus is available at no cost.
+
+    Parameters:
+    -----------
+    om: :class:`oemof.solph.models.Model`
+        The mathematical model formulation (including its dual values)
+
+    datetime_index: :obj:`pd.date_range`
+        The datetime_index of the energy system
+
+    Returns:
+    --------
+    power_prices: :obj:`pd.DataFrame`
+
+    """
+
+    constr = [c for c in om.component_objects(po.Constraint, active=True)
+              if c.name == "Bus.balance"][0]
+
+    power_prices_list = [om.dual[constr[index]] for index in constr if
+                         index[0].label == "DE_bus_el"]
+    power_prices = pd.DataFrame(data=power_prices_list, index=datetime_index,
+                                columns=["Power price"])
+
+    return power_prices
 
 
 def initial_states_RH(model_results,
@@ -454,8 +488,9 @@ def reconstruct_objective_value(om):
     for i, o in om.FLOWS:
         if om.flows[i, o].variable_costs[0] is not None:
             for t in om.TIMESTEPS:
-                variable_costs += (om.flow[i, o, t] * om.objective_weighting[t] *
-                                   om.flows[i, o].variable_costs[t])
+                variable_costs += (
+                            om.flow[i, o, t] * om.objective_weighting[t] *
+                            om.flows[i, o].variable_costs[t])
 
         if om.flows[i, o].positive_gradient['ub'][0] is not None:
             for t in om.TIMESTEPS:

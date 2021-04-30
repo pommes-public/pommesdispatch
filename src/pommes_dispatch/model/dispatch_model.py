@@ -55,31 +55,18 @@ import math
 import time
 
 import pandas as pd
-
-# TODO: Generalize package structure and imports
-# Complete enumeration to check which functions are imported
-
-import src.pommes_dispatch.dispatch_model.model_control as model_control
-
-from src.pommes_dispatch.dispatch_model.functions_for_processing_of_outputs_LP import (
-    create_aggregated_energy_source_results,
-    draw_production_plot_new,
-    get_power_prices_from_duals,
-    draw_price_plot)
-
-from supplementary.helper_functions_LP import days_between, timesteps_between_timestamps
-from matplotlib import pyplot as plt
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.tools import logger
+from pommes_supplementary.helper_functions import (
+    days_between, timesteps_between_timestamps)
 
-# %%
+# import src.pommes_dispatch.model_funcs.model_control as model_control
+from model_funcs import model_control
 
 ##############################################################################
 ### MODEL SETTINGS ###########################################################
 ##############################################################################
-
-# %%
 
 ### 1) Determine model configuration through control variables
 
@@ -99,7 +86,7 @@ ActivateEmissionsLimit = False
 emission_pathway = '100_percent_linear'
 
 # Control Demand response modeling
-# options for approach: ['DIW', 'DLR', 'IER', 'TUD']
+# options for approach: ['DIW', 'DLR', 'oemof']
 # options for scenario: ['25', '50', '75']
 ActivateDemandResponse = False
 approach = 'DLR'
@@ -107,14 +94,8 @@ scenario = '50'
 
 # Control processing of outputs
 Dumps = False
-PlotProductionResults = False
-PlotPriceResults = False
-SaveProductionPlot = False
-SavePricePlot = False
 SaveProductionResults = True
 SavePriceResults = True
-
-# %%
 
 ### 2) Set model optimization time and frequency for simple model runs
 
@@ -154,8 +135,6 @@ filename = (basic_filename + "start-" + starttime[:10] + "_"
 
 logger.define_logging(logfile=filename + '.log')
 
-# %%
-
 ### 3) Set input data
 
 # path_folder_output folder where all input data is stored
@@ -175,8 +154,6 @@ if ActivateDemandResponse:
                  'Considering a {}% scenario'.format(approach, scenario))
 else:
     logging.info('Running a model WITHOUT DEMAND RESPONSE')
-
-# %%
 
 ### Calculate timeslice and model control information for Rolling horizon
 
@@ -198,31 +175,27 @@ if RollingHorizon:
         overall_timesteps
         / timeslice_length_wo_overlap_in_timesteps)
 
-# %%
-
 ##############################################################################
 ### MODEL RUN ################################################################
 ##############################################################################
-
-# %%
 
 ### Model run for simple model set up
 
 if not RollingHorizon:
     # Build the mathematical optimization model
     om = model_control.build_simple_model(path_folder_input,
-                            AggregateInput,
-                            countries,
-                            fuel_cost_pathway,
-                            starttime,
-                            endtime,
-                            freq,
-                            str(year),
-                            ActivateEmissionsLimit,
-                            emission_pathway,
-                            ActivateDemandResponse,
-                            approach,
-                            scenario)
+                                          AggregateInput,
+                                          countries,
+                                          fuel_cost_pathway,
+                                          starttime,
+                                          endtime,
+                                          freq,
+                                          str(year),
+                                          ActivateEmissionsLimit,
+                                          emission_pathway,
+                                          ActivateDemandResponse,
+                                          approach,
+                                          scenario)
 
     om.receive_duals()
     logging.info('Obtaining dual values and reduced costs from the model\n'
@@ -235,15 +208,13 @@ if not RollingHorizon:
     ts_2 = time.gmtime()
     overall_time = time.mktime(ts_2) - time.mktime(ts)
 
-    power_prices = get_power_prices_from_duals(
+    power_prices = model_control.get_power_prices_from_duals(
         om, pd.date_range(starttime, endtime, freq=freq))
 
     print("********************************************************")
     logging.info("Done!")
     print(f'Overall solution time: {overall_solution_time:.2f}')
     print(f'Overall time: {overall_time:.2f}')
-
-# %%
 
 ### Rolling horizon: Run LP model
 
@@ -312,13 +283,9 @@ if RollingHorizon:
     print(f'Overall solution time: {overall_solution_time:.2f}')
     print(f'Overall time: {overall_time:.2f}')
 
-# %%
-
 ##############################################################################
 ### PROCESS MODEL RESULTS ####################################################
 ##############################################################################
-
-# %%
 
 if not RollingHorizon:
     model_results = processing.results(om)
