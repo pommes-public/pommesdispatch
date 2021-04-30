@@ -16,7 +16,8 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 """
 
 from subroutines import *
-# from supplementary.helper_functions_LP import convert_annual_limit
+# TODO: Prepare pommes_supplementary repo to use import
+from pommes_supplementary.helpers import convert_annual_limit
 
 
 def parse_input_data(path_folder_input,
@@ -26,7 +27,7 @@ def parse_input_data(path_folder_input,
                      year=str(2017),
                      ActivateDemandResponse=False,
                      scenario='50'):
-    """Read in csv files and build oemof components
+    r"""Read in csv files and build oemof components
 
     Parameters
     ----------
@@ -34,8 +35,8 @@ def parse_input_data(path_folder_input,
         The path_folder_output where the input data is stored
 
     AggregateInput: :obj:`boolean`
-        boolean control variable indicating whether to use complete or aggregated
-        transformer input data set
+        boolean control variable indicating whether to use complete
+        or aggregated transformer input data set
 
     countries : :obj:`list` of str
         List of countries to be simulated
@@ -53,6 +54,7 @@ def parse_input_data(path_folder_input,
         Demand response scenario to be modeled;
         must be one of ['25', '50', '75'] whereby '25' is the lower,
         i.e. rather pessimistic estimate
+
     Returns
     -------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -60,24 +62,15 @@ def parse_input_data(path_folder_input,
         with component names as keys
     """
     # save the input data in a dict; keys are names and values are DataFrames
-    files = {#'buses': 'buses',
-             'links': 'links',
+    files = {'links': 'links',
              'links_ts': 'links_ts',
              'sinks_excess': 'sinks_excess',
              'sinks_demand_el': 'sinks_demand_el',
              'sinks_demand_el_ts': 'sinks_demand_el_ts',
              'sources_shortage': 'sources_shortage',
-             # 'sources_commodity': 'sources_commodity',
              'sources_renewables_fluc': 'sources_renewables_fluc',
-             # 'costs_fuel': 'costs_fuel_' + fuel_cost_pathway,
-             # 'costs_ramping': 'costs_ramping',
-             # # 'costs_fixed',
-             # 'costs_carbon': 'costs_carbon',
              'costs_market_values': 'costs_market_values',
-             # 'costs_operation': 'costs_operation',
-             # 'costs_operation_storages': 'costs_operation_storages',
-             'emission_limits': 'emission_limits'
-             }
+             'emission_limits': 'emission_limits'}
 
     add_files = {'buses': 'buses',
                  'sources_commodity': 'sources_commodity',
@@ -85,13 +78,9 @@ def parse_input_data(path_folder_input,
                  'sources_renewables_ts': 'sources_renewables_ts',
                  'storages_el': 'storages_el',
                  'transformers': 'transformers',
-                 # 'transformers_minload_ts': 'transformers_minload_ts',
                  'transformers_renewables': 'transformers_renewables',
-                 # 'min_loads_dh': 'min_loads_dh',
-                 # 'min_loads_ipp': 'min_loads_ipp',
                  'costs_fuel': 'costs_fuel_' + fuel_cost_pathway,
                  'costs_ramping': 'costs_ramping',
-                 # 'costs_fixed',
                  'costs_carbon': 'costs_carbon',
                  'costs_operation': 'costs_operation',
                  'costs_operation_renewables': 'costs_operation_renewables',
@@ -105,7 +94,7 @@ def parse_input_data(path_folder_input,
     if AggregateInput:
         add_files['transformers'] = 'transformers_clustered'
 
-    # Addition: demand response units
+    # Add demand response units
     if ActivateDemandResponse:
         add_files['sinks_dr_el'] = 'sinks_demand_response_el_' + scenario
         add_files['sinks_dr_el_ts'] = (
@@ -121,19 +110,22 @@ def parse_input_data(path_folder_input,
 
     files = {**files, **add_files, **other_files}
 
-    input_data = {}
     if not year == str(2030):
-        input_data = {key: load_input_data(filename=name,
-                                           path_folder_input=path_folder_input,
-                                           countries=countries)
-                      for key, name in files.items()}
+        input_data = {
+            key: load_input_data(
+                filename=name,
+                path_folder_input=path_folder_input,
+                countries=countries)
+            for key, name in files.items()}
     else:
-        input_data = {key: load_input_data(filename=name,
-                                           path_folder_input=path_folder_input,
-                                           countries=countries,
-                                           reindex=True,
-                                           year=year)
-                      for key, name in files.items()}
+        input_data = {
+            key: load_input_data(
+                filename=name,
+                path_folder_input=path_folder_input,
+                countries=countries,
+                reindex=True,
+                year=year)
+            for key, name in files.items()}
 
     return input_data
 
@@ -143,8 +135,8 @@ def add_components(input_data,
                    endtime='2017-01-01 23:00:00',
                    year=2017,
                    ActivateDemandResponse=False,
-                   approach='DIW'):
-    """Add the oemof components to a dictionary of nodes
+                   approach='DLR'):
+    r"""Add the oemof components to a dictionary of nodes
 
     Note: Storages are not included here. They have to be defined
     separately since the approaches differ between RH and simple model.
@@ -175,12 +167,10 @@ def add_components(input_data,
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
-
     """
     # data container for oemof components
     node_dict = {}
 
-    ### create oemof components
     # create buses
     node_dict = create_buses(input_data['buses'], node_dict)
 
@@ -198,7 +188,8 @@ def add_components(input_data,
                                          node_dict,
                                          year)
 
-    node_dict = create_shortage_sources(input_data['sources_shortage'], node_dict)
+    node_dict = create_shortage_sources(input_data['sources_shortage'],
+                                        node_dict)
 
     node_dict = create_renewables(input_data['sources_renewables'],
                                   input_data['sources_renewables_ts'],
@@ -212,7 +203,6 @@ def add_components(input_data,
 
     # create sinks
     if ActivateDemandResponse:
-
         node_dict, dr_overall_load_ts_df = create_demand_response_units(
             input_data['sinks_dr_el'],
             input_data['sinks_dr_el_ts'],
@@ -235,6 +225,7 @@ def add_components(input_data,
             input_data['sinks_demand_el_ts'],
             starttime, endtime,
             node_dict)
+
     node_dict = create_excess_sinks(
         input_data['sinks_excess'], node_dict)
 
@@ -245,7 +236,6 @@ def add_components(input_data,
         endtime,
         node_dict,
         input_data['costs_operation'],
-        # input_data['costs_fixed'],
         input_data['costs_ramping'],
         input_data['transformers_minload_ts'],
         input_data['min_loads_dh'],
@@ -271,7 +261,7 @@ def add_limits(input_data,
                emission_pathway,
                starttime='2017-01-01 00:00:00',
                endtime='2017-01-01 23:00:00'):
-    """Add further limits to the optimization model (emissions limit for now)
+    r"""Add further limits to the optimization model (emissions limit for now)
 
     Parameters
     ----------
@@ -312,7 +302,7 @@ def nodes_from_csv(path_folder_input,
                    ActivateDemandResponse=False,
                    approach='DIW',
                    scenario='50'):
-    """Build oemof components from input data
+    r"""Build oemof components from input data
 
     Parameters
     ----------
@@ -320,8 +310,8 @@ def nodes_from_csv(path_folder_input,
         The path_folder_output where the input data is stored
 
     AggregateInput: :obj:`boolean`
-        boolean control variable indicating whether to use complete or aggregated
-        transformer input data set
+        boolean control variable indicating whether to use complete
+        or aggregated transformer input data set
 
     countries : :obj:`list` of str
         List of countries to be simulated
@@ -361,7 +351,6 @@ def nodes_from_csv(path_folder_input,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
     """
-
     input_data = parse_input_data(
         path_folder_input,
         AggregateInput,
@@ -409,7 +398,7 @@ def nodes_from_csv_rh(path_folder_input,
                       ActivateDemandResponse=False,
                       approach='DIW',
                       scenario='50'):
-    """Read in csv files and build oemof components (Rolling Horizon run)
+    r"""Read in csv files and build oemof components (Rolling Horizon run)
 
     Runs function for regular optimization run and updates storage values
 
@@ -471,11 +460,10 @@ def nodes_from_csv_rh(path_folder_input,
         used for assessing these and assigning initial states (via the
         function initial_states_RH form functions_for_model_control_LP)
     """
-
     freq_used = {'60min': (timeslice_length_with_overlap, 'h'),
                  '15min': (timeslice_length_with_overlap * 15, 'min')}[freq]
 
-    # Determine starttime and endtime
+    # Determine start time and end time
     starttime = timeseries_start.strftime("%Y-%m-%d %H:%M:%S")
     endtime = (timeseries_start
                + pd.to_timedelta(freq_used[0], freq_used[1])).strftime(
