@@ -30,7 +30,7 @@ def add_further_constrs(om,
                         emissions_limit,
                         countries=None,
                         fuels=None):
-    """Integrate further constraints into the optimization model
+    r"""Integrate further constraints into the optimization model
 
     For now, an additional overall emissions limit can be imposed.
 
@@ -55,9 +55,7 @@ def add_further_constrs(om,
 
     fuels : :obj:`list` of `str`
         The fuels for which an emissions limit shall be imposed
-
     """
-
     if countries is None:
         countries = ['DE']
 
@@ -66,7 +64,7 @@ def add_further_constrs(om,
                  'natgas', 'uranium', 'oil',
                  'otherfossil', 'waste', 'mixedfuels']
 
-    # Emissions limit is imposed for flows from commodity source to commodity bus
+    # Emissions limit is imposed for flows from commodity source to bus
     emission_flow_labels = [country + '_bus_' + fuel
                             for country in countries
                             for fuel in fuels]
@@ -94,9 +92,9 @@ def build_simple_model(path_folder_input,
                        ActivateEmissionsLimit=False,
                        emission_pathway='100_percent_linear',
                        ActivateDemandResponse=False,
-                       approach='DIW',
+                       approach='DLR',
                        scenario='50'):
-    """Set up and return a simple model (i.e. an overall optimization run
+    r"""Set up and return a simple model (i.e. an overall optimization run
     not including any measures for complexity reduction). 
     
     Parameters
@@ -143,8 +141,7 @@ def build_simple_model(path_folder_input,
     Returns
     -------
     om : :class:`oemof.colph.models.Model`
-        The mathematical optimisation model to be solved  
-        
+        The mathematical optimisation model to be solved
     """
     logging.info('Starting optimization')
     logging.info('Running a DISPATCH OPTIMIZATION')
@@ -181,11 +178,8 @@ def build_simple_model(path_folder_input,
 
 
 def get_power_prices_from_duals(om, datetime_index):
-    """ Function to obtain the power price results for a LP model formulation
-    (dispatch) from the dual value of the Bus.balance constraint of the
-    electricity bus. NOTE: Prices are other than 0 if constraint is binding
-    and equal to 0 if constraint is not binding, i.e. if plenty of production
-    surplus is available at no cost.
+    r"""Obtain the power price results for the dispatch model
+    from the dual value of the Bus.balance constraint of the electricity bus.
 
     Parameters:
     -----------
@@ -198,9 +192,7 @@ def get_power_prices_from_duals(om, datetime_index):
     Returns:
     --------
     power_prices: :obj:`pd.DataFrame`
-
     """
-
     constr = [c for c in om.component_objects(po.Constraint, active=True)
               if c.name == "Bus.balance"][0]
 
@@ -215,7 +207,7 @@ def get_power_prices_from_duals(om, datetime_index):
 def initial_states_RH(model_results,
                       timeslice_length_wo_overlap_in_timesteps,
                       storage_labels):
-    """Obtain the initial states for the upcoming rolling horizon model run
+    r"""Obtain the initial states for the upcoming rolling horizon model run.
     
     Parameters
     ----------                          
@@ -233,9 +225,7 @@ def initial_states_RH(model_results,
     storages_init_df : :obj:`pd.DataFrame`
         A pd.DataFrame containing the storage data (i.e. statuses for
         the last timestep of the optimization window - excluding overlap)
-        
     """
-
     storages_init_df = pd.DataFrame(columns=['Capacity_Last_Timestep'],
                                     index=storage_labels)
 
@@ -267,7 +257,7 @@ def build_RH_model(path_folder_input,
                    ActivateDemandResponse,
                    approach,
                    scenario):
-    """ Set up and return a rolling horizon LP dispatch model
+    r"""Set up and return a rolling horizon LP dispatch model
 
     Parameters
     ----------
@@ -366,6 +356,7 @@ def build_RH_model(path_folder_input,
         approach,
         scenario)
 
+    # Update for next iteration
     timeseries_start = timeseries_end
 
     es.add(*node_dict.values())
@@ -446,9 +437,7 @@ def solve_RH_model(om,
         
     overall_solution_time :obj:`float`
         The overall solution time
-    
     """
-
     om.receive_duals()
     logging.info('Obtaining dual values and reduced costs from the model \n'
                  'in order to calculate power prices.')
@@ -477,44 +466,3 @@ def solve_RH_model(om,
 
     return (om, model_results, results, overall_objective,
             overall_solution_time, power_prices)
-
-
-# TODO: Resume here, JK / YW
-def reconstruct_objective_value(om):
-    """ WORK IN PROGRESS; NO WARRANTY, THERE MAY BE BUGS HERE! """
-    variable_costs = 0
-    gradient_costs = 0
-
-    for i, o in om.FLOWS:
-        if om.flows[i, o].variable_costs[0] is not None:
-            for t in om.TIMESTEPS:
-                variable_costs += (
-                            om.flow[i, o, t] * om.objective_weighting[t] *
-                            om.flows[i, o].variable_costs[t])
-
-        if om.flows[i, o].positive_gradient['ub'][0] is not None:
-            for t in om.TIMESTEPS:
-                gradient_costs += (om.flows[i, o].positive_gradient[i, o, t] *
-                                   om.flows[i, o].positive_gradient[
-                                       'costs'])
-
-        if om.flows[i, o].negative_gradient['ub'][0] is not None:
-            for t in om.TIMESTEPS:
-                gradient_costs += (om.flows[i, o].negative_gradient[i, o, t] *
-                                   om.flows[i, o].negative_gradient[
-                                       'costs'])
-
-    return variable_costs + gradient_costs
-
-
-def dump_es(om, es, path, timestamp):
-    """Create a dump of the energy system """
-
-    es.results['main'] = processing.results(om)
-    es.results['meta'] = processing.meta_results(om)
-
-    filename = "es_dump_" + timestamp + ".oemof"
-
-    es.dump(dpath=path, filename=filename)
-
-    return None

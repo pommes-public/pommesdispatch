@@ -458,7 +458,10 @@ def nodes_from_csv_rh(path_folder_input,
     storage_labels : :obj:`list` of :class:`str`
         A list of the labels of all storage elements included in the model
         used for assessing these and assigning initial states (via the
-        function initial_states_RH form functions_for_model_control_LP)
+        function initial_states_RH form functions_for_model_control_LP)+
+
+    emissions_limit : int or None
+        The overall emissions limit
     """
     freq_used = {'60min': (timeslice_length_with_overlap, 'h'),
                  '15min': (timeslice_length_with_overlap * 15, 'min')}[freq]
