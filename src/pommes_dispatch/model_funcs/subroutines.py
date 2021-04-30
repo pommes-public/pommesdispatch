@@ -249,7 +249,6 @@ def create_shortage_sources(shortage_df, node_dict):
         Modified dictionary containing all nodes of the EnergySystem including
         the shortage source elements 
     """
-
     for i, s in shortage_df.iterrows():
         node_dict[i] = solph.Source(
             label=i,
@@ -285,9 +284,7 @@ def create_renewables(renewables_df, timeseries_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem
         including the renewables source elements
-        
     """
-
     for i, re in renewables_df.iterrows():
         try:
             node_dict[i] = solph.Source(
@@ -339,9 +336,7 @@ def create_demand(demand_df, timeseries_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem
         including the demand sink elements
-    
     """
-
     for i, d in demand_df.iterrows():
         kwargs_dict = {
             'label': i,
@@ -419,7 +414,6 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
         NOTE: This shall be substituted through a version which already
         includes this in the data preparation
     """
-
     for i, d in demand_response_df.iterrows():
         # Use kwargs dict for easier assignment of parameters
         # kwargs for all DR modeling approaches
@@ -434,7 +428,6 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
             'max_capacity_down': d['potential_pos_overall'],
             'delay_time': math.ceil(d['shifting_duration']),
             'shed_time': 1,
-            'recovery_time_shift': math.ceil(d['regeneration_duration']),
             'recovery_time_shed': 0,
             'cost_dsm_up': d['variable_costs'] / 2,
             'cost_dsm_down_shift': d['variable_costs'] / 2,
@@ -446,20 +439,23 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
 
         # kwargs dependent on DR modeling approach chosen
         kwargs_dict = {
-            'DIW': {'method': 'delay',
-                    'shift_interval': 24},
+            'DIW': {'approach': 'DIW',
+                    'recovery_time_shift': math.ceil(
+                        d['regeneration_duration'])},
 
-            'DLR': {'shift_time': d['interference_duration_pos'],
+            'DLR': {'approach': 'DLR',
+                    'shift_time': d['interference_duration_pos'],
                     'ActivateYearLimit': True,
                     'ActivateDayLimit': False,
                     'n_yearLimit_shift': np.max(
                         [round(d['maximum_activations_year']), 1]),
                     'n_yearLimit_shed': 1,
                     't_dayLimit': 24,
-                    'addition': False,
+                    'addition': True,
                     'fixes': True},
 
-            'oemof': {}
+            'oemof': {'approach': 'oemof',
+                      'shift_interval': 24}
         }
 
         approach_dict = {
@@ -490,7 +486,7 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
 
 
 def create_excess_sinks(excess_df, node_dict):
-    """Create excess sinks and add them to the dict of nodes.
+    r"""Create excess sinks and add them to the dict of nodes.
 
     The German excess sink is additionally connected to the renewable buses
     including punishment costs, which is needed to model negative prices.
@@ -532,7 +528,7 @@ def create_excess_sinks(excess_df, node_dict):
 
 
 def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
-    """Build a CHP transformer (fixed relation heat / power)
+    r"""Build a CHP transformer (fixed relation heat / power)
     
     Parameters
     ----------
@@ -557,9 +553,7 @@ def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     node_dict[i] : `transformer <oemof.network.Transformer>`
         The transformer element to be added to the dict of nodes
         as i-th element
-    
     """
-
     node_dict[i] = solph.Transformer(
         label=i,
         inputs={node_dict[t['from']]: solph.Flow()},
@@ -575,7 +569,7 @@ def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
 
 def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
                               outflow_args_th):
-    """Build variable CHP transformer.
+    r"""Build variable CHP transformer.
 
     (fixed relation heat / power or condensing only)
     
@@ -602,9 +596,7 @@ def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
     node_dict[i] : `transformer <oemof.network.Transformer>`
         The transformer element to be added to the dict of nodes
         as i-th element
-    
     """
-
     node_dict[i] = solph.Transformer(
         label=i,
         inputs={node_dict[t['from']]: solph.Flow()},
@@ -621,7 +613,7 @@ def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
 
 
 def build_condensing_transformer(i, t, node_dict, outflow_args_el):
-    """Build a regular condensing transformer
+    r"""Build a regular condensing transformer
     
     Parameters
     ----------
@@ -643,9 +635,7 @@ def build_condensing_transformer(i, t, node_dict, outflow_args_el):
     node_dict[i] : `transformer <oemof.network.Transformer>`
         The transformer element to be added to the dict of nodes
         as i-th element
-    
     """
-
     node_dict[i] = solph.Transformer(
         label=i,
         inputs={node_dict[t['from']]: solph.Flow()},
@@ -666,7 +656,7 @@ def create_transformers_conventional(transformers_df,
                                      min_loads_dh,
                                      min_loads_ipp,
                                      year=2017):
-    """Create transformers elements and add them to the dict of nodes
+    r"""Create transformers elements and add them to the dict of nodes
     
     Parameters
     ----------
@@ -707,9 +697,7 @@ def create_transformers_conventional(transformers_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem
         including the demand sink elements
-        
     """
-
     for i, t in transformers_df.iterrows():
 
         outflow_args_el = {
@@ -775,7 +763,7 @@ def create_transformers_RES(transformers_renewables,
                             endtime,
                             node_dict,
                             year=2017):
-    """Create renewable energy transformers and add them to the dict of nodes.
+    r"""Create renewable energy transformers and add them to the dict of nodes.
 
     Parameters
     ----------
@@ -813,7 +801,6 @@ def create_transformers_RES(transformers_renewables,
         Modified dictionary containing all nodes of the EnergySystem
         including the renewable transformer elements
     """
-
     for i, t in transformers_renewables.iterrows():
         # endogeneous fRES
         if not t['fixed']:
@@ -821,11 +808,11 @@ def create_transformers_RES(transformers_renewables,
                 'nominal_value': t['capacity'],
                 'variable_costs': (
                         costs_operation_renewables.at[i, 'costs']
-                        + np.array(costs_market_values[t['from']][starttime:
-                                                                  endtime])),
+                        + np.array(
+                    costs_market_values[t['from']][starttime:endtime])),
                 'min': t['min_load_factor'],
-                'max': np.array(sources_renewables_ts[t['from']][starttime:
-                                                                 endtime]),
+                'max': np.array(
+                    sources_renewables_ts[t['from']][starttime:endtime]),
                 'positive_gradient': {
                     'ub': t['grad_pos'],
                     'costs': costs_ramping.loc[t['from'], year]},
@@ -862,7 +849,7 @@ def create_transformers_RES(transformers_renewables,
 
 def create_storages(storages_df, storage_var_costs_df,
                     node_dict, year=2017):
-    """ Create storages and add the to the dict of nodes.
+    r"""Create storages and add the to the dict of nodes.
     
     Parameters
     ----------   
@@ -883,9 +870,7 @@ def create_storages(storages_df, storage_var_costs_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem
         including the storage elements
-        
     """
-
     for i, s in storages_df.iterrows():
 
         if s['type'] == 'phes':
@@ -931,8 +916,7 @@ def create_storages(storages_df, storage_var_costs_df,
 
 def create_storages_rh(storages_df, storage_var_costs_df,
                        storages_init_df, node_dict, year=2017):
-    """ Function to read in data from storages table and to create the storages elements
-    by adding them to the dictionary of nodes.
+    r"""Create storages, add them to the dict of nodes, return storage labels.
     
     Parameters
     ----------
@@ -956,8 +940,10 @@ def create_storages_rh(storages_df, storage_var_costs_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem
         including the demand sink elements
-    """
 
+    storage_labels : list
+        List of storage labels
+    """
     storage_labels = []
 
     for i, s in storages_df.iterrows():
@@ -965,8 +951,8 @@ def create_storages_rh(storages_df, storage_var_costs_df,
         storage_labels.append(i)
         try:
             initial_capacity_last = (
-                        storages_init_df.loc[i, 'Capacity_Last_Timestep']
-                        / s['nominal_storable_energy'])
+                    storages_init_df.loc[i, 'Capacity_Last_Timestep']
+                    / s['nominal_storable_energy'])
         except:
             initial_capacity_last = s['initial_storage_level']
 
