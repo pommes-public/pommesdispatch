@@ -91,7 +91,6 @@ approach = 'DLR'
 scenario = '50'
 
 # Control processing of outputs
-Dumps = False
 SaveProductionResults = True
 SavePriceResults = True
 
@@ -266,12 +265,6 @@ if RollingHorizon:
             model_results,
             timeslice_length_wo_overlap_in_timesteps,
             storage_labels)
-
-        if Dumps:
-            model_control.dump_es(om, es, "./dumps/", timestamp)
-
-        # TODO: Get overall objective value for model comparison
-        # overall_objective = reconstruct_objective_value(om)
 
         ts_2 = time.gmtime()
         overall_time = calendar.timegm(ts_2) - calendar.timegm(ts)
