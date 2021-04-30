@@ -4,50 +4,41 @@ Created on Thu May  2 13:44:03 2019
 
 General desription
 ------------------
-This file contains function definitions for subroutines used for reading in input data
-used for the fundamental model for power market optimization modelling 
-from the Department Energy and Resources of TU Berlin.
+This file contains all subroutines used for reading in input data
+for the dispatch variant of POMMES.
 
-These functions are imported by the file for reading in input data in order
-to increase code readability and reproducability (routines are reused for similar function definitions).
+Functions build_XX_transformer represent a hierarchical structure:
+    build_XX_transformer builds a single transformer element of a given type
+    and returns this to create_XX_transformers as node_dict[i], so the i_th
+    element to be build
 
-Functions create_XX_transformer as well as build_XX_transformer represent a
-hierarchical structure:
-    - create_XX_transformers iterates over transformer_df and actually adds
-      the transformer elements to the node_dict
-    - build_XX_transformer builds a single transformer element of a given type
-      and returns this to create_XX_transformers as node_dict[i], so the i_th
-      element to be build
+@author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
+Benjamin Grosse
 
-@author:  Johannes Kochems, Johannes Giehl, Carla Spiller, Sophie Westphal
+Contributors:
+Sophie Westphal, Flora von Mikulicz-Radecki, Carla Spiller, Fabian Büllesbach,
+Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
+
+(*) Corresponding authors
 """
-
-# Import necessary packages for function definitions
 import math
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 import oemof.solph as solph
-
-# TODO: Revise repo structure for clean imports of DR modeling
-# Imports for demand response modeling
-import SinkDSM_DIW as DSM_DIW
-import SinkDSM_DLR as DSM_DLR
-import SinkDSM_IER as DSM_IER
-import SinkDSM_TUD as DSM_TUD
 
 
 def load_input_data(filename=None,
                     path_folder_input='../data/Outputlisten/',
                     countries=None,
-                    reindex=False,
-                    year=str(2017)):
-    """Load input data from csv files.
+                    reindex=False):
+    r"""Load input data from csv files.
 
     Parameters
     ----------
     filename : :obj:`str`
-        Name of CSV file containing data
+        Name of .csv file containing data
 
     path_folder_input : :obj:`str`
         The path_folder_output where the input data is stored
@@ -66,21 +57,16 @@ def load_input_data(filename=None,
     df :pandas:`pandas.DataFrame`
         DataFrame containing information about nodes or time series.
     """
-    # TODO: include read in from binary files to save space with timeseries
-    # TODO: implement checkers for input data Validity, formats and such
-
     df = pd.read_csv(path_folder_input + filename + '.csv', index_col=0)
 
     if 'country' in df.columns and countries is not None:
         df = df[df['country'].isin(countries)]
 
-    # TODO: Tidy this up and make it robust:
-    #  Do not consider real years and timesteps anymore,
-    #  but synthetic model years consisting each of 8760 hours
+    # TODO: Tidy this up and make it robust
     if (('_ts' in filename
-            or 'market_values' in filename
-            or 'min_loads' in filename)
-            and (reindex == True)):
+         or 'market_values' in filename
+         or 'min_loads' in filename)
+            and reindex is True):
         df.index = pd.DatetimeIndex(df.index)
         df.index.freq = 'H'
         datediff = (df.index[0]
@@ -98,14 +84,17 @@ def load_input_data(filename=None,
         df.index = new_index
 
     if df.isna().any().any() and '_ts' in filename:
-        print(f'Attention! Time series input data file {filename} contains NaNs.')
+        print(
+            f'Attention! Time series input data file '
+            f'{filename} contains NaNs.'
+        )
         print(df.loc[df.isna().any(axis=1)])
 
     return df
 
 
 def create_buses(buses_df, node_dict):
-    """Create buses and add them to the dict of nodes.
+    r"""Create buses and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -120,7 +109,6 @@ def create_buses(buses_df, node_dict):
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem including
         the buses elements
-        
     """
     for i, b in buses_df.iterrows():
         node_dict[i] = solph.Bus(label=i)
@@ -130,7 +118,7 @@ def create_buses(buses_df, node_dict):
 
 def create_links(links_df, links_capacities_actual_df,
                  node_dict, starttime, endtime, year):
-    """ Create links and add them to the dict of nodes.
+    r"""Create links and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -157,9 +145,7 @@ def create_links(links_df, links_capacities_actual_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem including
         the link elements
-        
     """
-
     # try and except statement since not all countries might be modeled
     for i, l in links_df.iterrows():
         try:
@@ -224,8 +210,7 @@ def create_commodity_sources(commodity_sources_df=None,
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem including 
-        the commodity source elements 
-        
+        the commodity source elements
     """
     if fuel_costs_df is not None and carbon_costs_df is not None:
         for i, cs in commodity_sources_df.iterrows():
@@ -247,7 +232,7 @@ def create_commodity_sources(commodity_sources_df=None,
     return node_dict
 
 
-# TODO: SHOW A WARNING IF SHORTAGE OR EXCESS ARE ACTIVE
+# TODO: Show a warning if shortage or excess is active
 def create_shortage_sources(shortage_df, node_dict):
     """Create shortage sources and add them to the dict of nodes.
     
@@ -498,7 +483,8 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
                     # Hard-coded limit to prevent IndexError for small simulation timeframe
                     # 'annual_frequency_shift': 1,
                     'annual_frequency_shed': len(np.array(load_timeseries_df[i]
-                                                          .loc[starttime:endtime])),
+                                                          .loc[
+                                                          starttime:endtime])),
                     'daily_frequency_shift': 24,
                     'addition': False}
         }
@@ -623,7 +609,8 @@ def build_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     return node_dict[i]
 
 
-def build_var_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
+def build_var_CHP_transformer(i, t, node_dict, outflow_args_el,
+                              outflow_args_th):
     """Build variable CHP transformer.
 
     (fixed relation heat / power or condensing only)
@@ -666,24 +653,6 @@ def build_var_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th)
             node_dict[t['to_el']]: t['efficiency_el']})
 
     return node_dict[i]
-
-
-# TODO: Continue implementation. -> See documentation for the component
-# https://oemof.readthedocs.io/en/stable/api/oemof.solph.html#oemof.solph.components.ExtractionTurbineCHP
-# def build_ExtractionTurbineCHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
-#     """ UNDER DEVERLOPMENT
-#     """
-#     node_dict[i] = solph.components.ExtractionTurbineCHP(
-#         label=i,
-#         inputs={node_dict[t['from']]: solph.Flow()},
-#         outputs={
-#             node_dict[t['to_el']]: solph.Flow(**outflow_args_el),
-#             node_dict[t['to_th']]: solph.Flow(**outflow_args_th)},
-#         conversion_factors={
-#             node_dict[t['to_el']]: t['efficiency_el_CC'],
-#             node_dict[t['to_th']]: t['efficiency_th_CC']},
-#         conversion_factor_full_condensation={
-#             node_dict[t['to_el']]: t['efficiency_el']})
 
 
 def build_condensing_transformer(i, t, node_dict, outflow_args_el):
@@ -1030,8 +999,9 @@ def create_storages_rh(storages_df, storage_var_costs_df,
 
         storage_labels.append(i)
         try:
-            initial_capacity_last = (storages_init_df.loc[i, 'Capacity_Last_Timestep']
-                                     / s['nominal_storable_energy'])
+            initial_capacity_last = (
+                        storages_init_df.loc[i, 'Capacity_Last_Timestep']
+                        / s['nominal_storable_energy'])
         except:
             initial_capacity_last = s['initial_storage_level']
 

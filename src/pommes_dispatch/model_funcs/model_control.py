@@ -2,14 +2,15 @@
 """
 General desription
 ------------------
-This file contains all function definitions for reading in input data
-used for the fundamental model for power market optimization modeling
-from the Department Energy and Resources at TU Berlin.
-
-These functions are imported by the main project file.
+This file contains all function definitions for controlling the model
+workflow of the dispatch variant of POMMES.
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
-Fabian Büllesbach, Carla Spiller, Sophie Westphal
+Benjamin Grosse
+
+Contributors:
+Sophie Westphal, Flora von Mikulicz-Radecki, Carla Spiller, Fabian Büllesbach,
+Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 
 (*) Corresponding authors
 """
@@ -22,7 +23,6 @@ from oemof.solph import (constraints, views,
                          models, network, processing)
 
 from data_input import nodes_from_csv, nodes_from_csv_rh
-from functions_for_processing_of_outputs_LP import get_power_prices_from_duals
 
 
 def add_further_constrs(om,

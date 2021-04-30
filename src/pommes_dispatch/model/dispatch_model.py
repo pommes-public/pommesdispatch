@@ -1,5 +1,4 @@
-# coding: utf-8
-
+# -*- coding: utf-8 -*-
 """
 General description
 -------------------
@@ -18,7 +17,7 @@ https://git.tu-berlin.de/POMMES/POMMES/wikis/home
 
 Licensing information and Disclaimer
 ------------------------------------
-MIT License
+This software is provided under MIT License (see licensing file).
 
 A special thank you goes out to all the developers creating,
 maintaining, and expanding packages used in this model,
@@ -38,7 +37,7 @@ Python version >= 3.8
 oemof version 0.4.2
 
 
-@authors: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
+@author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
 Benjamin Grosse
 
 Contributors:
@@ -48,7 +47,7 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
-### Package Imports
+# Package Imports
 import calendar
 import logging
 import math
@@ -58,11 +57,10 @@ import pandas as pd
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.tools import logger
-from pommes_supplementary.helper_functions import (
-    days_between, timesteps_between_timestamps)
+# from pommes_supplementary.helper_functions import (
+#     days_between, timesteps_between_timestamps)
 
-# import src.pommes_dispatch.model_funcs.model_control as model_control
-from model_funcs import model_control
+from pommes_dispatch.model_funcs import model_control
 
 ##############################################################################
 ### MODEL SETTINGS ###########################################################

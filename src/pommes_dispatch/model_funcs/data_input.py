@@ -5,18 +5,20 @@ Created on Thu May 2 13:44:03 2019
 General desription
 ------------------
 This file contains all function definitions for reading in input data
-used for the fundamental model for power market optimization modelling 
-from the Department Energy and Resources of TU Berlin.
-
-These functions are imported by the main project file.
+used for the dispatch variant of POMMES.
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
-Fabian Büllesbach, Carla Spiller,
-Sophie Westphal
+Benjamin Grosse
+
+Contributors:
+Sophie Westphal, Flora von Mikulicz-Radecki, Carla Spiller, Fabian Büllesbach,
+Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
+
+(*) Corresponding authors
 """
 
 from subroutines import *
-from supplementary.helper_functions_LP import convert_annual_limit
+# from supplementary.helper_functions_LP import convert_annual_limit
 
 
 def parse_input_data(path_folder_input,
