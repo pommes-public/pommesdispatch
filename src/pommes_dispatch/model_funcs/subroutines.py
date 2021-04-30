@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May  2 13:44:03 2019
-
-General desription
+General description
 ------------------
 This file contains all subroutines used for reading in input data
 for the dispatch variant of POMMES.
@@ -116,6 +114,7 @@ def create_buses(buses_df, node_dict):
     return node_dict
 
 
+# TODO: Update to changed link definition from solph v0.4.2: 2 inputs & outputs
 def create_links(links_df, links_capacities_actual_df,
                  node_dict, starttime, endtime, year):
     r"""Create links and add them to the dict of nodes.
@@ -186,7 +185,7 @@ def create_commodity_sources(commodity_sources_df=None,
                              carbon_costs_df=None,
                              node_dict=None,
                              year=2017):
-    """Create commodity sources and add them to the dict of nodes.
+    r"""Create commodity sources and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -234,7 +233,7 @@ def create_commodity_sources(commodity_sources_df=None,
 
 # TODO: Show a warning if shortage or excess is active
 def create_shortage_sources(shortage_df, node_dict):
-    """Create shortage sources and add them to the dict of nodes.
+    r"""Create shortage sources and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -262,7 +261,7 @@ def create_shortage_sources(shortage_df, node_dict):
 
 def create_renewables(renewables_df, timeseries_df,
                       starttime, endtime, node_dict):
-    """Create renewable sources and add them to the dict of nodes.
+    r"""Create renewable sources and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -306,7 +305,7 @@ def create_demand(demand_df, timeseries_df,
                   starttime, endtime, node_dict,
                   ActivateDemandResponse=False,
                   dr_overall_load_ts_df=None):
-    """Create demand sinks and add them to the dict of nodes.
+    r"""Create demand sinks and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -373,7 +372,7 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
                                  availability_timeseries_neg_df,
                                  approach, starttime, endtime,
                                  node_dict):
-    """Create demand response units and add them to the dict of nodes.
+    r"""Create demand response units and add them to the dict of nodes.
 
     The demand response modeling approach can be chosen from different
     approaches that have been implemented.
@@ -460,64 +459,30 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
                     'addition': False,
                     'fixes': True},
 
-            'IER': {'shift_time_up': d['interference_duration_neg'],
-                    'shift_time_down': d['interference_duration_pos'],
-                    'start_times':
-                        range(0,
-                              len(np.array(load_timeseries_df[i]
-                                           .loc[starttime:endtime])),
-                              math.ceil(d['shifting_duration'])),
-                    'cumulative_shift_time':
-                        (np.max([round(d['maximum_activations_year']), 1])
-                         * d['interference_duration_pos']),
-                    'cumulative_shed_time':
-                        len(np.array(load_timeseries_df[i]
-                                     .loc[starttime:endtime])),
-                    'addition': False,
-                    'fixes': True},
-
-            'TUD': {'shift_time_down': d['interference_duration_pos'],
-                    'postpone_time': d['interference_duration_neg'],
-                    'annual_frequency_shift':
-                        np.max([round(d['maximum_activations_year']), 1]),
-                    # Hard-coded limit to prevent IndexError for small simulation timeframe
-                    # 'annual_frequency_shift': 1,
-                    'annual_frequency_shed': len(np.array(load_timeseries_df[i]
-                                                          .loc[
-                                                          starttime:endtime])),
-                    'daily_frequency_shift': 24,
-                    'addition': False}
+            'oemof': {}
         }
 
-        # Note: label and inputs have to be separately assigned here
-        # in order to prevent a KeyError that has something to do with constraint grouping
         approach_dict = {
-            "DIW": DSM_DIW.SinkDSM(
-                label=i,
-                inputs={node_dict[d['from']]: solph.Flow(variable_costs=0)},
-                **kwargs_all,
-                **kwargs_dict["DIW"]),
-            "DLR": DSM_DLR.SinkDR(
+            "DLR": solph.custom.SinkDSM(
                 label=i,
                 inputs={node_dict[d['from']]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
                 **kwargs_dict["DLR"]),
-            "IER": DSM_IER.SinkDSI(
+            "DIW": solph.custom.SinkDSM(
                 label=i,
                 inputs={node_dict[d['from']]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
-                **kwargs_dict["IER"]),
-            "TUD": DSM_TUD.SinkDSM(
+                **kwargs_dict["DIW"]),
+            "oemof": solph.custom.SinkDSM(
                 label=i,
                 inputs={node_dict[d['from']]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
-                **kwargs_dict["TUD"])
+                **kwargs_dict["oemof"]),
         }
 
         node_dict[i] = approach_dict[approach]
 
     # Calculate overall electrical load from demand response units
-    # which is substracted from electrical load
     dr_overall_load_ts_df = load_timeseries_df.mul(
         demand_response_df['max_cap']).sum(axis=1)
 
@@ -545,14 +510,12 @@ def create_excess_sinks(excess_df, node_dict):
         Modified dictionary containing all nodes of the EnergySystem including 
         the excess sink elements 
     """
-
     for i, e in excess_df.iterrows():
         node_dict[i] = solph.Sink(
             label=i,
             inputs={node_dict[e['from']]: solph.Flow(variable_costs=1000)})
 
-    # The German sink is special due to a different input.
-    # It is currently also in the data (and loop above) but is overwritten here.
+    # The German sink is special due to a different input
     try:
         node_dict['DE_sink_el_excess'] = solph.Sink(
             label='DE_sink_el_excess',
@@ -568,7 +531,7 @@ def create_excess_sinks(excess_df, node_dict):
     return node_dict
 
 
-def build_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
+def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     """Build a CHP transformer (fixed relation heat / power)
     
     Parameters
@@ -577,7 +540,8 @@ def build_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
         label of current transformer (within iteration)
     
     t : :obj:`pd.Series`
-        pd.Series containing attributes for transformer component (row-wise data entries)
+        pd.Series containing attributes for transformer component
+        (row-wise data entries)
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem     
@@ -609,7 +573,7 @@ def build_CHP_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     return node_dict[i]
 
 
-def build_var_CHP_transformer(i, t, node_dict, outflow_args_el,
+def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
                               outflow_args_th):
     """Build variable CHP transformer.
 
@@ -621,7 +585,8 @@ def build_var_CHP_transformer(i, t, node_dict, outflow_args_el,
         label of current transformer (within iteration)
     
     t : :obj:`pd.Series`
-        pd.Series containing attributes for transformer component (row-wise data entries)
+        pd.Series containing attributes for transformer component
+        (row-wise data entries)
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem     

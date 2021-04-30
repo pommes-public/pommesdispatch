@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May 2 13:44:03 2019
-
-General desription
+General description
 ------------------
 This file contains all function definitions for reading in input data
 used for the dispatch variant of POMMES.

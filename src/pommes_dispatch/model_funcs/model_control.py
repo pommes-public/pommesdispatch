@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-General desription
+General description
 ------------------
 This file contains all function definitions for controlling the model
 workflow of the dispatch variant of POMMES.
