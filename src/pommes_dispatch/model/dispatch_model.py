@@ -66,7 +66,8 @@ from pommes_dispatch.model_funcs import model_control
 # 1) Determine model configuration through control variables
 
 # Control main settings
-model_control_dict = {
+# TODO: Resume idea of putting everything to control kwargs passed to funcs
+model_parameters = {
     "RollingHorizon": False,
     "AggregateInput": False,
     "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL',
@@ -110,6 +111,12 @@ SavePriceResults = True
 
 # 2) Set model optimization time and frequency for simple model runs
 
+time_parameters = {
+    "starttime": "2017-01-01 00:00:00",
+    "endtime": "2017-01-02 23:00:00",
+    "freq": "60min"
+}
+
 # Control starttime and endtime for simulation
 starttime = '2017-01-01 00:00:00'
 endtime = '2017-01-02 23:00:00'
@@ -117,6 +124,12 @@ freq = '60min'
 year = pd.to_datetime(starttime).year
 
 # Control rolling horizon timeslice length
+
+RH_parameters = {
+    "timeslice_length_wo_overlap_in_hours": 24,
+    "overlap_in_hours": 12
+}
+
 if RollingHorizon:
     timeslice_length_wo_overlap_in_hours = 24
     overlap_in_hours = 12
@@ -150,8 +163,8 @@ logger.define_logging(logfile=filename + '.log')
 # 3) Set input data
 
 # path_folder_output folder where all input data is stored
-path_folder_input = '../data/Outputlisten/'
-path_folder_output = './results/'
+path_folder_input = "../../../inputs/"
+path_folder_output = "../../../results/"
 
 # Show some logging info dependent on model configuration
 if AggregateInput:
@@ -167,7 +180,7 @@ if ActivateDemandResponse:
 else:
     logging.info('Running a model WITHOUT DEMAND RESPONSE')
 
-### Calculate timeslice and model control information for Rolling horizon
+# Calculate timeslice and model control information for Rolling horizon
 
 if RollingHorizon:
     # TODO: Use same procedure for data input for rolling horizon as well
@@ -189,7 +202,7 @@ if RollingHorizon:
 
 # ---- MODEL RUN ----
 
-### Model run for simple model set up
+# Model run for simple model set up
 
 if not RollingHorizon:
     # Build the mathematical optimization model
@@ -227,7 +240,7 @@ if not RollingHorizon:
     print(f'Overall solution time: {overall_solution_time:.2f}')
     print(f'Overall time: {overall_time:.2f}')
 
-### Rolling horizon: Run LP model
+# Rolling horizon: Run LP model
 
 if RollingHorizon:
     logging.info('Creating a LP optimization model for dipatch optimization \n'
@@ -288,9 +301,7 @@ if RollingHorizon:
     print(f'Overall solution time: {overall_solution_time:.2f}')
     print(f'Overall time: {overall_time:.2f}')
 
-##############################################################################
-### PROCESS MODEL RESULTS ####################################################
-##############################################################################
+# ---- PROCESS MODEL RESULTS ----
 
 if not RollingHorizon:
     model_results = processing.results(om)
