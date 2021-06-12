@@ -114,10 +114,9 @@ def create_buses(buses_df, node_dict):
     return node_dict
 
 
-# TODO: Update to changed link definition from solph v0.4.2: 2 inputs & outputs
-def create_links(links_df, links_capacities_actual_df,
-                 node_dict, starttime, endtime, year):
-    r"""Create links and add them to the dict of nodes.
+def create_interconnection_transformers(links_df, links_capacities_actual_df,
+                                        node_dict, starttime, endtime, year):
+    r"""Create interconnection transformers and add them to the dict of nodes.
     
     Parameters
     ----------
@@ -143,13 +142,13 @@ def create_links(links_df, links_capacities_actual_df,
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem including
-        the link elements
+        the interconnection transformers elements
     """
     # try and except statement since not all countries might be modeled
     for i, l in links_df.iterrows():
         try:
             if l['type'] == 'DC':
-                node_dict[i] = solph.custom.Link(
+                node_dict[i] = solph.Transformer(
                     label=i,
                     inputs={node_dict[l['from']]:
                                 solph.Flow(nominal_value=l[year])},
@@ -161,7 +160,7 @@ def create_links(links_df, links_capacities_actual_df,
                 )
 
             if l['type'] == 'AC':
-                node_dict[i] = solph.custom.Link(
+                node_dict[i] = solph.Transformer(
                     label=i,
                     inputs={node_dict[l['from']]:
                                 solph.Flow(nominal_value=l[year],

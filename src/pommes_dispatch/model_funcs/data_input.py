@@ -175,11 +175,11 @@ def add_components(input_data,
     node_dict = create_buses(input_data['buses'], node_dict)
 
     # create links
-    node_dict = create_links(input_data['links'],
-                             input_data['links_ts'],
-                             node_dict,
-                             starttime, endtime,
-                             year)
+    node_dict = create_interconnection_transformers(input_data['links'],
+                                                    input_data['links_ts'],
+                                                    node_dict,
+                                                    starttime, endtime,
+                                                    year)
 
     # create sources
     node_dict = create_commodity_sources(input_data['sources_commodity'],
