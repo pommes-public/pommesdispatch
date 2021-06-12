@@ -15,9 +15,9 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
-from subroutines import *
+from .subroutines import *
 # TODO: Prepare pommes_supplementary repo to use import
-from pommes_supplementary.helpers import convert_annual_limit
+# from pommes_supplementary.helpers import convert_annual_limit
 
 
 def parse_input_data(path_folder_input,

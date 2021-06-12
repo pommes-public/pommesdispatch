@@ -22,7 +22,7 @@ import pyomo.environ as po
 from oemof.solph import (constraints, views,
                          models, network, processing)
 
-from data_input import nodes_from_csv, nodes_from_csv_rh
+from .data_input import nodes_from_csv, nodes_from_csv_rh
 
 
 def add_further_constrs(om,

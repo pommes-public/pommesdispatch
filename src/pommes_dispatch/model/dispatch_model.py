@@ -34,7 +34,7 @@ Input data is read in from the repository POMMES_data using dependencies
 Installation requirements
 -------------------------
 Python version >= 3.8
-oemof version 0.4.2
+oemof version 0.4.4
 
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
@@ -47,7 +47,6 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
-# Package Imports
 import calendar
 import logging
 import math
@@ -57,18 +56,33 @@ import pandas as pd
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.tools import logger
-# from pommes_supplementary.helper_functions import (
-#     days_between, timesteps_between_timestamps)
+# from .helper_functions import (
+#      days_between, timesteps_between_timestamps)
 
 from pommes_dispatch.model_funcs import model_control
 
-##############################################################################
-### MODEL SETTINGS ###########################################################
-##############################################################################
+# ---- MODEL SETTINGS ----
 
-### 1) Determine model configuration through control variables
+# 1) Determine model configuration through control variables
 
 # Control main settings
+model_control_dict = {
+    "RollingHorizon": False,
+    "AggregateInput": False,
+    "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL',
+                  'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
+                  'SE1', 'SE2', 'SE3', 'SE4'],
+    "solver": "gurobi",
+    "fuel_cost_pathway": "middle",
+    "ActivateEmissionsLimit": False,
+    "emission_pathway": "100_percent_linear",
+    "ActivateDemandResponse": False,
+    "approach": "DLR",
+    "scenario": "50",
+    "SaveProductionResults": True,
+    "SavePriceResults": True,
+}
+
 RollingHorizon = False
 AggregateInput = False
 countries = ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL', 'NO1',
@@ -94,7 +108,7 @@ scenario = '50'
 SaveProductionResults = True
 SavePriceResults = True
 
-### 2) Set model optimization time and frequency for simple model runs
+# 2) Set model optimization time and frequency for simple model runs
 
 # Control starttime and endtime for simulation
 starttime = '2017-01-01 00:00:00'
@@ -113,7 +127,8 @@ timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", ts)
 overall_objective = 0
 overall_time = 0
 overall_solution_time = 0
-optimization_timeframe = days_between(starttime, endtime)
+# optimization_timeframe = days_between(starttime, endtime)
+optimization_timeframe = 300
 
 # Create filename that covers relevant model information
 basic_filename = 'dispatch_LP_'
@@ -132,7 +147,7 @@ filename = (basic_filename + "start-" + starttime[:10] + "_"
 
 logger.define_logging(logfile=filename + '.log')
 
-### 3) Set input data
+# 3) Set input data
 
 # path_folder_output folder where all input data is stored
 path_folder_input = '../data/Outputlisten/'
@@ -172,27 +187,26 @@ if RollingHorizon:
         overall_timesteps
         / timeslice_length_wo_overlap_in_timesteps)
 
-##############################################################################
-### MODEL RUN ################################################################
-##############################################################################
+# ---- MODEL RUN ----
 
 ### Model run for simple model set up
 
 if not RollingHorizon:
     # Build the mathematical optimization model
-    om = model_control.build_simple_model(path_folder_input,
-                                          AggregateInput,
-                                          countries,
-                                          fuel_cost_pathway,
-                                          starttime,
-                                          endtime,
-                                          freq,
-                                          str(year),
-                                          ActivateEmissionsLimit,
-                                          emission_pathway,
-                                          ActivateDemandResponse,
-                                          approach,
-                                          scenario)
+    om = model_control.build_simple_model(
+        path_folder_input,
+        AggregateInput,
+        countries,
+        fuel_cost_pathway,
+        starttime,
+        endtime,
+        freq,
+        str(year),
+        ActivateEmissionsLimit,
+        emission_pathway,
+        ActivateDemandResponse,
+        approach,
+        scenario)
 
     om.receive_duals()
     logging.info('Obtaining dual values and reduced costs from the model\n'
