@@ -566,11 +566,11 @@ def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     return node_dict[i]
 
 
-def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
-                              outflow_args_th):
-    r"""Build variable CHP transformer.
-
-    (fixed relation heat / power or condensing only)
+def build_var_chp_units(i, t, node_dict, outflow_args_el,
+                        outflow_args_th):
+    r"""Build variable CHP units which are modeled as extraction turbine CHP
+    units and can choose between full condensation mode, full coupling mode
+    and any allowed state in between.
     
     Parameters
     ----------
@@ -592,11 +592,11 @@ def build_var_chp_transformer(i, t, node_dict, outflow_args_el,
 
     Returns
     -------
-    node_dict[i] : `transformer <oemof.network.Transformer>`
-        The transformer element to be added to the dict of nodes
+    node_dict[i] : oemof.solph.custom.ExtractionTurbineCHP
+        The extraction turbine element to be added to the dict of nodes
         as i-th element
     """
-    node_dict[i] = solph.Transformer(
+    node_dict[i] = solph.ExtractionTurbineCHP(
         label=i,
         inputs={node_dict[t['from']]: solph.Flow()},
         outputs={
