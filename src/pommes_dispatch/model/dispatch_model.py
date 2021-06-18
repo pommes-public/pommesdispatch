@@ -115,6 +115,7 @@ if dm.rolling_horizon:
 
 dm.initialize_logging()
 dm.check_model_configuration()
+dm.show_configuration_log()
 
 # ---- MODEL RUN ----
 # NO NEED FOR USER CHANGES FROM HERE ON

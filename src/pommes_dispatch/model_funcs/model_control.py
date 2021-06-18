@@ -174,7 +174,7 @@ class DispatchModel():
 
         if self.activate_demand_response:
             logging.info(
-                f"Using approach from {self.demand_response_approach}"
+                f"Using approach from {self.demand_response_approach} "
                 f"for DEMAND RESPONSE modeling\n"
                 f"Considering a {self.demand_response_scenario}% scenario")
         else:
