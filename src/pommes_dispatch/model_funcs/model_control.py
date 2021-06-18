@@ -32,6 +32,34 @@ class DispatchModel():
 
     A dispatch model is a container for all the model parameters as well
     as for methods for controlling the model workflow.
+
+    Parameters
+    ----------
+
+
+    aggregate_input: :obj:`boolean`
+        boolean control variable indicating whether to use complete
+        or aggregated transformer input data set
+
+    countries : :obj:`list` of str
+        List of countries to be simulated
+
+    fuel_cost_pathway:  :obj:`str`
+       The chosen pathway for commodity cost scenarios (lower, middle, upper)
+
+    year: :obj:`str`
+        Reference year for pathways depending on start_time
+
+    activate_demand_response : :obj:`boolean`
+        If True, demand response input data is read in
+
+    demand_response_scenario : :obj:`str`
+        Demand response scenario to be modeled;
+        must be one of ['25', '50', '75'] whereby '25' is the lower,
+        i.e. rather pessimistic estimate
+
+    path_folder_input : :obj:`str`
+        The path_folder_output where the input data is stored
     """
 
     def __init__(self):
@@ -109,7 +137,7 @@ class DispatchModel():
                 (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
                 + getattr(self, "overlap_in_time_steps")))
         setattr(self, "overall_timesteps",
-                helpers.timesteps_between_timestamps(
+                helpers.time_steps_between_timestamps(
                     self.time_series_start, self.time_series_end, self.freq))
         setattr(self, "amount_of_timeslices",
                 math.ceil(self.overall_time_steps
