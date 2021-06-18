@@ -56,8 +56,6 @@ import pandas as pd
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.tools import logger
-# from .helper_functions import (
-#      days_between, timesteps_between_timestamps)
 
 from pommes_dispatch.model_funcs import model_control
 
