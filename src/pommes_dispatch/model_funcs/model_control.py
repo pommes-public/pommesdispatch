@@ -19,7 +19,6 @@ import logging
 import math
 
 import pandas as pd
-import pyomo.environ as po
 from oemof.solph import (constraints, views,
                          models, network, processing)
 from oemof.tools import logger
@@ -54,8 +53,7 @@ class DispatchModel():
         self.freq = None
         self.path_folder_input = None
         self.path_folder_output = None
-        self.time_slice_length_wo_overlap_in_hours = None
-        self.overlap_in_hours = None
+        self.om = None
 
     def update_model_configuration(self, *model_parameters, nolog=False):
         """Set the main model parameters by extracting them from dicts
@@ -88,7 +86,7 @@ class DispatchModel():
         """Checks if any necessary model parameter hasn't been set yet"""
         for entry in dir(self):
             if not entry.startswith("_"):
-                if entry is None:
+                if entry != "om" and getattr(self, entry) is None:
                     logging.warning(
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!")
@@ -134,6 +132,7 @@ class DispatchModel():
         filename = ("dispatch_LP_" + "start-" + self.start_time[:10] + "_"
                     + str(optimization_timeframe) + "-days_" + rh + agg)
 
+        setattr(self, "filename", filename)
         logger.define_logging(logfile=filename + ".log")
 
     def show_configuration_log(self):
@@ -153,69 +152,11 @@ class DispatchModel():
         else:
             logging.info("Running a model WITHOUT DEMAND RESPONSE")
 
-    def build_simple_model(
-            self):
-        # path_folder_input,
-        # AggregateInput,
-        # countries,
-        # fuel_cost_pathway,
-        # start_time='2017-01-01 00:00:00',
-        # end_time='2017-01-02 12:00:00',
-        # freq='60min',
-        # year=2017,
-        # ActivateEmissionsLimit=False,
-        # emission_pathway='100_percent_linear',
-        # ActivateDemandResponse=False,
-        # approach='DLR',
-        # scenario='50'):
-        r"""Set up and return a simple model (i.e. an overall optimization run
-        not including any measures for complexity reduction).
+    def build_simple_model(self):
+        r"""Set up and return a simple model
 
-        Parameters
-        ----------
-        path_folder_input : :obj:`str`
-            The path folder where the input data is stored
-
-        AggregateInput : boolean
-            If True, an aggregated input data set is used
-
-        countries : list of str
-            List of countries to be simulated
-
-        fuel_cost_pathway : `str`
-            The fuel costs pathway to be used ('lower', 'middle', 'upper')
-
-        start_time : :obj:`str`
-            The start_time of the optimization run
-
-        end_time : :obj:`str`
-            The end_time of the optimization run
-
-        freq : :obj:`str`
-            The frequency of the timeindex
-
-        year : int
-            The simulation year
-
-        ActivateEmissionsLimit : :obj:`boolean`
-            If True, an emission limit is introduced
-
-        emission_pathway : str
-            The pathway for emissions reduction to be used
-
-        ActivateDemandResponse : :obj:`boolean`
-            If True, demand response input data is read in
-
-        approach : :obj:`str`
-            The modeling approach to be used for demand response modeling
-
-        scenario : :obj:`str`
-            The scenario to be used for demand response modeling
-
-        Returns
-        -------
-        om : :class:`oemof.colph.models.Model`
-            The mathematical optimisation model to be solved
+        Construct a model for an overall optimization run
+        not including any measures for complexity reduction.
         """
         logging.info('Starting optimization')
         logging.info('Running a DISPATCH OPTIMIZATION')
@@ -225,18 +166,6 @@ class DispatchModel():
         es = network.EnergySystem(timeindex=datetime_index)
 
         nodes_dict, emissions_limit = nodes_from_csv(self)
-        # path_folder_input,
-        # AggregateInput,
-        # countries,
-        # fuel_cost_pathway,
-        # start_time,
-        # end_time,
-        # year,
-        # ActivateEmissionsLimit,
-        # emission_pathway,
-        # ActivateDemandResponse,
-        # approach,
-        # scenario)
 
         logging.info('Creating a LP model for DISPATCH OPTIMIZATION.')
 
@@ -256,31 +185,29 @@ class DispatchModel():
         For now, an additional overall emissions limit can be imposed.
 
         Note that setting an emissions limit may conflict with high minimum
-        loads from conventional transformers. This may lead to model infeasibility
+        loads from conventional transformers.
+        Be aware that this may lead to model infeasibility
         if commodity bus balances cannot be met.
 
         Parameters
         ----------
-        om : :class:`oemof.solph.models.Model`
-            The original mathematical optimisation model to be solved
-
         emissions_limit : float
             The actual emissions limit to be used
 
         countries : :obj:`list` of `str`
             The countries for which an emissions limit shall be imposed
-            (Usually only Germany)
+            (Usually only Germany, so ["DE"])
 
         fuels : :obj:`list` of `str`
             The fuels for which an emissions limit shall be imposed
         """
         if countries is None:
-            countries = ['DE']
+            countries = ["DE"]
 
         if fuels is None:
-            fuels = ['biomass', 'hardcoal', 'lignite',
-                     'natgas', 'uranium', 'oil',
-                     'otherfossil', 'waste', 'mixedfuels']
+            fuels = ["biomass", "hardcoal", "lignite",
+                     "natgas", "uranium", "oil",
+                     "otherfossil", "waste", "mixedfuels"]
 
         # Emissions limit is imposed for flows from commodity source to bus
         emission_flow_labels = [country + '_bus_' + fuel
@@ -301,28 +228,21 @@ class DispatchModel():
 
     def get_power_prices_from_duals(self):
         r"""Obtain the power price results for the dispatch model
-        from the dual value of the Bus.balance constraint of the electricity bus.
 
-        Parameters:
-        -----------
-        om: :class:`oemof.solph.models.Model`
-            The mathematical model formulation (including its dual values)
+        The power prices are obtained from the dual value of the
+        Bus.balance constraint of the German electricity bus.
 
-        datetime_index: :obj:`pd.date_range`
-            The datetime_index of the energy system
-
-        Returns:
-        --------
+        Returns
+        -------
         power_prices: :obj:`pd.DataFrame`
         """
-        constr = [c for c in self.om.component_objects(po.Constraint, active=True)
-                  if c.name == "Bus.balance"][0]
+        constr = self.om.Bus.balance
 
-        power_prices_list = [self.om.dual[constr[index]] for index in constr if
+        power_prices_list = [self.om.dual[constr[index]]
+                             for index in constr if
                              index[0].label == "DE_bus_el"]
         power_prices = pd.DataFrame(data=power_prices_list,
                                     index=self.om.es.timeindex,
-        # datetime_index,
                                     columns=["Power price"])
 
         return power_prices
@@ -595,3 +515,14 @@ class DispatchModel():
 
         return (om, model_results, results, overall_objective,
                 overall_solution_time, power_prices)
+
+    def show_meta_logging_info(self, model_meta):
+        """Show some logging information on model meta data"""
+        logging.info(f"***** MODEL RUN TERMINATED SUCESSFULLY :-) *****")
+        logging.info(f"Overall objective value: "
+                     + f"{model_meta['overall_objective']:.2f}")
+        logging.info(f"Overall solution time: "
+                     + f"{model_meta['overall_solution_time']:.2f}")
+        logging.info(f"Overall time: "
+                     +
+                     f"{model_meta['overall_time']:.2f}")

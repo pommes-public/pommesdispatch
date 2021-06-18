@@ -59,6 +59,7 @@ from oemof.solph import views
 from pommes_dispatch.model_funcs import model_control
 
 # ---- MODEL SETTINGS ----
+# THIS IS THE ONLY PART, THE USER CAN MANIPULATE
 
 # 1) Determine model configuration through control parameters
 
@@ -116,19 +117,20 @@ dm.initialize_logging()
 dm.check_model_configuration()
 
 # ---- MODEL RUN ----
+# NO NEED FOR USER CHANGES FROM HERE ON
 
-# Meta information (No need to change anything here)
+# Initialize results and meta information
+model_meta = {
+    "overall_objective": 0,
+    "overall_time": 0,
+    "overall_solution_time": 0
+}
 ts = time.gmtime()
-timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", ts)
-overall_objective = 0
-overall_time = 0
-overall_solution_time = 0
-
+results = None
+power_prices = pd.DataFrame()
 
 # Model run for simple model set up
-
 if not dm.rolling_horizon:
-    # Build the mathematical optimization model
     dm.build_simple_model()
 
     dm.om.receive_duals()
@@ -137,20 +139,15 @@ if not dm.rolling_horizon:
 
     dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
     meta_results = processing.meta_results(dm.om)
-    overall_solution_time += meta_results["solver"]["Time"]
 
     ts_2 = time.gmtime()
-    overall_time = time.mktime(ts_2) - time.mktime(ts)
-
     power_prices = dm.get_power_prices_from_duals()
 
-    print("********************************************************")
-    logging.info("Done!")
-    logging.info(f"Overall solution time: {overall_solution_time:.2f}")
-    logging.info(f"Overall time: {overall_time:.2f}")
+    model_meta["overall_objective"] = meta_results["objective"]
+    model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
+    model_meta["overall_time"] = time.mktime(ts_2) - time.mktime(ts)
 
 # Rolling horizon: Run LP model
-
 if dm.rolling_horizon:
     logging.info('Creating a LP optimization model for dipatch optimization \n'
                  'using a ROLLING HORIZON approach for model solution.')
@@ -205,24 +202,22 @@ if dm.rolling_horizon:
         ts_2 = time.gmtime()
         overall_time = calendar.timegm(ts_2) - calendar.timegm(ts)
 
-    print('**********************FINALLY DONE**********************')
-    print(f'Overall objective value: {overall_objective:.2f}')
-    print(f'Overall solution time: {overall_solution_time:.2f}')
-    print(f'Overall time: {overall_time:.2f}')
-
 # ---- PROCESS MODEL RESULTS ----
 
+dm.show_meta_logging_info(model_meta)
+
 if not dm.rolling_horizon:
-    model_results = processing.results(om)
+    model_results = processing.results(dm.om)
 
     buses_el_views = [country + '_bus_el' for country in dm.countries]
     results = pd.concat([views.node(model_results, bus_el)['sequences']
                          for bus_el in buses_el_views], axis=1)
 
-if dm.SaveProductionResults:
-    results.to_csv(dm.path_folder_output + dm.filename + '_production.csv',
-                   sep=',', decimal='.')
+if dm.save_production_results:
+    results.to_csv(dm.path_folder_output + getattr(dm, "filename")
+                   + '_production.csv', sep=',', decimal='.')
 
-if dm.SavePriceResults:
-    power_prices.to_csv(dm.path_folder_output + dm.filename + '_power-prices.csv',
-                        sep=';', decimal=',')
+if dm.save_price_results:
+    power_prices.to_csv(
+        dm.path_folder_output + getattr(dm, "filename")
+        + '_power-prices.csv', sep=',', decimal='.')
