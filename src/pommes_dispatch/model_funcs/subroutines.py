@@ -115,7 +115,7 @@ def create_buses(buses_df, node_dict):
 
 
 def create_interconnection_transformers(links_df, links_capacities_actual_df,
-                                        node_dict, starttime, endtime, year):
+                                        node_dict, start_time, end_time, year):
     r"""Create interconnection transformers and add them to the dict of nodes.
     
     Parameters
@@ -129,14 +129,14 @@ def create_interconnection_transformers(links_df, links_capacities_actual_df,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
         
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
    
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe
         
     year: :obj:`str`
-        Reference year for pathways depending on starttime (and endtime)  
+        Reference year for pathways depending on start_time (and end_time)  
     
     Returns
     -------
@@ -165,7 +165,7 @@ def create_interconnection_transformers(links_df, links_capacities_actual_df,
                     inputs={node_dict[l['from']]:
                                 solph.Flow(nominal_value=l[year],
                                            max=links_capacities_actual_df[i][
-                                               starttime:endtime].to_numpy())},
+                                               start_time:end_time].to_numpy())},
                     outputs={node_dict[l['to']]:
                                  solph.Flow()},
                     conversion_factors={
@@ -202,7 +202,7 @@ def create_commodity_sources(commodity_sources_df=None,
         Dictionary containing all nodes of the EnergySystem
         
     year: :obj:`str`
-        Reference year for pathways depending on starttime (and endtime)     
+        Reference year for pathways depending on start_time (and end_time)     
 
     Returns
     -------
@@ -258,7 +258,7 @@ def create_shortage_sources(shortage_df, node_dict):
 
 
 def create_renewables(renewables_df, timeseries_df,
-                      starttime, endtime, node_dict):
+                      start_time, end_time, node_dict):
     r"""Create renewable sources and add them to the dict of nodes.
     
     Parameters
@@ -269,10 +269,10 @@ def create_renewables(renewables_df, timeseries_df,
     timeseries_df : :obj:`pd.DataFrame`
         pd.DataFrame containing the timeseries data
         
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
    
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe        
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -289,7 +289,7 @@ def create_renewables(renewables_df, timeseries_df,
             node_dict[i] = solph.Source(
                 label=i,
                 outputs={node_dict[re['to']]: solph.Flow(
-                    fix=np.array(timeseries_df[i][starttime:endtime]),
+                    fix=np.array(timeseries_df[i][start_time:end_time]),
                     nominal_value=re['capacity'])})
         except KeyError:
             print(re)
@@ -298,8 +298,8 @@ def create_renewables(renewables_df, timeseries_df,
 
 
 def create_demand(demand_df, timeseries_df,
-                  starttime, endtime, node_dict,
-                  ActivateDemandResponse=False,
+                  start_time, end_time, node_dict,
+                  activate_demand_response=False,
                   dr_overall_load_ts_df=None):
     r"""Create demand sinks and add them to the dict of nodes.
     
@@ -311,10 +311,10 @@ def create_demand(demand_df, timeseries_df,
     timeseries_df : :obj:`pd.DataFrame`
         pd.DataFrame containing the timeseries data
 
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
    
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe        
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -340,19 +340,19 @@ def create_demand(demand_df, timeseries_df,
         kwargs_dict = {
             'label': i,
             'inputs': {node_dict[d['from']]: solph.Flow(
-                fix=np.array(timeseries_df[i][starttime:endtime]),
+                fix=np.array(timeseries_df[i][start_time:end_time]),
                 nominal_value=d['maximum'])}}
 
         # TODO: Include into data preparation and write adjusted demand
         # Adjusted demand here means the difference between overall demand
         # and default load profile for demand response units
-        if ActivateDemandResponse:
+        if activate_demand_response:
             if i == 'DE_sink_el_load':
                 kwargs_dict['inputs'] = {node_dict[d['from']]: solph.Flow(
-                    fix=np.array(timeseries_df[i][starttime:endtime]
+                    fix=np.array(timeseries_df[i][start_time:end_time]
                         .mul(d['maximum'])
                         .sub(
-                        dr_overall_load_ts_df[starttime:endtime])),
+                        dr_overall_load_ts_df[start_time:end_time])),
                     nominal_value=1)}
 
         node_dict[i] = solph.Sink(**kwargs_dict)
@@ -364,7 +364,7 @@ def create_demand(demand_df, timeseries_df,
 def create_demand_response_units(demand_response_df, load_timeseries_df,
                                  availability_timeseries_pos_df,
                                  availability_timeseries_neg_df,
-                                 approach, starttime, endtime,
+                                 approach, start_time, end_time,
                                  node_dict):
     r"""Create demand response units and add them to the dict of nodes.
 
@@ -392,10 +392,10 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
         Demand response modeling approach to be used;
         must be one of ['DIW', 'DLR', 'IER', 'TUD']
 
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
 
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -417,13 +417,13 @@ def create_demand_response_units(demand_response_df, load_timeseries_df,
         # Use kwargs dict for easier assignment of parameters
         # kwargs for all DR modeling approaches
         kwargs_all = {
-            'demand': np.array(load_timeseries_df[i].loc[starttime:endtime]),
+            'demand': np.array(load_timeseries_df[i].loc[start_time:end_time]),
             'max_demand': d['max_cap'],
             'capacity_up': np.array(availability_timeseries_neg_df[i]
-                                    .loc[starttime:endtime]),
+                                    .loc[start_time:end_time]),
             'max_capacity_up': d['potential_neg_overall'],
             'capacity_down': np.array(availability_timeseries_pos_df[i]
-                                      .loc[starttime:endtime]),
+                                      .loc[start_time:end_time]),
             'max_capacity_down': d['potential_pos_overall'],
             'delay_time': math.ceil(d['shifting_duration']),
             'shed_time': 1,
@@ -645,8 +645,8 @@ def build_condensing_transformer(i, t, node_dict, outflow_args_el):
 
 
 def create_transformers_conventional(transformers_df,
-                                     starttime,
-                                     endtime,
+                                     start_time,
+                                     end_time,
                                      node_dict,
                                      operation_costs_df,
                                      # fixed_costs_df,
@@ -662,10 +662,10 @@ def create_transformers_conventional(transformers_df,
     transformers_df : :obj:`pd.DataFrame`
         pd.DataFrame containing the transformer elements to be created
 
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
 
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -689,7 +689,7 @@ def create_transformers_conventional(transformers_df,
         serving as industrial power plants
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
     Returns
     -------
@@ -702,7 +702,7 @@ def create_transformers_conventional(transformers_df,
         outflow_args_el = {
             'nominal_value': t['capacity'],
             'variable_costs': operation_costs_df.loc[t['from'], year],
-            # fixed_costs_df.loc[starttime:endtime, t['fuel']].to_numpy(),
+            # fixed_costs_df.loc[start_time:end_time, t['fuel']].to_numpy(),
             'min': t['min_load_factor'],
             'max': t['max_load_factor'],
 
@@ -718,33 +718,33 @@ def create_transformers_conventional(transformers_df,
             if t['type'] == 'chp':
                 if t['identifier'] in min_loads_dh.columns:
                     outflow_args_el['min'] = (
-                        min_loads_dh.loc[starttime:endtime,
+                        min_loads_dh.loc[start_time:end_time,
                         t['identifier']].to_numpy())
                 elif t['fuel'] in ['natgas', 'hardcoal', 'lignite']:
                     outflow_args_el['min'] = (
-                        transformer_min_load_df.loc[starttime:endtime,
+                        transformer_min_load_df.loc[start_time:end_time,
                         'chp_' + t['fuel']].to_numpy())
                 else:
                     outflow_args_el['min'] = (
-                        transformer_min_load_df.loc[starttime:endtime,
+                        transformer_min_load_df.loc[start_time:end_time,
                         'chp'].to_numpy())
 
             if t['type'] == 'ipp':
                 if t['identifier'] in min_loads_ipp.columns:
                     outflow_args_el['min'] = (
-                        min_loads_ipp.loc[starttime:endtime,
+                        min_loads_ipp.loc[start_time:end_time,
                         t['identifier']].to_numpy())
                 else:
                     outflow_args_el['min'] = (
-                        transformer_min_load_df.loc[starttime:endtime,
+                        transformer_min_load_df.loc[start_time:end_time,
                         'ipp'].to_numpy())
 
         if t['country'] in ['AT', 'FR'] and t['country'] == 'natgas':
             outflow_args_el['min'] = (
-                transformer_min_load_df.loc[starttime:endtime,
+                transformer_min_load_df.loc[start_time:end_time,
                 t['country'] + '_natgas'].to_numpy())
             outflow_args_el['max'] = (
-                    transformer_min_load_df.loc[starttime:endtime,
+                    transformer_min_load_df.loc[start_time:end_time,
                     t['country'] + '_natgas'].to_numpy() + 0.01)
 
         node_dict[i] = build_condensing_transformer(
@@ -758,8 +758,8 @@ def create_transformers_RES(transformers_renewables,
                             costs_operation_renewables,
                             costs_ramping,
                             costs_market_values,
-                            starttime,
-                            endtime,
+                            start_time,
+                            end_time,
                             node_dict,
                             year=2017):
     r"""Create renewable energy transformers and add them to the dict of nodes.
@@ -782,17 +782,17 @@ def create_transformers_RES(transformers_renewables,
     costs_market_values: :obj:`pd.DataFrame`
         pd.DataFrame containing technology specfic markte values of renewables
 
-    starttime: :obj:`str`
+    start_time: :obj:`str`
         The starting timestamp of the optimization timeframe
 
-    endtime: :obj:`str`
+    end_time: :obj:`str`
         The end timestamp of the optimization timeframe
 
     node_dict: :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
     Returns
     -------
@@ -808,10 +808,10 @@ def create_transformers_RES(transformers_renewables,
                 'variable_costs': (
                         costs_operation_renewables.at[i, 'costs']
                         + np.array(
-                    costs_market_values[t['from']][starttime:endtime])),
+                    costs_market_values[t['from']][start_time:end_time])),
                 'min': t['min_load_factor'],
                 'max': np.array(
-                    sources_renewables_ts[t['from']][starttime:endtime]),
+                    sources_renewables_ts[t['from']][start_time:end_time]),
                 'positive_gradient': {
                     'ub': t['grad_pos'],
                     'costs': costs_ramping.loc[t['from'], year]},
@@ -838,8 +838,8 @@ def create_transformers_RES(transformers_renewables,
                     solph.Flow(
                         nominal_value=t['capacity'],
                         fix=np.array(
-                            sources_renewables_ts[t['from']][starttime:
-                                                             endtime]))},
+                            sources_renewables_ts[t['from']][start_time:
+                                                             end_time]))},
                 conversion_factors={node_dict[t['to_el']]:
                                         t['efficiency_el']})
 
@@ -862,7 +862,7 @@ def create_storages(storages_df, storage_var_costs_df,
         Dictionary containing all nodes of the EnergySystem     
     
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
         
     Returns
     -------
@@ -932,7 +932,7 @@ def create_storages_rh(storages_df, storage_var_costs_df,
         Dictionary containing all nodes of the EnergySystem     
     
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
     Returns
     -------

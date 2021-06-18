@@ -20,13 +20,14 @@ from .subroutines import *
 # from pommes_supplementary.helpers import convert_annual_limit
 
 
-def parse_input_data(path_folder_input,
-                     AggregateInput,
-                     countries,
-                     fuel_cost_pathway='middle',
-                     year=str(2017),
-                     ActivateDemandResponse=False,
-                     scenario='50'):
+def parse_input_data(dispatch_model):
+        # path_folder_input,
+        #              aggregate_input,
+        #              countries,
+        #              fuel_cost_pathway='middle',
+        #              year=str(2017),
+        #              activate_demand_response=False,
+        #              scenario='50'):
     r"""Read in csv files and build oemof components
 
     Parameters
@@ -34,7 +35,7 @@ def parse_input_data(path_folder_input,
     path_folder_input : :obj:`str`
         The path_folder_output where the input data is stored
 
-    AggregateInput: :obj:`boolean`
+    aggregate_input: :obj:`boolean`
         boolean control variable indicating whether to use complete
         or aggregated transformer input data set
 
@@ -45,9 +46,9 @@ def parse_input_data(path_folder_input,
        The chosen pathway for commodity cost scenarios (lower, middle, upper)
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
-    ActivateDemandResponse : :obj:`boolean`
+    activate_demand_response : :obj:`boolean`
         If True, demand response input data is read in
 
     scenario : :obj:`str`
@@ -79,7 +80,7 @@ def parse_input_data(path_folder_input,
                  'storages_el': 'storages_el',
                  'transformers': 'transformers',
                  'transformers_renewables': 'transformers_renewables',
-                 'costs_fuel': 'costs_fuel_' + fuel_cost_pathway,
+                 'costs_fuel': 'costs_fuel_' + dispatch_model.fuel_cost_pathway,
                  'costs_ramping': 'costs_ramping',
                  'costs_carbon': 'costs_carbon',
                  'costs_operation': 'costs_operation',
@@ -91,51 +92,52 @@ def parse_input_data(path_folder_input,
                    'min_loads_ipp': 'min_loads_ipp'}
 
     # Optionally use aggregated transformer data instead
-    if AggregateInput:
+    if dispatch_model.aggregate_input:
         add_files['transformers'] = 'transformers_clustered'
 
     # Add demand response units
-    if ActivateDemandResponse:
-        add_files['sinks_dr_el'] = 'sinks_demand_response_el_' + scenario
+    if dispatch_model.activate_demand_response:
+        add_files['sinks_dr_el'] = 'sinks_demand_response_el_' + dispatch_model.scenario
         add_files['sinks_dr_el_ts'] = (
-                'sinks_demand_response_el_ts_' + scenario)
+                'sinks_demand_response_el_ts_' + dispatch_model.scenario)
         add_files['sinks_dr_el_ava_pos_ts'] = (
-                'sinks_demand_response_el_ava_pos_ts_' + scenario)
+                'sinks_demand_response_el_ava_pos_ts_' + dispatch_model.scenario)
         add_files['sinks_dr_el_ava_neg_ts'] = (
-                'sinks_demand_response_el_ava_neg_ts_' + scenario)
+                'sinks_demand_response_el_ava_neg_ts_' + dispatch_model.scenario)
 
     # Use dedicated 2030 data
-    if year == str(2030):
+    if dispatch_model.year == str(2030):
         add_files = {k: v + '_2030' for k, v in add_files.items()}
 
     files = {**files, **add_files, **other_files}
 
-    if not year == str(2030):
+    if not dispatch_model.year == str(2030):
         input_data = {
             key: load_input_data(
                 filename=name,
-                path_folder_input=path_folder_input,
-                countries=countries)
+                path_folder_input=dispatch_model.path_folder_input,
+                countries=dispatch_model.countries)
             for key, name in files.items()}
     else:
         input_data = {
             key: load_input_data(
                 filename=name,
-                path_folder_input=path_folder_input,
-                countries=countries,
+                path_folder_input=dispatch_model.path_folder_input,
+                countries=dispatch_model.countries,
                 reindex=True,
-                year=year)
+                year=dispatch_model.year)
             for key, name in files.items()}
 
     return input_data
 
 
 def add_components(input_data,
-                   starttime='2017-01-01 00:00:00',
-                   endtime='2017-01-01 23:00:00',
-                   year=2017,
-                   ActivateDemandResponse=False,
-                   approach='DLR'):
+dispatch_model):
+                   # start_time='2017-01-01 00:00:00',
+                   # end_time='2017-01-01 23:00:00',
+                   # year=2017,
+                   # activate_demand_response=False,
+                   # approach='DLR'):
     r"""Add the oemof components to a dictionary of nodes
 
     Note: Storages are not included here. They have to be defined
@@ -147,16 +149,16 @@ def add_components(input_data,
         The input data given as a dict of DataFrames
         with component names as keys
 
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
 
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
-    ActivateDemandResponse : :obj:`boolean`
+    activate_demand_response : :obj:`boolean`
         If True, demand response input data is read in
 
     approach : :obj:`str`
@@ -178,22 +180,22 @@ def add_components(input_data,
     node_dict = create_interconnection_transformers(input_data['links'],
                                                     input_data['links_ts'],
                                                     node_dict,
-                                                    starttime, endtime,
-                                                    year)
+                                                    dispatch_model.start_time, dispatch_model.end_time,
+                                                    dispatch_model.year)
 
     # create sources
     node_dict = create_commodity_sources(input_data['sources_commodity'],
                                          input_data['costs_fuel'],
                                          input_data['costs_carbon'],
                                          node_dict,
-                                         year)
+                                         dispatch_model.year)
 
     node_dict = create_shortage_sources(input_data['sources_shortage'],
                                         node_dict)
 
     node_dict = create_renewables(input_data['sources_renewables'],
                                   input_data['sources_renewables_ts'],
-                                  starttime, endtime,
+                                  dispatch_model.start_time, dispatch_model.end_time,
                                   node_dict)
 
     # create fluctuating renewable sources for Germany
@@ -202,28 +204,28 @@ def add_components(input_data,
         node_dict=node_dict)
 
     # create sinks
-    if ActivateDemandResponse:
+    if dispatch_model.activate_demand_response:
         node_dict, dr_overall_load_ts_df = create_demand_response_units(
             input_data['sinks_dr_el'],
             input_data['sinks_dr_el_ts'],
             input_data['sinks_dr_el_ava_pos_ts'],
             input_data['sinks_dr_el_ava_neg_ts'],
-            approach,
-            starttime, endtime,
+            dispatch_model.approach,
+            dispatch_model.start_time, dispatch_model.end_time,
             node_dict)
 
         node_dict = create_demand(
             input_data['sinks_demand_el'],
             input_data['sinks_demand_el_ts'],
-            starttime, endtime,
+            dispatch_model.start_time, dispatch_model.end_time,
             node_dict,
-            ActivateDemandResponse,
+            dispatch_model.activate_demand_response,
             dr_overall_load_ts_df)
     else:
         node_dict = create_demand(
             input_data['sinks_demand_el'],
             input_data['sinks_demand_el_ts'],
-            starttime, endtime,
+            dispatch_model.start_time, dispatch_model.end_time,
             node_dict)
 
     node_dict = create_excess_sinks(
@@ -232,15 +234,15 @@ def add_components(input_data,
     # create conventional transformers
     node_dict = create_transformers_conventional(
         input_data['transformers'],
-        starttime,
-        endtime,
+        dispatch_model.start_time,
+        dispatch_model.end_time,
         node_dict,
         input_data['costs_operation'],
         input_data['costs_ramping'],
         input_data['transformers_minload_ts'],
         input_data['min_loads_dh'],
         input_data['min_loads_ipp'],
-        year)
+        dispatch_model.year)
 
     # create renewable transformers
     node_dict = create_transformers_RES(
@@ -249,18 +251,18 @@ def add_components(input_data,
         input_data['costs_operation_renewables'],
         input_data['costs_ramping'],
         input_data['costs_market_values'],
-        starttime,
-        endtime,
+        dispatch_model.start_time,
+        dispatch_model.end_time,
         node_dict,
-        year)
+        dispatch_model.year)
 
     return node_dict
 
 
 def add_limits(input_data,
                emission_pathway,
-               starttime='2017-01-01 00:00:00',
-               endtime='2017-01-01 23:00:00'):
+               start_time='2017-01-01 00:00:00',
+               end_time='2017-01-01 23:00:00'):
     r"""Add further limits to the optimization model (emissions limit for now)
 
     Parameters
@@ -272,11 +274,11 @@ def add_limits(input_data,
     emission_pathway : str
         The pathway for emissions reduction to be used
 
-    starttime : :obj:`str`
-        The starttime of the optimization run
+    start_time : :obj:`str`
+        The start_time of the optimization run
 
-    endtime : :obj:`str`
-        The endtime of the optimization run
+    end_time : :obj:`str`
+        The end_time of the optimization run
 
     Returns
     -------
@@ -285,23 +287,24 @@ def add_limits(input_data,
     """
     emissions_limit = convert_annual_limit(
         input_data['emission_limits'][emission_pathway],
-        starttime, endtime)
+        start_time, end_time)
 
     return emissions_limit
 
 
-def nodes_from_csv(path_folder_input,
-                   AggregateInput,
-                   countries,
-                   fuel_cost_pathway='middle',
-                   starttime='2017-01-01 00:00:00',
-                   endtime='2017-01-01 23:00:00',
-                   year=2017,
-                   ActivateEmissionsLimit=False,
-                   emission_pathway='100_percent_linear',
-                   ActivateDemandResponse=False,
-                   approach='DIW',
-                   scenario='50'):
+def nodes_from_csv(dispatch_model):
+        # path_folder_input,
+        #            aggregate_input,
+        #            countries,
+        #            fuel_cost_pathway='middle',
+        #            start_time='2017-01-01 00:00:00',
+        #            end_time='2017-01-01 23:00:00',
+        #            year=2017,
+        #            activate_emissions_limit=False,
+        #            emission_pathway='100_percent_linear',
+        #            activate_demand_response=False,
+        #            approach='DIW',
+        #            scenario='50'):
     r"""Build oemof components from input data
 
     Parameters
@@ -309,7 +312,7 @@ def nodes_from_csv(path_folder_input,
     path_folder_input : :obj:`str`
         The path_folder_output where the input data is stored
 
-    AggregateInput: :obj:`boolean`
+    aggregate_input: :obj:`boolean`
         boolean control variable indicating whether to use complete
         or aggregated transformer input data set
 
@@ -319,22 +322,22 @@ def nodes_from_csv(path_folder_input,
     fuel_cost_pathway:  :obj:`str`
         The chosen pathway for commodity cost scenarios (lower, middle, upper)
 
-    starttime : :obj:`str`
+    start_time : :obj:`str`
         The starting timestamp of the optimization timeframe
 
-    endtime : :obj:`str`
+    end_time : :obj:`str`
         The end timestamp of the optimization timeframe
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
-    ActivateEmissionsLimit : :obj:`boolean`
+    activate_emissions_limit : :obj:`boolean`
         If True, an emission limit is introduced
 
     emission_pathway : str
         The pathway for emissions reduction to be used
 
-    ActivateDemandResponse : :obj:`boolean`
+    activate_demand_response : :obj:`boolean`
         If True, demand response input data is read in
 
     approach : :obj:`str`
@@ -351,41 +354,42 @@ def nodes_from_csv(path_folder_input,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
     """
-    input_data = parse_input_data(
-        path_folder_input,
-        AggregateInput,
-        countries,
-        fuel_cost_pathway,
-        year,
-        ActivateDemandResponse,
-        scenario)
+    input_data = parse_input_data(dispatch_model)
+        # path_folder_input,
+        # aggregate_input,
+        # countries,
+        # fuel_cost_pathway,
+        # year,
+        # activate_demand_response,
+        # scenario)
 
     node_dict = add_components(
         input_data,
-        starttime,
-        endtime,
-        year,
-        ActivateDemandResponse,
-        approach)
+        dispatch_model)
+        # start_time,
+        # end_time,
+        # year,
+        # activate_demand_response,
+        # approach)
 
     # create storages
     node_dict = create_storages(
         input_data['storages_el'],
         input_data['costs_operation_storages'],
-        node_dict, year)
+        node_dict, dispatch_model.year)
 
     emissions_limit = None
-    if ActivateEmissionsLimit:
+    if dispatch_model.activate_emissions_limit:
         emissions_limit = add_limits(
             input_data,
-            emission_pathway,
-            starttime, endtime)
+            dispatch_model.emission_pathway,
+            dispatch_model.start_time, dispatch_model.end_time)
 
     return node_dict, emissions_limit
 
 
 def nodes_from_csv_rh(path_folder_input,
-                      AggregateInput,
+                      aggregate_input,
                       countries,
                       timeseries_start,
                       timeslice_length_with_overlap,
@@ -393,9 +397,9 @@ def nodes_from_csv_rh(path_folder_input,
                       freq,
                       fuel_cost_pathway='middle',
                       year=2017,
-                      ActivateEmissionsLimit=False,
+                      activate_emissions_limit=False,
                       emission_pathway='100_percent_linear',
-                      ActivateDemandResponse=False,
+                      activate_demand_response=False,
                       approach='DIW',
                       scenario='50'):
     r"""Read in csv files and build oemof components (Rolling Horizon run)
@@ -407,7 +411,7 @@ def nodes_from_csv_rh(path_folder_input,
     path_folder_input : :obj:`str`
         The path_folder_output where the input data is stored
 
-    AggregateInput: :obj:`boolean`
+    aggregate_input: :obj:`boolean`
         boolean control variable indicating whether to use complete or
         aggregated transformer input data set
 
@@ -430,15 +434,15 @@ def nodes_from_csv_rh(path_folder_input,
         The chosen pathway for commodity cost scenarios (lower, middle, upper)
 
     year: :obj:`str`
-        Reference year for pathways depending on starttime
+        Reference year for pathways depending on start_time
 
-    ActivateEmissionsLimit : :obj:`boolean`
+    activate_emissions_limit : :obj:`boolean`
         If True, an emission limit is introduced
 
     emission_pathway : str
         The pathway for emissions reduction to be used
 
-    ActivateDemandResponse : :obj:`boolean`
+    activate_demand_response : :obj:`boolean`
         If True, demand response input data is read in
 
     approach : :obj:`str`
@@ -467,26 +471,26 @@ def nodes_from_csv_rh(path_folder_input,
                  '15min': (timeslice_length_with_overlap * 15, 'min')}[freq]
 
     # Determine start time and end time
-    starttime = timeseries_start.strftime("%Y-%m-%d %H:%M:%S")
-    endtime = (timeseries_start
+    start_time = timeseries_start.strftime("%Y-%m-%d %H:%M:%S")
+    end_time = (timeseries_start
                + pd.to_timedelta(freq_used[0], freq_used[1])).strftime(
         "%Y-%m-%d %H:%M:%S")
 
     input_data = parse_input_data(
         path_folder_input,
-        AggregateInput,
+        aggregate_input,
         countries,
         fuel_cost_pathway,
         year,
-        ActivateDemandResponse,
+        activate_demand_response,
         scenario)
 
     node_dict = add_components(
         input_data,
-        starttime,
-        endtime,
+        start_time,
+        end_time,
         year,
-        ActivateDemandResponse,
+        activate_demand_response,
         approach)
 
     # create storages (Rolling horizon)
@@ -497,10 +501,10 @@ def nodes_from_csv_rh(path_folder_input,
         node_dict, year)
 
     emissions_limit = None
-    if ActivateEmissionsLimit:
+    if activate_emissions_limit:
         emissions_limit = add_limits(
             input_data,
             emission_pathway,
-            starttime, endtime)
+            start_time, end_time)
 
     return node_dict, storage_labels, emissions_limit
