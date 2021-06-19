@@ -1,0 +1,14 @@
+name: pommes_dispatch
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - pip:
+    - oemof.solph==0.4.4
+
