@@ -33,33 +33,94 @@ class DispatchModel():
     A dispatch model is a container for all the model parameters as well
     as for methods for controlling the model workflow.
 
-    Parameters
+    Attributes
     ----------
+    rolling_horizon : boolean
+        boolean control variable indicating whether to run a rolling horizon
+        optimization or an integral optimization run (a simple model).
+        Note: For the rolling_horizon optimization run, additionally the
+        parameters `time_slice_length_wo_overlap_in_hours` and
+        `overlap_in_hours` (both of type int) have to be defined.
 
-
-    aggregate_input: :obj:`boolean`
+    aggregate_input : boolean
         boolean control variable indicating whether to use complete
         or aggregated transformer input data set
 
-    countries : :obj:`list` of str
+    countries : list of str
         List of countries to be simulated
 
-    fuel_cost_pathway:  :obj:`str`
-       The chosen pathway for commodity cost scenarios (lower, middle, upper)
+    solver : str
+        The solver to be used for solving the mathematical optimization model.
+        Must be one of the solvers oemof.solph resp. pyomo support, e.g.
+        'cbc', 'gplk', 'gurobi', 'cplex'.
 
-    year: :obj:`str`
-        Reference year for pathways depending on start_time
+    fuel_cost_pathway :  str
+       A predefined pathway for commodity cost develoment until 2050
+        Options: 'lower', 'middle', 'upper'
 
-    activate_demand_response : :obj:`boolean`
-        If True, demand response input data is read in
+    activate_emissions_limit : boolean
+        boolean control variable indicating whether to introduce an overall
+        emissions limit
+        Note: Combining an emissions limit with comparatively high minimum
+        loads of conventionals may lead to an infeasible model configuration
+        since either one of the restrictions may not be reached.
 
-    demand_response_scenario : :obj:`str`
-        Demand response scenario to be modeled;
-        must be one of ['25', '50', '75'] whereby '25' is the lower,
+    emissions_pathway : str
+        A predefined pathway for emissions reduction until 2050
+        Options: '100_percent_linear', '95_percent_linear', '80_percent_linear'
+        or 'BAU'
+
+    activate_demand_response : boolean
+        boolean control variable indicating whether to introduce
+        demand response to the model
+
+    demand_response_approach : str
+        The approach used for demand response modeling
+        Options: 'DLR', 'DIW', 'oemof'
+        See the documentation of the custom SinkDSM in oemof.solph as well
+        as the presentation by Johannes Kochems from the INREC 2020
+        for further information
+
+    demand_response_scenario : str
+        A predefined demand response scenario to be modeled
+        Options: '25', '50', '75', whereby '25' is the lower,
         i.e. rather pessimistic estimate
 
-    path_folder_input : :obj:`str`
-        The path_folder_output where the input data is stored
+    save_production_results : boolean
+        boolean control variable indicating whether to save the dispatch
+        results of the model run to a .csv file
+
+    save_price_results : boolean
+        boolean control variable indicating whether to save the power price
+        results of the model run to a .csv file
+
+    start_time : str
+        A date string of format "YYYY-MM-DD hh:mm:ss" defining the start time
+        of the simulation
+
+    end_time : str
+        A date string of format "YYYY-MM-DD hh:mm:ss" defining the end time
+        of the simulation
+
+    save_price_results : boolean
+        boolean control variable indicating whether to save the power price
+        results of the model run to a .csv file
+
+    path_folder_input : str
+        The path to the folder where the input data is stored
+
+    path_folder_output : str
+        The path to the folder where the output data is to be stored
+
+    om : :class:`oemof.solph.models.Model`
+        The mathematical optimization model itself
+
+    time_slice_length_wo_overlap_in_hours : int (optional)
+        The length of a time slice for a rolling horizon model run in hours,
+        not including an overlap
+
+    overlap_in_hours : int (optional)
+        The length of the overlap for a rolling horizon model run in hours
     """
 
     def __init__(self):
@@ -70,7 +131,7 @@ class DispatchModel():
         self.solver = None
         self.fuel_cost_pathway = None
         self.activate_emissions_limit =None
-        self.emission_pathway = None
+        self.emissions_pathway = None
         self.activate_demand_response = None
         self.demand_response_approach = None
         self.demand_response_scenario = None
@@ -93,7 +154,8 @@ class DispatchModel():
             information
 
         nolog : boolean
-            Show no logging ingo if True
+            Show no logging ingo if True; else show logs for updating resp.
+            adding attributes to the dispatch model
         """
         for param_dict in model_parameters:
             for k, v in param_dict.items():
@@ -119,9 +181,9 @@ class DispatchModel():
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!")
 
-    def add_rh_configuration(self, RH_parameters):
+    def add_rh_configuration(self, rh_parameters):
         """Add a rolling horizon configuration to the dispatch model"""
-        self.update_model_configuration(RH_parameters)
+        self.update_model_configuration(rh_parameters)
 
         setattr(self, "time_series_start",
                 pd.Timestamp(self.start_time, self.freq))
@@ -129,19 +191,23 @@ class DispatchModel():
                 pd.Timestamp(self.end_time, self.freq))
         setattr(self, "time_slice_length_wo_overlap_in_timesteps",
                 ({'60min': 1, '15min': 4}[self.freq]
-                 * self.time_slice_length_wo_overlap_in_hours))
+                 * getattr(self, "time_slice_length_wo_overlap_in_hours")))
         setattr(self, "overlap_in_time_steps",
                 ({'60min': 1, '15min': 4}[self.freq]
-                 * self.overlap_in_hours))
+                 * getattr(self, "overlap_in_hours")))
         setattr(self, "time_slice_length_with_overlap",
                 (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
                 + getattr(self, "overlap_in_time_steps")))
         setattr(self, "overall_timesteps",
                 helpers.time_steps_between_timestamps(
-                    self.time_series_start, self.time_series_end, self.freq))
+                    getattr(self, "time_series_start"),
+                    getattr(self, "time_series_end"),
+                    self.freq))
         setattr(self, "amount_of_timeslices",
-                math.ceil(self.overall_time_steps
-                          / self.time_slice_length_wo_overlap_in_time_steps))
+                math.ceil(
+                    getattr(self, "overall_time_steps")
+                    / getattr(self,
+                              "time_slice_length_wo_overlap_in_time_steps")))
 
     def initialize_logging(self):
         """Initialize logging by deriving a filename from the configuration"""
@@ -153,11 +219,11 @@ class DispatchModel():
         else:
             rh = 'RH_'
         if self.aggregate_input:
-            agg = 'clustered_'
+            agg = 'clustered'
         else:
-            agg = 'complete_'
+            agg = 'complete'
 
-        filename = ("dispatch_LP_" + "start-" + self.start_time[:10] + "_"
+        filename = ("dispatch_LP_start-" + self.start_time[:10] + "_"
                     + str(optimization_timeframe) + "-days_" + rh + agg)
 
         setattr(self, "filename", filename)
@@ -327,7 +393,7 @@ class DispatchModel():
             freq,
             year,
             activate_emissions_limit,
-            emission_pathway,
+            emissions_pathway,
             activate_demand_response,
             approach,
             scenario):
@@ -372,7 +438,7 @@ class DispatchModel():
         ActivateEmissionsLimit : :obj:`boolean`
             If True, an emission limit is introduced
 
-        emission_pathway : str
+        emissions_pathway : str
             The pathway for emissions reduction to be used
 
         ActivateDemandResponse : :obj:`boolean`
@@ -425,7 +491,7 @@ class DispatchModel():
             fuel_cost_pathway,
             year,
             activate_emissions_limit,
-            emission_pathway,
+            emissions_pathway,
             activate_demand_response,
             approach,
             scenario)

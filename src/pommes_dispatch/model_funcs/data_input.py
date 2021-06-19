@@ -116,7 +116,8 @@ def add_components(input_data,
     r"""Add the oemof components to a dictionary of nodes
 
     Note: Storages are not included here. They have to be defined
-    separately since the approaches differ between RH and simple model.
+    separately since the approaches differ between rolling horizon
+    and simple model.
 
     Parameters
     ----------
@@ -189,7 +190,7 @@ def add_components(input_data,
 
 
 def add_limits(input_data,
-               emission_pathway,
+               emissions_pathway,
                start_time='2017-01-01 00:00:00',
                end_time='2017-01-01 23:00:00'):
     r"""Add further limits to the optimization model (emissions limit for now)
@@ -200,7 +201,7 @@ def add_limits(input_data,
         The input data given as a dict of DataFrames
         with component names as keys
 
-    emission_pathway : str
+    emissions_pathway : str
         The pathway for emissions reduction to be used
 
     start_time : :obj:`str`
@@ -215,14 +216,14 @@ def add_limits(input_data,
         The emissions limit to be used (converted)
     """
     emissions_limit = helpers.convert_annual_limit(
-        input_data['emission_limits'][emission_pathway],
+        input_data['emission_limits'][emissions_pathway],
         start_time, end_time)
 
     return emissions_limit
 
 
 def nodes_from_csv(dispatch_model):
-    r"""Build oemof components from input data
+    r"""Build oemof.solph components from input data
 
     Parameters
     ----------
@@ -249,7 +250,7 @@ def nodes_from_csv(dispatch_model):
     if dispatch_model.activate_emissions_limit:
         emissions_limit = add_limits(
             input_data,
-            dispatch_model.emission_pathway,
+            dispatch_model.emissions_pathway,
             dispatch_model.start_time, dispatch_model.end_time)
 
     return node_dict, emissions_limit
@@ -265,7 +266,7 @@ def nodes_from_csv_rh(path_folder_input,
                       fuel_cost_pathway='middle',
                       year=2017,
                       activate_emissions_limit=False,
-                      emission_pathway='100_percent_linear',
+                      emissions_pathway='100_percent_linear',
                       activate_demand_response=False,
                       approach='DIW',
                       scenario='50'):
@@ -306,7 +307,7 @@ def nodes_from_csv_rh(path_folder_input,
     activate_emissions_limit : :obj:`boolean`
         If True, an emission limit is introduced
 
-    emission_pathway : str
+    emissions_pathway : str
         The pathway for emissions reduction to be used
 
     activate_demand_response : :obj:`boolean`
@@ -371,7 +372,7 @@ def nodes_from_csv_rh(path_folder_input,
     if activate_emissions_limit:
         emissions_limit = add_limits(
             input_data,
-            emission_pathway,
+            emissions_pathway,
             start_time, end_time)
 
     return node_dict, storage_labels, emissions_limit

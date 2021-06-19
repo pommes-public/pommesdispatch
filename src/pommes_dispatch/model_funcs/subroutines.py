@@ -33,6 +33,9 @@ def load_input_data(filename=None,
                     reindex=False):
     r"""Load input data from csv files.
 
+    Optionally reindex time series in order to simulate 2030 (or another year).
+    Display some information on NaN values in time series data.
+
     Parameters
     ----------
     filename : :obj:`str`
@@ -45,11 +48,12 @@ def load_input_data(filename=None,
         List of countries to be simulated
 
     reindex : boolean
-        If reindex is True, the given year will be used for reindexing
+        If reindex is True, the year 2030 will be used for reindexing
+        time series data
 
     Returns
     -------
-    df :pandas:`pandas.DataFrame`
+    df : :class:`pandas.DataFrame`
         DataFrame containing information about nodes or time series.
     """
     df = pd.read_csv(path_folder_input + filename + '.csv', index_col=0)
@@ -139,11 +143,11 @@ def create_interconnection_transformers(input_data, dispatch_model, node_dict):
             if l['type'] == 'DC':
                 node_dict[i] = solph.Transformer(
                     label=i,
-                    inputs={node_dict[l['from']]:
-                        solph.Flow(
-                            nominal_value=l[dispatch_model.year])},
-                    outputs={node_dict[l['to']]:
-                                 solph.Flow()},
+                    inputs={
+                        node_dict[l['from']]:
+                            solph.Flow(
+                                nominal_value=l[dispatch_model.year])},
+                    outputs={node_dict[l['to']]: solph.Flow()},
                     conversion_factors={
                         (node_dict[l['from']], node_dict[l['to']]):
                             l['conversion_factor']}
@@ -152,14 +156,14 @@ def create_interconnection_transformers(input_data, dispatch_model, node_dict):
             if l['type'] == 'AC':
                 node_dict[i] = solph.Transformer(
                     label=i,
-                    inputs={node_dict[l['from']]:
-                        solph.Flow(
-                            nominal_value=l[dispatch_model.year],
-                            max=input_data['links_ts'][i][
-                                dispatch_model.start_time
-                                :dispatch_model.end_time].to_numpy())},
-                    outputs={node_dict[l['to']]:
-                                 solph.Flow()},
+                    inputs={
+                        node_dict[l['from']]:
+                            solph.Flow(
+                                nominal_value=l[dispatch_model.year],
+                                max=input_data['links_ts'][i][
+                                    dispatch_model.start_time
+                                    :dispatch_model.end_time].to_numpy())},
+                    outputs={node_dict[l['to']]: solph.Flow()},
                     conversion_factors={
                         (node_dict[l['from']], node_dict[l['to']]):
                             l['conversion_factor']}
@@ -209,8 +213,7 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
     for i, cs in input_data['sources_renewables_fluc'].iterrows():
         node_dict[i] = solph.Source(
             label=i,
-            outputs={node_dict[cs["to"]]:
-                         solph.Flow()})
+            outputs={node_dict[cs["to"]]: solph.Flow()})
 
     return node_dict
 
@@ -296,7 +299,7 @@ def create_demand(input_data, dispatch_model, node_dict,
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
 
-    dr_overall_load_ts_df : :pandas:`pandas.Series`
+    dr_overall_load_ts_df : :class:`pandas.Series`
         The overall load time series from demand response units which is
         used to decrement overall electrical load for Germany
         NOTE: This shall be substituted through a version which already
@@ -319,7 +322,7 @@ def create_demand(input_data, dispatch_model, node_dict,
 
         # TODO: Include into data preparation and write adjusted demand
         # Adjusted demand here means the difference between overall demand
-        # and default load profile for demand response units
+        # and the baseline load profile for demand response units
         if dispatch_model.activate_demand_response:
             if i == 'DE_sink_el_load':
                 kwargs_dict['inputs'] = {node_dict[d['from']]: solph.Flow(
@@ -363,15 +366,14 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
         Modified dictionary containing all nodes of the EnergySystem including
         the demand response sink elements
 
-    dr_overall_load_ts : :pandas:`pandas.Series`
-        The overall load time series from demand response units which is
-        used to decrement overall electrical load for Germany
+    dr_overall_load_ts : :class:`pandas.Series`
+        The overall baseline load time series from demand response units
+        which is used to decrement overall electrical load for Germany
         NOTE: This shall be substituted through a version which already
         includes this in the data preparation
     """
     for i, d in input_data['sinks_dr_el'].iterrows():
-        # Use kwargs dict for easier assignment of parameters
-        # kwargs for all DR modeling approaches
+        # kwargs for all demand response modeling approaches
         kwargs_all = {
             'demand': np.array(
                 input_data['sinks_dr_el_ts'][i]
@@ -396,7 +398,7 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
             'shift_eligibility': True,
         }
 
-        # kwargs dependent on DR modeling approach chosen
+        # kwargs dependent on demand response modeling approach chosen
         kwargs_dict = {
             'DIW': {'approach': 'DIW',
                     'recovery_time_shift': math.ceil(
@@ -437,7 +439,7 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
 
         node_dict[i] = approach_dict[dispatch_model.demand_response_approach]
 
-    # Calculate overall electrical load from demand response units
+    # Calculate overall electrical baseline load from demand response units
     dr_overall_load_ts_df = input_data['sinks_dr_el_ts'].mul(
         input_data['sinks_dr_el']['max_cap']).sum(axis=1)
 
@@ -475,12 +477,13 @@ def create_excess_sinks(input_data, node_dict):
     try:
         node_dict['DE_sink_el_excess'] = solph.Sink(
             label='DE_sink_el_excess',
-            inputs={node_dict['DE_bus_windoffshore']:
-                        solph.Flow(variable_costs=0),
-                    node_dict['DE_bus_windonshore']:
-                        solph.Flow(variable_costs=0),
-                    node_dict['DE_bus_solarPV']:
-                        solph.Flow(variable_costs=0)})
+            inputs={
+                node_dict['DE_bus_windoffshore']:
+                    solph.Flow(variable_costs=0),
+                node_dict['DE_bus_windonshore']:
+                    solph.Flow(variable_costs=0),
+                node_dict['DE_bus_solarPV']:
+                    solph.Flow(variable_costs=0)})
     except KeyError:
         pass
 
@@ -529,8 +532,10 @@ def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
 
 def build_var_chp_units(i, t, node_dict, outflow_args_el,
                         outflow_args_th):
-    r"""Build variable CHP units which are modeled as extraction turbine CHP
-    units and can choose between full condensation mode, full coupling mode
+    r"""Build variable CHP units
+
+    These are modeled as extraction turbine CHP units and can choose
+    between full condensation mode, full coupling mode
     and any allowed state in between.
     
     Parameters
@@ -753,24 +758,25 @@ def create_transformers_res(input_data,
             node_dict[i] = solph.Transformer(
                 label=i,
                 inputs={node_dict[t['from']]: solph.Flow()},
-                outputs={node_dict[t['to_el']]:
-                             solph.Flow(**outflow_args_el)},
-                conversion_factors={node_dict[t['to_el']]:
-                                        t['efficiency_el']})
+                outputs={
+                    node_dict[t['to_el']]:
+                        solph.Flow(**outflow_args_el)},
+                conversion_factors={
+                    node_dict[t['to_el']]: t['efficiency_el']})
 
         # exogeneous fRES
         else:
             node_dict[i] = solph.Transformer(
                 label=i,
-                inputs={node_dict[t['from']]:
-                            solph.Flow()},
-                outputs={node_dict[t['to_el']]:
-                    solph.Flow(
-                        nominal_value=t['capacity'],
-                        fix=np.array(
-                            input_data['sources_renewables_ts'][
-                                t['from']][dispatch_model.start_time
-                                           :dispatch_model.end_time]))},
+                inputs={node_dict[t['from']]: solph.Flow()},
+                outputs={
+                    node_dict[t['to_el']]:
+                        solph.Flow(
+                            nominal_value=t['capacity'],
+                            fix=np.array(
+                                input_data['sources_renewables_ts'][
+                                    t['from']][dispatch_model.start_time
+                                               :dispatch_model.end_time]))},
                 conversion_factors={node_dict[t['to_el']]: t['efficiency_el']})
 
     return node_dict

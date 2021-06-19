@@ -72,7 +72,7 @@ control_parameters = {
     "solver": "gurobi",
     "fuel_cost_pathway": "middle",
     "activate_emissions_limit": False,
-    "emission_pathway": "100_percent_linear",
+    "emissions_pathway": "100_percent_linear",
     "activate_demand_response": False,
     "demand_response_approach": "DLR",
     "demand_response_scenario": "50",
@@ -175,7 +175,7 @@ if dm.rolling_horizon:
             freq,
             str(year),
             ActivateEmissionsLimit,
-            emission_pathway,
+            emissions_pathway,
             ActivateDemandResponse,
             approach,
             scenario)
