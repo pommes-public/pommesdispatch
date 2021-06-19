@@ -15,8 +15,8 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
-from .subroutines import *
 from pommes_dispatch.model_funcs import helpers
+from .subroutines import *
 
 
 def parse_input_data(dispatch_model):
@@ -104,8 +104,7 @@ def parse_input_data(dispatch_model):
                 filename=name,
                 path_folder_input=dispatch_model.path_folder_input,
                 countries=dispatch_model.countries,
-                reindex=True,
-                year=dispatch_model.year)
+                reindex=True)
             for key, name in files.items()}
 
     return input_data
@@ -234,6 +233,9 @@ def nodes_from_csv(dispatch_model):
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
+
+    emissions_limit : int or None
+        The overall emissions limit
     """
     input_data = parse_input_data(dispatch_model)
 
@@ -256,123 +258,63 @@ def nodes_from_csv(dispatch_model):
     return node_dict, emissions_limit
 
 
-def nodes_from_csv_rh(path_folder_input,
-                      aggregate_input,
-                      countries,
-                      timeseries_start,
-                      timeslice_length_with_overlap,
-                      storages_init_df,
-                      freq,
-                      fuel_cost_pathway='middle',
-                      year=2017,
-                      activate_emissions_limit=False,
-                      emissions_pathway='100_percent_linear',
-                      activate_demand_response=False,
-                      approach='DIW',
-                      scenario='50'):
-    r"""Read in csv files and build oemof components (Rolling Horizon run)
-
-    Runs function for regular optimization run and updates storage values
+def nodes_from_csv_rh(dispatch_model, iteration_results):
+    r"""Read in csv files and build components for a rolling horizon run
 
     Parameters
     ----------
-    path_folder_input : :obj:`str`
-        The path_folder_output where the input data is stored
+    dispatch_model : :class:`DispatchModel`
+        The dispatch model that is considered
 
-    aggregate_input: :obj:`boolean`
-        boolean control variable indicating whether to use complete or
-        aggregated transformer input data set
-
-    countries : :obj:`list` of str
-        List of countries to be simulated
-
-    timeseries_start : :obj:`pd.Timestamp`
-        the adjusted starting timestep for used the next iteration
-
-    timeslice_length_with_overlap : :obj:`int`
-        The timeslice length with overlap in timesteps (hours)
-
-    storages_init_df : :obj:`pd.DataFrame`
-        DataFrame to store initial states of storages
-
-    freq : :obj:`str`
-        The frequency of the timeindex
-
-    fuel_cost_pathway:  :obj:`str`
-        The chosen pathway for commodity cost scenarios (lower, middle, upper)
-
-    year: :obj:`str`
-        Reference year for pathways depending on start_time
-
-    activate_emissions_limit : :obj:`boolean`
-        If True, an emission limit is introduced
-
-    emissions_pathway : str
-        The pathway for emissions reduction to be used
-
-    activate_demand_response : :obj:`boolean`
-        If True, demand response input data is read in
-
-    approach : :obj:`str`
-        Demand response modeling approach to be used;
-        must be one of ['DIW', 'DLR', 'IER', 'TUD']
-
-    scenario : :obj:`str`
-        Demand response scenario to be modeled;
-        must be one of ['25', '50', '75'] whereby '25' is the lower,
-        i.e. rather pessimistic estimate
+    iteration_results : dict
+        A dictionary holding the results of the previous rolling horizon
+        iteration
 
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
 
-    storage_labels : :obj:`list` of :class:`str`
-        A list of the labels of all storage elements included in the model
-        used for assessing these and assigning initial states (via the
-        function initial_states_RH form functions_for_model_control_LP)+
-
     emissions_limit : int or None
         The overall emissions limit
+
+    storage_labels : :obj:`list` of :class:`str`
+        A list of the labels of all storage elements included in the model
+        used for assessing these and assigning initial states
     """
-    freq_used = {'60min': (timeslice_length_with_overlap, 'h'),
-                 '15min': (timeslice_length_with_overlap * 15, 'min')}[freq]
+    frequency_used = {
+        "60min": (getattr(dispatch_model,
+                          "time_slice_length_with_overlap"), "h"),
+        "15min": (getattr(dispatch_model,
+                          "time_slice_length_with_overlap") * 15, "min")
+    }[dispatch_model.freq]
 
-    # Determine start time and end time
-    start_time = timeseries_start.strftime("%Y-%m-%d %H:%M:%S")
-    end_time = (timeseries_start
-                + pd.to_timedelta(freq_used[0], freq_used[1])).strftime(
-        "%Y-%m-%d %H:%M:%S")
+    # Update start time and end time of the model for retrieving the right data
+    dispatch_model.start_time = (getattr(dispatch_model, "time_series_start")
+                                 .strftime("%Y-%m-%d %H:%M:%S"))
+    dispatch_model.end_time = (
+        (getattr(dispatch_model, "time_series_start")
+         + pd.to_timedelta(frequency_used[0], frequency_used[1])).strftime(
+            "%Y-%m-%d %H:%M:%S"))
 
-    input_data = parse_input_data(
-        path_folder_input,
-        aggregate_input,
-        countries,
-        fuel_cost_pathway,
-        year,
-        activate_demand_response,
-        scenario)
+    input_data = parse_input_data(dispatch_model)
 
     node_dict = add_components(
         input_data,
-        start_time,
-        end_time,
-        year,
-        activate_demand_response,
-        approach)
+        dispatch_model)
 
     # create storages (Rolling horizon)
-    node_dict, storage_labels = create_storages_rh(
-        input_data['storages_el'],
-        input_data['costs_operation_storages'],
-        storages_init_df,
-        node_dict, year)
+    node_dict, storage_labels = create_storages_rolling_horizon(
+        input_data,
+        dispatch_model,
+        node_dict,
+        iteration_results)
 
     emissions_limit = None
-    if activate_emissions_limit:
+    if dispatch_model.activate_emissions_limit:
         emissions_limit = add_limits(
             input_data,
-            emissions_pathway,
-            start_time, end_time)
+            dispatch_model.emissions_pathway,
+            dispatch_model.start_time, dispatch_model.end_time)
 
-    return node_dict, storage_labels, emissions_limit
+    return node_dict, emissions_limit, storage_labels

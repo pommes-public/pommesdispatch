@@ -3,20 +3,6 @@
 General description
 -------------------
 These are supplementary routines used in the power market model POMMES.
-The rather generic routines are centrally collected and imported
-by the different model variants.
-
-Licensing information and Disclaimer
-------------------------------------
-This software is provided under MIT License (see licensing file).
-
-A special thank you goes out to all the developers creating,
-maintaining, and expanding packages used in this model,
-especially to the oemof and pyomo developer groups!
-
-In addition to that, a special thank you goes to all students
-and student assistants which have contributed to the model itself
-or its data inputs.
 
 Installation requirements
 -------------------------
@@ -24,7 +10,6 @@ Python version >= 3.8
 
 @author: Johannes Kochems
 """
-
 import math
 from datetime import datetime
 

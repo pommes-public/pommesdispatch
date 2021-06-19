@@ -22,9 +22,8 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 import math
 
 import numpy as np
-import pandas as pd
-
 import oemof.solph as solph
+import pandas as pd
 
 
 def load_input_data(filename=None,
@@ -852,26 +851,25 @@ def create_storages(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-def create_storages_rh(storages_df, storage_var_costs_df,
-                       storages_init_df, node_dict, year=2017):
+def create_storages_rolling_horizon(input_data, dispatch_model, node_dict,
+                                    iteration_results):
     r"""Create storages, add them to the dict of nodes, return storage labels.
     
     Parameters
     ----------
-    storages_df : :obj:`pd.DataFrame`
-        pd.DataFrame containing the storages elements to be created
-    
-    storage_var_costs_df : :obj:`pd.DataFrame`
-        pd.DataFrame containing the storages variable costs data
+    input_data: :obj:`dict` of :class:`pd.DataFrame`
+        The input data given as a dict of DataFrames
+        with component names as keys
 
-    storages_init_df : :obj;`pd.DataFrame`
-        pd.DataFrame containing the storage states from previous iterations 
+    dispatch_model : :class:`DispatchModel`
+        The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Dictionary containing all nodes of the EnergySystem     
-    
-    year: :obj:`str`
-        Reference year for pathways depending on start_time
+        Dictionary containing all nodes of the EnergySystem
+
+    iteration_results : dict
+        A dictionary holding the results of the previous rolling horizon
+        iteration
 
     Returns
     -------
@@ -884,28 +882,33 @@ def create_storages_rh(storages_df, storage_var_costs_df,
     """
     storage_labels = []
 
-    for i, s in storages_df.iterrows():
+    for i, s in input_data['storages_el'].iterrows():
 
         storage_labels.append(i)
-        try:
-            initial_capacity_last = (
-                    storages_init_df.loc[i, 'Capacity_Last_Timestep']
-                    / s['nominal_storable_energy'])
-        except:
-            initial_capacity_last = s['initial_storage_level']
+        if not iteration_results["storages_initial"].empty:
+            initial_storage_level_last_iteration = (
+                iteration_results["storages_initial"]
+                .loc[i, "initial_storage_level_last_iteration"]
+                / s["nominal_storable_energy"])
+        else:
+            initial_storage_level_last_iteration = s["initial_storage_level"]
 
         if s['type'] == 'phes':
             node_dict[i] = solph.components.GenericStorage(
                 label=i,
                 inputs={node_dict[s['bus_inflow']]: solph.Flow(
                     nominal_value=s['capacity_pump'],
-                    variable_costs=storage_var_costs_df.loc[i, year])},
+                    variable_costs=(
+                        input_data['costs_operation_storages']
+                        .loc[i, dispatch_model.year]))},
                 outputs={node_dict[s['bus_outflow']]: solph.Flow(
                     nominal_value=s['capacity_turbine'],
-                    variable_costs=storage_var_costs_df.loc[i, year])},
+                    variable_costs=(
+                        input_data['costs_operation_storages']
+                        .loc[i, dispatch_model.year]))},
                 nominal_storage_capacity=s['nominal_storable_energy'],
                 loss_rate=s['loss_rate'],
-                initial_storage_level=initial_capacity_last,
+                initial_storage_level=initial_storage_level_last_iteration,
                 max_storage_level=s['max_storage_level'],
                 min_storage_level=s['min_storage_level'],
                 inflow_conversion_factor=s['efficiency_pump'],
@@ -919,12 +922,14 @@ def create_storages_rh(storages_df, storage_var_costs_df,
                 inputs={node_dict[s['bus_inflow']]: solph.Flow()},
                 outputs={node_dict[s['bus_outflow']]: solph.Flow(
                     nominal_value=s['capacity_turbine'],
-                    variable_costs=storage_var_costs_df.loc[i, year],
+                    variable_costs=(
+                        input_data['costs_operation_storages']
+                        .loc[i, dispatch_model.year]),
                     min=s['min_load_factor'],
                     max=s['max_load_factor'])},
                 nominal_storage_capacity=s['nominal_storable_energy'],
                 loss_rate=s['loss_rate'],
-                initial_storage_level=initial_capacity_last,
+                initial_storage_level=initial_storage_level_last_iteration,
                 max_storage_level=s['max_storage_level'],
                 min_storage_level=s['min_storage_level'],
                 inflow_conversion_factor=s['efficiency_pump'],

@@ -2,7 +2,7 @@
 """
 General description
 ------------------
-This file contains all function definitions for controlling the model
+This file contains all class and function definitions for controlling the model
 workflow of the dispatch variant of POMMES.
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
@@ -27,7 +27,18 @@ from pommes_dispatch.model_funcs import helpers
 from .data_input import nodes_from_csv, nodes_from_csv_rh
 
 
-class DispatchModel():
+def show_meta_logging_info(model_meta):
+    """Show some logging information on model meta data"""
+    logging.info(f"***** MODEL RUN TERMINATED SUCESSFULLY :-) *****")
+    logging.info(f"Overall objective value: "
+                 + f"{model_meta['overall_objective']:.2f}")
+    logging.info(f"Overall solution time: "
+                 + f"{model_meta['overall_solution_time']:.2f}")
+    logging.info(f"Overall time: "
+                 + f"{model_meta['overall_time']:.2f}")
+
+
+class DispatchModel(object):
     """A class that holds an dispatch model.
 
     A dispatch model is a container for all the model parameters as well
@@ -115,11 +126,11 @@ class DispatchModel():
     om : :class:`oemof.solph.models.Model`
         The mathematical optimization model itself
 
-    time_slice_length_wo_overlap_in_hours : int (optional)
+    time_slice_length_wo_overlap_in_hours : int (optional, for rolling horizon)
         The length of a time slice for a rolling horizon model run in hours,
         not including an overlap
 
-    overlap_in_hours : int (optional)
+    overlap_in_hours : int (optional, for rolling horizon)
         The length of the overlap for a rolling horizon model run in hours
     """
 
@@ -130,7 +141,7 @@ class DispatchModel():
         self.countries = None
         self.solver = None
         self.fuel_cost_pathway = None
-        self.activate_emissions_limit =None
+        self.activate_emissions_limit = None
         self.emissions_pathway = None
         self.activate_demand_response = None
         self.demand_response_approach = None
@@ -161,10 +172,10 @@ class DispatchModel():
             for k, v in param_dict.items():
                 if not nolog:
                     if hasattr(self, k):
-                        logger.info(
+                        print(
                             f"Updating attribute `{k}` with value '{v}'.")
                     else:
-                        logger.info(
+                        print(
                             f"Adding attribute `{k}` with value '{v}' "
                             + "to the model.")
                 setattr(self, k, v)
@@ -181,15 +192,17 @@ class DispatchModel():
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!")
 
-    def add_rh_configuration(self, rh_parameters):
+    def add_rolling_horizon_configuration(self, rolling_horizon_parameters,
+                                          nolog=False):
         """Add a rolling horizon configuration to the dispatch model"""
-        self.update_model_configuration(rh_parameters)
+        self.update_model_configuration(rolling_horizon_parameters,
+                                        nolog=nolog)
 
         setattr(self, "time_series_start",
                 pd.Timestamp(self.start_time, self.freq))
         setattr(self, "time_series_end",
                 pd.Timestamp(self.end_time, self.freq))
-        setattr(self, "time_slice_length_wo_overlap_in_timesteps",
+        setattr(self, "time_slice_length_wo_overlap_in_time_steps",
                 ({'60min': 1, '15min': 4}[self.freq]
                  * getattr(self, "time_slice_length_wo_overlap_in_hours")))
         setattr(self, "overlap_in_time_steps",
@@ -197,13 +210,13 @@ class DispatchModel():
                  * getattr(self, "overlap_in_hours")))
         setattr(self, "time_slice_length_with_overlap",
                 (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
-                + getattr(self, "overlap_in_time_steps")))
-        setattr(self, "overall_timesteps",
+                 + getattr(self, "overlap_in_time_steps")))
+        setattr(self, "overall_time_steps",
                 helpers.time_steps_between_timestamps(
                     getattr(self, "time_series_start"),
                     getattr(self, "time_series_end"),
                     self.freq))
-        setattr(self, "amount_of_timeslices",
+        setattr(self, "amount_of_time_slices",
                 math.ceil(
                     getattr(self, "overall_time_steps")
                     / getattr(self,
@@ -240,7 +253,7 @@ class DispatchModel():
 
         if self.activate_demand_response:
             logging.info(
-                f"Using approach from {self.demand_response_approach} "
+                f"Using approach '{self.demand_response_approach}' "
                 f"for DEMAND RESPONSE modeling\n"
                 f"Considering a {self.demand_response_scenario}% scenario")
         else:
@@ -341,282 +354,132 @@ class DispatchModel():
 
         return power_prices
 
-    def initial_states_RH(
-            self,
-            model_results,
-            timeslice_length_wo_overlap_in_timesteps,
-            storage_labels):
-        r"""Obtain the initial states for the upcoming rolling horizon model run.
+    def retrieve_initial_states_rolling_horizon(self, iteration_results):
+        r"""Retrieve the initial states for the upcoming rolling horizon run
 
         Parameters
         ----------
-        model_results: :obj:`pd.DataFrame`
-            the results of the optimization run
-
-        timeslice_length_wo_overlap_in_timesteps: :obj:`int`
-            length of a rolling horizon timeslice excluding overlap
-
-        storage_labels: :obj:`list` of :class:`str`
-            list of storage labels (obtained from input data)
-
-        Returns
-        -------
-        storages_init_df : :obj:`pd.DataFrame`
-            A pd.DataFrame containing the storage data (i.e. statuses for
-            the last timestep of the optimization window - excluding overlap)
+        iteration_results : dict
+            A dictionary holding the results of the previous rolling horizon
+            iteration
         """
-        storages_init_df = pd.DataFrame(columns=['Capacity_Last_Timestep'],
-                                        index=storage_labels)
+        iteration_results["storages_initial"] = pd.DataFrame(
+            columns=["initial_storage_level_last_iteration"],
+            index=getattr(self, "storage_labels"))
 
-        for i, s in storages_init_df.iterrows():
-            storage = views.node(model_results, i)
+        for i, s in iteration_results["storages_initial"].iterrows():
+            storage = views.node(iteration_results["model_results"], i)
 
-            storages_init_df.loc[i, 'Capacity_Last_Timestep'] = (
-                storage['sequences'][((i, 'None'), 'storage_content')][
-                    timeslice_length_wo_overlap_in_timesteps - 1])
+            iteration_results["storages_initial"].at[
+                i, "initial_storage_level_last_iteration"] = (
+                storage["sequences"][((i, "None"),
+                                      "storage_content")].iloc[
+                    getattr(
+                        self,
+                        "time_slice_length_wo_overlap_in_time_steps") - 1])
 
-        logging.info("Obtained initial (storage) states for next iteration")
+        logging.info("Obtained initial (storage) levels for next iteration")
 
-        return storages_init_df
-
-    def build_RH_model(
-            self,
-            path_folder_input,
-            AggregateInput,
-            countries,
-            fuel_cost_pathway,
-            timeseries_start,
-            timeslice_length_wo_overlap_in_timesteps,
-            timeslice_length_with_overlap,
-            counter,
-            storages_init_df,
-            freq,
-            year,
-            activate_emissions_limit,
-            emissions_pathway,
-            activate_demand_response,
-            approach,
-            scenario):
+    def build_rolling_horizon_model(self, counter, iteration_results):
         r"""Set up and return a rolling horizon LP dispatch model
 
+        Track the storage labels in order to obtain and pass initial
+        storage levels for each iteration. Set the end time of an iteration
+        excluding the overlap to the start of the next iteration.
+
         Parameters
         ----------
-        path_folder_input : :obj:`str`
-            The path folder where the input data is stored
+        counter : int
+            A counter for the rolling horizon optimization iterations
 
-        AggregateInput : boolean
-            If True, an aggregated input data set is used
-
-        countries : list of str
-            List of countries to be simulated
-
-        fuel_cost_pathway : `str`
-            The fuel costs pathway to be used ('lower', 'middle', 'upper')
-
-        timeseries_start : :obj:`pd.Timestamp`
-            the adjusted starting timestep for used the next iteration
-
-        timeslice_length_wo_overlap_in_timesteps : :obj:`int`
-            The timeslice length without the overlap (in timesteps)
-
-        timeslice_length_with_overlap : :obj:`int`
-            The timeslice length with the overlap (in timesteps)
-
-        counter: :obj:`int`
-            A counter for rolling horizon optimization windows (iterations)
-
-        storages_init_df : :obj:`pd.DataFrame`
-            A pd.DataFrame containing the storage data (i.e. statuses for
-            the last timestep of the optimization window - excluding overlap)
-
-        freq : :obj:`str`
-            The frequency of the timeindex
-
-        year : int
-            The simulation year
-
-        ActivateEmissionsLimit : :obj:`boolean`
-            If True, an emission limit is introduced
-
-        emissions_pathway : str
-            The pathway for emissions reduction to be used
-
-        ActivateDemandResponse : :obj:`boolean`
-            If True, demand response input data is read in
-
-        approach : :obj:`str`
-            The modeling approach to be used for demand response modeling
-
-        scenario : :obj:`str`
-            The scenario to be used for demand response modeling
-
-        Returns
-        -------
-        om : :class:`oemof.solph.models.Model`
-            The mathematical optimisation model to be solved
-
-        es : :class:`oemof.solph.network.EnergySystem`
-            The energy system itself (used for determining initial states for the
-            next rolling horizon iteration)
-
-        timeseries_start : :obj:`pd.Timestamp`
-            the adjusted starting timestep for used the next iteration
-
-        datetime_index : :obj:`pd.DatetimeIndex`
-            The datetime index of the EnergySystem for the next iteration
-
-        storage_labels: :obj:`list` of :class:`str`
-            list of storage labels (obtained from input data)
+        iteration_results : dict
+            A dictionary holding the results of the previous rolling horizon
+            iteration
         """
-        timeseries_end = timeseries_start + pd.to_timedelta(
-            timeslice_length_wo_overlap_in_timesteps, 'h')
+        setattr(self, "time_series_end",
+                (getattr(self, "time_series_start")
+                 + pd.to_timedelta(
+                            getattr(
+                                self,
+                                "time_slice_length_wo_overlap_in_hours"),
+                            "h")))
 
-        logging.info(f'Starting optimization for optimization run {counter}')
-        logging.info(f'Start of iteration {counter}: {timeseries_start}')
-        logging.info(f'End of iteration {counter}: {timeseries_end}')
+        logging.info(f"Starting optimization for optimization run {counter}")
+        logging.info(f"Start of iteration {counter}: "
+                     + f"{getattr(self, 'time_series_start')}")
+        logging.info(f"End of iteration {counter}: "
+                     + f"{getattr(self, 'time_series_end')}")
 
-        datetime_index = pd.date_range(start=timeseries_start,
-                                       periods=timeslice_length_with_overlap,
-                                       freq=freq)
+        datetime_index = pd.date_range(
+            start=getattr(self, "time_series_start"),
+            periods=getattr(self, "time_slice_length_with_overlap"),
+            freq=self.freq)
         es = network.EnergySystem(timeindex=datetime_index)
 
-        node_dict, storage_labels, emissions_limit = nodes_from_csv_rh(
-            path_folder_input,
-            AggregateInput,
-            countries,
-            timeseries_start,
-            timeslice_length_with_overlap,
-            storages_init_df,
-            freq,
-            fuel_cost_pathway,
-            year,
-            activate_emissions_limit,
-            emissions_pathway,
-            activate_demand_response,
-            approach,
-            scenario)
+        node_dict, emissions_limit, storage_labels = nodes_from_csv_rh(
+            self, iteration_results)
+        # Only set storage labels attribute for the 0th iteration
+        if not hasattr(self, "storage_labels"):
+            setattr(self, "storage_labels", storage_labels)
 
-        # Update for next iteration
-        timeseries_start = timeseries_end
+        # Update model start time for the next iteration
+        setattr(self, "time_series_start", getattr(self, "time_series_end"))
 
         es.add(*node_dict.values())
         logging.info(
-            f"Sucessfully set up energy system for iteration {counter}")
+            f"Successfully set up energy system for iteration {counter}")
 
-        om = models.Model(es)
+        self.om = models.Model(es)
 
-        add_further_constrs(
-            om,
-            activate_emissions_limit,
-            emissions_limit)
+        self.add_further_constrs(emissions_limit)
 
-        return om, es, timeseries_start, storage_labels, datetime_index
-
-    def solve_RH_model(
-            self,
-            datetime_index,
-            counter,
-            timeslice_length_wo_overlap_in_timesteps,
-            timeslice_length_with_overlap,
-            results,
-            power_prices,
-            overall_objective,
-            overall_solution_time,
-            solver='gurobi'):
-        """Solve an Rolling Horizon optimization model and return its results
+    def solve_rolling_horizon_model(self, counter, iteration_results,
+                                    model_meta):
+        """Solve a rolling horizon optimization model
 
         Parameters
         ----------
-        om : :class:`oemof.solph.models.Model`
-            The mathematical optimisation model to be solved
+        counter : int
+            A counter for the rolling horizon optimization iterations
 
-        datetime_index : :obj:`pd.DatetimeIndex`
-            The datetime index of the EnergySystem
+        iteration_results : dict
+            A dictionary holding the results of the previous rolling horizon
+            iteration
 
-        counter : :obj:`int`
-            A counter for rolling horizon optimization windows (iterations)
-
-        timeslice_length_wo_overlap_in_timesteps : :obj:`int`
-            The timeslice length without the overlap (in timesteps)
-
-        timeslice_length_with_overlap : :obj:`int`
-            The timeslice length with the overlap (in timesteps)
-
-        results : :obj:`pd.DataFrame`
-            A DataFrame to store the overall results by concatenating
-            the sliced results for each iteration
-
-        power_prices : :obj:`pd.DataFrame`
-            A DataFrame to store the power price results
-
-        overall_objective : :obj:`float`
-            The overall objective value
-
-        overall_solution_time : :obj:`float`
-            The overall solution time
-
-        solver : :obj:`str`
-            The solver to be used (defaults to 'gurobi')
-
-        Returns
-        -------
-        om : :class:`oemof.solph.models.Model`
-            The mathematical optimisation model to be solved
-
-        results : :obj:`pd.DataFrame`
-            A DataFrame to store the overall results by concatenating
-            the sliced results for each iteration
-
-        model_results : :obj:`pd.DataFrame`
-            A DataFrame with the results of the particular iteration
-
-        power_prices : :obj:`pd.DataFrame`
-            A DataFrame to store the power price results
-
-        overall_objective : :obj:`float`
-            The overall objective value
-
-        overall_solution_time :obj:`float`
-            The overall solution time
+        model_meta : dict
+            A dictionary holding meta information on the model, such as
+             solution times and objective value
         """
-        om.receive_duals()
+        self.om.receive_duals()
         logging.info(
-            'Obtaining dual values and reduced costs from the model \n'
-            'in order to calculate power prices.')
+            "Obtaining dual values and reduced costs from the model \n"
+            "in order to calculate power prices.")
 
-        om.solve(solver=solver, solve_kwargs={'tee': True})
+        self.om.solve(solver=self.solver, solve_kwargs={'tee': True})
         print("********************************************************")
-        logging.info("Model run %s done!" % (str(counter)))
+        logging.info(f"Model run {counter} done!")
 
-        model_results = processing.results(om)
-        electricity_bus = views.node(model_results, 'DE_bus_el')
-        df_rcut = pd.DataFrame(
-            data=electricity_bus['sequences'][
-                 0:timeslice_length_wo_overlap_in_timesteps])
-        results = results.append(df_rcut)
+        iteration_results["model_results"] = processing.results(self.om)
+        electricity_bus = views.node(iteration_results["model_results"],
+                                     "DE_bus_el")
+        sliced_dispatch_results = pd.DataFrame(
+            data=electricity_bus["sequences"].iloc[
+                 0:getattr(self,
+                           "time_slice_length_wo_overlap_in_time_steps")])
+        iteration_results["dispatch_results"] = (
+            iteration_results["dispatch_results"].append(
+                sliced_dispatch_results))
 
-        meta_results = processing.meta_results(om)
+        meta_results = processing.meta_results(self.om)
         # Objective is weighted in order to take overlap into account
-        overall_objective += (int(meta_results['objective'])
-                              * (timeslice_length_wo_overlap_in_timesteps
-                                 / timeslice_length_with_overlap))
-        overall_solution_time += meta_results['solver']['Time']
-
-        pps = get_power_prices_from_duals(
-            om, datetime_index).iloc[
-              0:timeslice_length_wo_overlap_in_timesteps]
-        power_prices = power_prices.append(pps)
-
-        return (om, model_results, results, overall_objective,
-                overall_solution_time, power_prices)
-
-    def show_meta_logging_info(self, model_meta):
-        """Show some logging information on model meta data"""
-        logging.info(f"***** MODEL RUN TERMINATED SUCESSFULLY :-) *****")
-        logging.info(f"Overall objective value: "
-                     + f"{model_meta['overall_objective']:.2f}")
-        logging.info(f"Overall solution time: "
-                     + f"{model_meta['overall_solution_time']:.2f}")
-        logging.info(f"Overall time: "
-                     +
-                     f"{model_meta['overall_time']:.2f}")
+        model_meta["overall_objective"] += (
+            (int(meta_results["objective"]
+                 * (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+                    / getattr(self, "time_slice_length_with_overlap"))))
+        )
+        model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
+        pps = self.get_power_prices_from_duals().iloc[
+              0:getattr(self, "time_slice_length_wo_overlap_in_time_steps")]
+        iteration_results["power_prices"] = (
+            iteration_results["power_prices"].append(pps)
+        )
