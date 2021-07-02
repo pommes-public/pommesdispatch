@@ -34,8 +34,8 @@ def parse_input_data(dispatch_model):
         with component names as keys
     """
     files = {
-        'links': 'links',
-        'links_ts': 'links_ts',
+        'linking_transformers': 'linking_transformers',
+        'linking_transformers_ts': 'linking_transformers_ts',
         'sinks_excess': 'sinks_excess',
         'sinks_demand_el': 'sinks_demand_el',
         'sinks_demand_el_ts': 'sinks_demand_el_ts',
@@ -136,9 +136,9 @@ def add_components(input_data,
 
     node_dict = create_buses(input_data, node_dict)
 
-    node_dict = create_interconnection_transformers(input_data,
-                                                    dispatch_model,
-                                                    node_dict)
+    node_dict = create_linking_transformers(input_data,
+                                            dispatch_model,
+                                            node_dict)
 
     # Also creates fluctuating RES sources for Germany
     node_dict = create_commodity_sources(input_data,
