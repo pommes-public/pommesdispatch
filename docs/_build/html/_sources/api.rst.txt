@@ -1,0 +1,5 @@
+API docs
+========
+
+.. automodule:: src.pommes_dispatch.model.dispatch_model
+    :members:
