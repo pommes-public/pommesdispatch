@@ -8,14 +8,17 @@
     <title>Welcome to pommes-dispatch’s documentation! &#8212; pommes-dispatch  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="User’s guide" href="usage.html" />
+    <link rel="next" title="Installation and User’s guide" href="usage.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -46,15 +49,30 @@ The investment model is described
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">User’s guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">Model description</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#background">Background</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#categorization">Categorization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#mathematical-formulation">Mathematical formulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Installation and User’s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#using-pommes-dispatch">Using pommes-dispatch</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Model description</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model.html#background">Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#model-categorization">Model categorization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#mathematical-formulation">Mathematical formulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#pommes-dispatch-model">pommes_dispatch.model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pommes-dispatch-model-dispatch-model">pommes_dispatch.model.dispatch_model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pommes-dispatch-model-funcs-data-input">pommes_dispatch.model_funcs.data_input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pommes-dispatch-model-funcs-helpers">pommes_dispatch.model_funcs.helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pommes-dispatch-model-funcs-model-control">pommes_dispatch.model_funcs.model_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pommes-dispatch-model-funcs-subroutines">pommes_dispatch.model_funcs.subroutines</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 </div>
@@ -87,10 +105,10 @@ The investment model is described
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">User’s guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">Model description</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Installation and User’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Model description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -98,7 +116,7 @@ The investment model is described
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="usage.html" title="next chapter">User’s guide</a></li>
+      <li>Next: <a href="usage.html" title="next chapter">Installation and User’s guide</a></li>
   </ul></li>
 </ul>
 </div>
