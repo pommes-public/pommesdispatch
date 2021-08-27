@@ -10,7 +10,11 @@ v0.0.2 (YYYY-MM-DD)
 v0.0.1 (2021-08-05)
 -------------------
 
-This is *POMMES*, **A bottom-up fundamental power market model for the German electricity sector**
+Initial release of ``pommes-dispatch``
+
+Welcome to the *POMMES* cosmos!
+
+**A bottom-up fundamental power market model for the German electricity sector**
 
 Features:
 
