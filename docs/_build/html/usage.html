@@ -170,6 +170,17 @@ for details.</p></li>
 <span class="p">}</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="line-block">
+<div class="line">Including an emissions limit usually leads to an infeasible model formulation.</div>
+<div class="line">This is because we specify minimum loads for power plants causing emissions</div>
+<div class="line">exceeding the limit imposed. If you wish to include an emissions limit, you</div>
+<div class="line">should adjust minimum loads. This is only recommended for experienced users.</div>
+<div class="line">To enforce emissions reductions, setting higher CO2 prices is another option</div>
+<div class="line">rather than constraining the amount of emissions.</div>
+</div>
+</div>
 <p>In the next section, you can control the simulation time. Please stick
 to the date format (pre-)defined. You have to ensure that the input data
 time series match the time frame you want to simulate. As a default, you’ll

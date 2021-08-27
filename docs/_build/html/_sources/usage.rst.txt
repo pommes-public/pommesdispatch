@@ -130,6 +130,14 @@ Pay attention to the allowed values for the string values:
         "save_price_results": True,
     }
 
+.. note::
+    | Including an emissions limit usually leads to an infeasible model formulation.
+    | This is because we specify minimum loads for power plants causing emissions
+    | exceeding the limit imposed. If you wish to include an emissions limit, you
+    | should adjust minimum loads. This is only recommended for experienced users.
+    | To enforce emissions reductions, setting higher CO2 prices is another option
+    | rather than constraining the amount of emissions.
+
 In the next section, you can control the simulation time. Please stick
 to the date format (pre-)defined. You have to ensure that the input data
 time series match the time frame you want to simulate. As a default, you'll

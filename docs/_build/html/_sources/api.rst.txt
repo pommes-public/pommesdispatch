@@ -6,7 +6,7 @@ TODO: Fix path for building autodocs!
 pommes_dispatch.model.dispatch_model
 ------------------------------------
 
-.. automodule:: pommes_dispatch.model.dispatch_model
+.. automodule:: src.pommes_dispatch.model
     :members:
 
 pommes_dispatch.model_funcs.data_input

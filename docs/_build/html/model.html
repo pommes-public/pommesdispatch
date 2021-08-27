@@ -37,49 +37,67 @@
           <div class="body" role="main">
             
   <div class="section" id="model-description">
-<h1><a class="toc-backref" href="#id1">Model description</a><a class="headerlink" href="#model-description" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id2">Model description</a><a class="headerlink" href="#model-description" title="Permalink to this headline">¶</a></h1>
 <div class="contents topic" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#model-description" id="id1">Model description</a></p>
+<li><p><a class="reference internal" href="#model-description" id="id2">Model description</a></p>
 <ul>
-<li><p><a class="reference internal" href="#background" id="id2">Background</a></p>
+<li><p><a class="reference internal" href="#background" id="id3">Background</a></p>
 <ul>
-<li><p><a class="reference internal" href="#overview" id="id3">Overview</a></p></li>
-<li><p><a class="reference internal" href="#energy-economic-background" id="id4">Energy-economic background</a></p></li>
-<li><p><a class="reference internal" href="#mathematical-background" id="id5">Mathematical background</a></p></li>
-<li><p><a class="reference internal" href="#technical-background" id="id6">Technical background</a></p></li>
-<li><p><a class="reference internal" href="#rolling-horizon-approach" id="id7">Rolling horizon approach</a></p></li>
+<li><p><a class="reference internal" href="#overview" id="id4">Overview</a></p></li>
+<li><p><a class="reference internal" href="#energy-economic-background" id="id5">Energy-economic background</a></p></li>
+<li><p><a class="reference internal" href="#mathematical-background" id="id6">Mathematical background</a></p></li>
+<li><p><a class="reference internal" href="#technical-background" id="id7">Technical background</a></p></li>
+<li><p><a class="reference internal" href="#rolling-horizon-approach" id="id8">Rolling horizon approach</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#model-categorization" id="id8">Model categorization</a></p></li>
-<li><p><a class="reference internal" href="#mathematical-formulation" id="id9">Mathematical formulation</a></p></li>
-<li><p><a class="reference internal" href="#references" id="id10">References</a></p></li>
+<li><p><a class="reference internal" href="#model-categorization" id="id9">Model categorization</a></p>
+<ul>
+<li><p><a class="reference internal" href="#model-purpose-and-structure" id="id10">Model purpose and structure</a></p></li>
+<li><p><a class="reference internal" href="#technological-detail" id="id11">Technological detail</a></p></li>
+<li><p><a class="reference internal" href="#mathematical-description" id="id12">Mathematical description</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#mathematical-formulation" id="id13">Mathematical formulation</a></p></li>
+<li><p><a class="reference internal" href="#references" id="id14">References</a></p></li>
 </ul>
 </li>
 </ul>
 </div>
 <p>Feel free to directly jump to the section of interest.</p>
 <div class="section" id="background">
-<h2><a class="toc-backref" href="#id2">Background</a><a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id3">Background</a><a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="overview">
-<h3><a class="toc-backref" href="#id3">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id4">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
 <p>The <strong>dispatch variant</strong> of the power market model <em>POMMES</em> <code class="docutils literal notranslate"><span class="pre">pommes-dispatch</span></code>
 enables the user to simulate the <strong>dispatch of backup power plants,
 storages as well as demand response units for the Federal Republic of Germany</strong>
 for an arbitrary year or timeframe between 2017 and 2030.
 The dispatch of renewable power plants is exogenously determined
-by normalized infeed time series and capacity values.
+by normalized infeed time series which are multiplied with capacity values
+(maximum capacities for foreign countries, installed ones for Germany).
 The models’ overall goal is to minimize power system costs
-occurring from wholesale markets whereby no network constraints
+occurring from wholesale markets, whereby no network constraints
 are considered except for the existing bidding zone configuration
 used for modeling electricity exchange.
 Thus, the model purpose is to simulate <strong>dispatch decisions</strong>
 and the resulting <strong>day-ahed market prices</strong>.</p>
+<p>You can find the following information on this page:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#economics"><span class="std std-ref">Energy-economic background</span></a>: Some basics of power wholesale markets design and how our model
+fits in there.</p></li>
+<li><p><a class="reference internal" href="#maths"><span class="std std-ref">Mathematical background</span></a>: A brief mathematical characterisation of our linear programming
+model</p></li>
+<li><p><a class="reference internal" href="#techs"><span class="std std-ref">Technical background</span></a>: Information on the main python packages used, such as <code class="docutils literal notranslate"><span class="pre">oemof.solph</span></code>.</p></li>
+<li><p><a class="reference internal" href="#characteristics"><span class="std std-ref">Model categorization</span></a>: An in-depth characterization of our model, following
+the proposed scheme from Hall and Buckley (2016).</p></li>
+<li><p><a class="reference internal" href="#formulas"><span class="std std-ref">Mathematical formulation</span></a>: All (in)equations of the model.</p></li>
+</ul>
 </div>
 <div class="section" id="energy-economic-background">
-<h3><a class="toc-backref" href="#id4">Energy-economic background</a><a class="headerlink" href="#energy-economic-background" title="Permalink to this headline">¶</a></h3>
-<p>Feel free to skip that section if you are familiar with power markets design
+<span id="economics"></span><h3><a class="toc-backref" href="#id5">Energy-economic background</a><a class="headerlink" href="#energy-economic-background" title="Permalink to this headline">¶</a></h3>
+<p>Feel free to skip this section if you are familiar with power markets design
 as well as fundamental bottom-up power market modeling.</p>
 <p>Wholesale power markets in Europe are organized as a sequential series
 of markets from futures and forwards markets to short-term markets (spot markets).
@@ -89,30 +107,31 @@ of plants and include a physical delivery of electricity to the system.</p>
 <p>There are two kinds of spot markets, the day-ahead market as well as intraday
 markets (auctions and continuous trading). We in turn focus on the day-ahead
 market which is the most relevant one.</p>
-<p>Our model in a way abstracts from the real market constellation and assumes
+<p>Our model in a way abstracts from the real market constellations and assumes
 all plant operators to bid into the day-ahead market. We in turn do not explicitly
-model power plant operator’s bidding behaviour, but assume them to offer their
+model power plant operators’ (or other traders’) bidding behaviour, but assume them to offer their
 capacities at their marginal costs in a perfectly competitive
 <strong>quasi day-ahead market</strong> in order
-to serve an inflexible and exogenously given demand. We also include demand
-response which enables parts of the demand to adjust in a flexible manner.
-Thus, the aggregated power plants capacities sorted by their marginal costs
+to serve an inflexible and exogenously given demand. We also include power storages and demand
+response. The latter enables parts of the demand to adjust in a flexible manner.
+Thus, the aggregated power plants capacities which are sorted by their marginal costs
 result in a merit order that is similar to the aggregated supply curves in
 the real day-ahead auction procedure in competitive power markets.</p>
 <p>The perspective of our model is to assume that there is a “social planner”
 optimizing the power system in terms of minimizing its overall (dispatch) costs
-under the prevalent constraints such as demand coverage or power plant capacity limits.
+under the prevalent constraints, such as demand coverage or power plants capacity limits.
 We assume this social planner to have <strong>perfect</strong> foresight over the entire
 simulation time frame. We offer a <a class="reference internal" href="#rolling-horizon"><span class="std std-ref">Rolling horizon approach</span></a> to break with
-this assumption. Our bascic approach is quite common
+this assumption. Our basic approach is quite common
 for <strong>fundamental bottom-up modeling</strong> of power systems
-since it enables the modeler to produce close to reality results in a highly
+since using a sound model parameterization, it enables the modeler
+to produce close to reality dispatch and price results in a highly
 simplified modeling setting with quite large system boundaries.</p>
 <p>What is more, is that power markets in Europe are <strong>interconnected</strong> and operated
-within (mostly national) bidding zones. We model the German neighbouring countries
+within (mostly national) bidding zones. We model the German neighboring countries
 and their power plants in a rather aggregated manner in order to improve our
 day-ahead price prognosis and the dispatch result for Germany.</p>
-<p>In order to improve our model results, we account for some <strong>power system inflexibilites</strong>
+<p>In order to improve our model results, we account for some <strong>power system inflexibilities</strong>
 that lead to a deviation from the cost optimum and are expressed by introducing
 additional constraints (such as minimum load profiles for CHP power plants
 that are empirically derived to serve heat demands)
@@ -120,12 +139,60 @@ or adjusting parameter values (such as the overall
 capacities of coal power plants that has not been fully made use of).</p>
 </div>
 <div class="section" id="mathematical-background">
-<h3><a class="toc-backref" href="#id5">Mathematical background</a><a class="headerlink" href="#mathematical-background" title="Permalink to this headline">¶</a></h3>
-<p>Feel free to skip that section if you are familiar with fundamental
+<span id="maths"></span><h3><a class="toc-backref" href="#id6">Mathematical background</a><a class="headerlink" href="#mathematical-background" title="Permalink to this headline">¶</a></h3>
+<p>Feel free to skip this section if you are familiar with fundamental
 bottom-up power market modeling using a linear programming approach.</p>
+<p>From a mathematical point of view, our model is formulated as a linear program
+with the following characteristics:
+* goal: Minimize total power system costs
+* constraints:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>demand coverage</p></li>
+<li><p>power plants constraints: capacity limits, ramping constraints</p></li>
+<li><p>storage constraints: power limits, energy limits, storage losses, storage transition</p></li>
+<li><p>demand response constraints: power limits, energy limits, time restrictions</p></li>
+<li><p>constraints for interconnection: power limits, transmission losses</p></li>
+<li><p>optional emissions constraint</p></li>
+</ul>
+</div></blockquote>
+<p>Fixed time series, such as the demand time series or the fixed renewable infeed,
+as well as scalar values we read in, are provided as parameters from a mathematical point of view.</p>
+<p>Our model has a block-angular structure since the constraint formulations and
+objective terms are encapsulated in the components definitions of oemof.solph.
+Thus, in general decomposition techniques could be applied to speed up computation.</p>
+<p>The model formulation ends in a sparse matrix. The model statistics are
+summarized in the table below (48 hours simulation time frame):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>element</p></th>
+<th class="head"><p>No.</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>rows</p></td>
+<td><p>93821</p></td>
+</tr>
+<tr class="row-odd"><td><p>columns</p></td>
+<td><p>129653</p></td>
+</tr>
+<tr class="row-even"><td><p>nonzeros</p></td>
+<td><p>309613</p></td>
+</tr>
+</tbody>
+</table>
+<p>For the mathematical formulation, please see below.
+You may also refer to the
+<a class="reference external" href="https://oemof-solph.readthedocs.io/en/latest/reference/oemof.solph.html">oemof.solph API reference</a>
+for a documentation of the constraints and objective terms introduced
+with the individual components.</p>
 </div>
 <div class="section" id="technical-background">
-<h3><a class="toc-backref" href="#id6">Technical background</a><a class="headerlink" href="#technical-background" title="Permalink to this headline">¶</a></h3>
+<span id="techs"></span><h3><a class="toc-backref" href="#id7">Technical background</a><a class="headerlink" href="#technical-background" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">pommes-dispatch</span></code> builds on the framework <a class="reference external" href="https://github.com/oemof/oemof-solph">oemof.solph</a>
 which allows to model energy systems in a graph-based representation
 with the underlying mathematical constraints and objective function terms
@@ -136,12 +203,10 @@ the oemof community.
 Users not familiar with oemof.solph may find further information
 in the <a class="reference external" href="https://oemof-solph.readthedocs.io/en/latest/readme.html">oemof.solph documentation</a>.</p>
 <p>We use the following components from the <code class="docutils literal notranslate"><span class="pre">oemof.solph</span></code> framework in order
-to represent the following units of the power system:
-- Transformer: (conventional) power plants, renewable units for Germany in the</p>
-<blockquote>
-<div><p>market premium scheme, interconnetors to other bidding zones</p>
-</div></blockquote>
+to represent the following units of the power system:</p>
 <ul class="simple">
+<li><p>Transformer: (conventional) power plants, renewable units for Germany in the
+market premium scheme, interconnetors to other bidding zones</p></li>
 <li><p>Source: commodity sources, fixed renewable units infeed</p></li>
 <li><p>Sink: national electricity demands</p></li>
 <li><p>GenericStorage: electricity storage units (pumped storage and reservoir)</p></li>
@@ -149,7 +214,7 @@ to represent the following units of the power system:
 </ul>
 </div>
 <div class="section" id="rolling-horizon-approach">
-<span id="rolling-horizon"></span><h3><a class="toc-backref" href="#id7">Rolling horizon approach</a><a class="headerlink" href="#rolling-horizon-approach" title="Permalink to this headline">¶</a></h3>
+<span id="rolling-horizon"></span><h3><a class="toc-backref" href="#id8">Rolling horizon approach</a><a class="headerlink" href="#rolling-horizon-approach" title="Permalink to this headline">¶</a></h3>
 <p>A rolling horizon approach can be used for multiple use cases, e.g.</p>
 <ul class="simple">
 <li><p>to force a break with the perfect foresight paradigm and to model imperfect
@@ -171,53 +236,117 @@ alternative to a perfect foresight simulation in <code class="docutils literal n
 </div>
 </div>
 <div class="section" id="model-categorization">
-<h2><a class="toc-backref" href="#id8">Model categorization</a><a class="headerlink" href="#model-categorization" title="Permalink to this headline">¶</a></h2>
+<span id="characteristics"></span><h2><a class="toc-backref" href="#id9">Model categorization</a><a class="headerlink" href="#model-categorization" title="Permalink to this headline">¶</a></h2>
 <p>The model in brief can be characterized as a <strong>bottom-up electricity market optimization model</strong>.
 In the following, a model characterization based on Hall and Buckley (2016) is introduced:</p>
-<p>### Model purpose and structure</p>
-<div class="line-block">
-<div class="line"><strong>criterion</strong> | <strong>manifestation</strong> |</div>
-<div class="line">—- | —- |</div>
-<div class="line">Purpose of the model | general: scenario analyses (forecasting) &lt;br&gt;</div>
+<div class="section" id="model-purpose-and-structure">
+<h3><a class="toc-backref" href="#id10">Model purpose and structure</a><a class="headerlink" href="#model-purpose-and-structure" title="Permalink to this headline">¶</a></h3>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>criterion</strong></p></th>
+<th class="head"><p><strong>manifestation</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Purpose of the model</p></td>
+<td><div class="line-block">
+<div class="line">General: scenario analyses (forecasting)</div>
+<div class="line">Specific: power supply and power prices</div>
 </div>
-<p>specific: power supply and power prices |
-| Structure of the model | Demand: exogenously (except for demand response usage) &lt;br&gt;
-Supply: RES exogenously; all other power sources endogenously optimized |
-| Geographical coverage | National: Federal Republic of Germany + imports / exports from / to adjacent electric neighbors |
-| Sectoral coverage | Power market (effectively day-ahead) from a macroeconomic point of view (no bidding simulation) |
-| The time horizon | Short (&lt; 1 year) to Long Term (up to 2050) dependend on part model used and input data &lt;br&gt;
-LP dispatch model: usual time horizon 1 year &lt;br&gt;
-investment model: usual time horizon 2016 up to 2050 |
-| The time step | hourly or less granular dependent on part model &lt;br&gt;
-LP dispatch model: usual time step size 1 hour &lt;br&gt;
-investment model: usual time step size down to 4 hours or hourly using representative days |</p>
-<p>### Technological detail</p>
-<div class="line-block">
-<div class="line"><strong>criterion</strong> | <strong>manifestation</strong> |</div>
-<div class="line">—- | —- |</div>
-<div class="line">Renewable Techology inclusion | Hydro (run of river), Solar, Wind, Biomass |</div>
-<div class="line">Storage Technology Inclusion | Pumped-hydro energy storage, Reservoir energy storage, Battery energy storage |</div>
-<div class="line">Demand Characteristic Inclusion | only aggregated demand for Industry, Residential Sector, Commercial Sector and Transportation |</div>
-<div class="line">Cost Inclusion | Fuel prices, Investment, Variable Production Costs, CO2-costs |</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p>Structure of the model</p></td>
+<td><div class="line-block">
+<div class="line">Demand: exogenously (except for demand response)</div>
+<div class="line">Supply: RES exogenously; All other power sources endogenously optimized</div>
 </div>
-<p>### Mathematical description</p>
-<div class="line-block">
-<div class="line"><strong>criterion</strong> | <strong>manifestation</strong> |</div>
-<div class="line">—- | —- |</div>
-<div class="line">Analytical Approach | Bottom-Up |</div>
-<div class="line">Underlying Methodology | Optimization / Spreadsheet / Toolbox |</div>
-<div class="line">The Mathematical Approach | Linear programming or Mixed-integer linear programming depending on part model used |</div>
-<div class="line">Data Requirements | Quantitative, Monetary, Disggregated |</div>
+</td>
+</tr>
+<tr class="row-even"><td><p>Geographical coverage</p></td>
+<td><p>Na tional: Federal Republic of Germany + imports / exports from / to adjacent electric neighbors</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sectoral coverage</p></td>
+<td><p>Power market (effectively day-ahead) from a macroeconomic point of view (no bidding simulation)</p></td>
+</tr>
+<tr class="row-even"><td><p>Time horizon</p></td>
+<td><p>Short-term (&lt;= 1 year)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Time step</p></td>
+<td><p>Hourly</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="technological-detail">
+<h3><a class="toc-backref" href="#id11">Technological detail</a><a class="headerlink" href="#technological-detail" title="Permalink to this headline">¶</a></h3>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>criterion</strong></p></th>
+<th class="head"><p><strong>manifestation</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Renewable Techology inclusion</p></td>
+<td><p>Hydro (run of river), Solar, Wind, Biomass</p></td>
+</tr>
+<tr class="row-odd"><td><p>Storage Technology Inclusion</p></td>
+<td><p>Pumped-hydro energy storage, Reservoir energy storage, Battery energy storage</p></td>
+</tr>
+<tr class="row-even"><td><p>Demand Characteristic Inclusion</p></td>
+<td><p>Aggregated demand for Industry, Residential Sector, Commercial Sector and Transportation</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cost Inclusion</p></td>
+<td><p>Fuel prices, Operations and Maintenance Costs, CO2-costs</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="mathematical-description">
+<h3><a class="toc-backref" href="#id12">Mathematical description</a><a class="headerlink" href="#mathematical-description" title="Permalink to this headline">¶</a></h3>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>criterion</strong></p></th>
+<th class="head"><p><strong>manifestation</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Analytical Approach</p></td>
+<td><p>Bottom-Up (fundamental)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Underlying Methodology</p></td>
+<td><p>Optimization / Spreadsheet / Toolbox</p></td>
+</tr>
+<tr class="row-even"><td><p>Mathematical Approach</p></td>
+<td><p>Linear programming</p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Requirements</p></td>
+<td><p>Quantitative, Monetary, Disaggregated by technologies and bidding zones</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="mathematical-formulation">
-<h2><a class="toc-backref" href="#id9">Mathematical formulation</a><a class="headerlink" href="#mathematical-formulation" title="Permalink to this headline">¶</a></h2>
-<p>All constraints formulations can be found in the oemof.solph documentation.
+<span id="formulas"></span><h2><a class="toc-backref" href="#id13">Mathematical formulation</a><a class="headerlink" href="#mathematical-formulation" title="Permalink to this headline">¶</a></h2>
+<p>All constraints formulations can be found in the
+<a class="reference external" href="https://oemof-solph.readthedocs.io/en/latest/reference/oemof.solph.html">oemof.solph documentation</a>.
 We’ll provide a complete mathematical description for the parts we
 used here soon.</p>
 </div>
 <div class="section" id="references">
-<h2><a class="toc-backref" href="#id10">References</a><a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">References</a><a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <p>Büllesbach, Fabian (2018): Simulation von Stromspeichertechnologien
 in regionaler und technischer Differenzierung.
 Freie wissenschaftliche Arbeit zur Erlangung des Grades eines

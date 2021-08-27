@@ -44,6 +44,11 @@
 <li><p><a class="reference internal" href="#reference-docs" id="id1">Reference docs</a></p>
 <ul>
 <li><p><a class="reference internal" href="#pommes-dispatch-model" id="id2">pommes_dispatch.model</a></p></li>
+<li><p><a class="reference internal" href="#pommes-dispatch-model-funcs" id="id3">pommes_dispatch.model_funcs</a></p>
+<ul>
+<li><p><a class="reference internal" href="#modules" id="id4">Modules</a></p></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -53,6 +58,35 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">pommes_dispatch.model</span></code> package contains the actual model which
 is a single file <code class="docutils literal notranslate"><span class="pre">dispatch_model.py</span></code> that can be run in a python editor.
 For usage please see <a class="reference internal" href="usage.html#using"><span class="std std-ref">Using pommes-dispatch</span></a>.</p>
+</div>
+<div class="section" id="pommes-dispatch-model-funcs">
+<h2><a class="toc-backref" href="#id3">pommes_dispatch.model_funcs</a><a class="headerlink" href="#pommes-dispatch-model-funcs" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pommes_dispatch.model_funcs</span></code> package contains a collection of functions,
+classes and methods that are needed to run a dispatch model in
+<code class="docutils literal notranslate"><span class="pre">pommes_dispatch.model.dispatch_model.py</span></code>.</p>
+<div class="section" id="modules">
+<h3><a class="toc-backref" href="#id4">Modules</a><a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model_control.py</span></code>: Controls a model workflow consisting of defining a model
+configuration, controlling logging information, reading in input data, building
+and solving an oemof.solph model and a pyomo model. The class <code class="docutils literal notranslate"><span class="pre">DispatchModel</span></code>
+holds parameterization information as well as methods in order to control the
+model workflow. Makes use of the modules <code class="docutils literal notranslate"><span class="pre">data_input.py</span></code> as well as <code class="docutils literal notranslate"><span class="pre">helpers.py</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_input.py</span></code>: Holds functions to parse input data from .csv files and to
+create oemof.solph components (see
+<a class="reference external" href="https://oemof-solph.readthedocs.io/en/latest/usage.html#">oemof.solph’s user’s guide</a>)
+out of it. Optionally includes an emissions limit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subroutines.py</span></code>: Includes all the functions to actually build the
+oemof.solph components given the provided input data. Is imported in the
+module <code class="docutils literal notranslate"><span class="pre">data_input.py</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">helpers.py</span></code>: Includes some helper routines to support the model workflow
+that are imported in <code class="docutils literal notranslate"><span class="pre">model_control.py</span></code> resp. <code class="docutils literal notranslate"><span class="pre">data_input.py</span></code> in order
+to perform some calculations not directly related to the actual mathematical
+model, but facilitating its setup and parameterization.</p></li>
+</ul>
+<p>For an in-depth documentation of all modules, functions, classes and methods,
+see the <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a>.</p>
+</div>
 </div>
 </div>
 
@@ -79,6 +113,7 @@ For usage please see <a class="reference internal" href="usage.html#using"><span
 <li class="toctree-l1"><a class="reference internal" href="model.html">Model description</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reference docs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pommes-dispatch-model">pommes_dispatch.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pommes-dispatch-model-funcs">pommes_dispatch.model_funcs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
