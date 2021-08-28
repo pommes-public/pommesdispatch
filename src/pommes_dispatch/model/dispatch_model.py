@@ -52,68 +52,30 @@ import logging
 import time
 
 import pandas as pd
+import yaml
 from oemof.solph import processing
 from oemof.solph import views
+from yaml.loader import SafeLoader
 
 from pommes_dispatch.model_funcs import model_control
 
-# ---- MODEL SETTINGS ----
-# THIS IS THE ONLY PART, THE USER SHOULD MANIPULATE
+# ---- MODEL CONFIGURATION ----
 
-# 1) Determine model configuration through control parameters
-
-control_parameters = {
-    "rolling_horizon": False,
-    "aggregate_input": False,
-    "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL',
-                  'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
-                  'SE1', 'SE2', 'SE3', 'SE4'],
-    "solver": "gurobi",
-    "fuel_cost_pathway": "middle",
-    "activate_emissions_limit": False,
-    "emissions_pathway": "100_percent_linear",
-    "activate_demand_response": False,
-    "demand_response_approach": "DLR",
-    "demand_response_scenario": "50",
-    "save_production_results": True,
-    "save_price_results": True,
-}
-
-# 2) Set model optimization time and frequency for simple model runs
-
-time_parameters = {
-    "start_time": "2017-01-01 00:00:00",
-    "end_time": "2017-01-02 23:00:00",
-    "freq": "60min"
-}
-
-# 3) Set input and output data paths
-
-input_output_parameters = {
-    "path_folder_input": "../../../inputs/",
-    "path_folder_output": "../../../results/"
-}
-
-# 4) Set rolling horizon parameters (optional)
-
-rolling_horizon_parameters = {
-    "time_slice_length_wo_overlap_in_hours": 24,
-    "overlap_in_hours": 12
-}
-
-# ---- INITIALIZE MODEL CONFIGURATION ----
-# NO NEED FOR USER CHANGES FROM HERE ON!
+# Import model config from yml config file
+with open("../../../config.yml") as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
 dm = model_control.DispatchModel()
 dm.update_model_configuration(
-    control_parameters,
-    time_parameters,
-    input_output_parameters,
+    config["control_parameters"],
+    config["time_parameters"],
+    config["input_output_parameters"],
     nolog=True)
 
 if dm.rolling_horizon:
-    dm.add_rolling_horizon_configuration(rolling_horizon_parameters,
-                                         nolog=True)
+    dm.add_rolling_horizon_configuration(
+        config["rolling_horizon_parameters"],
+        nolog=True)
 
 dm.initialize_logging()
 dm.check_model_configuration()
@@ -173,7 +135,7 @@ if dm.rolling_horizon:
 
 model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
 
-# ---- PROCESS MODEL RESULTS ----
+# ---- MODEL RESULTS PROCESSING ----
 
 model_control.show_meta_logging_info(model_meta)
 
