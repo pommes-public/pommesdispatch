@@ -50,6 +50,7 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 
 import logging
 import time
+import argparse
 
 import pandas as pd
 import yaml
@@ -60,7 +61,7 @@ from yaml.loader import SafeLoader
 from pommes_dispatch.model_funcs import model_control
 
 
-def run_pommes_dispatch(config_file="../../../config.yml"):
+def run_dispatch_model(config_file="../../../config.yml"):
     """
     Run a pommes-dispatch model.
 
@@ -174,6 +175,16 @@ def run_pommes_dispatch(config_file="../../../config.yml"):
             + '_power-prices.csv', sep=',', decimal='.')
 
 
+def add_args():
+    """Add command line argument for config file"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", required=False,
+                        default="../../../config.yml",
+                        help="Specify input config file")
+    args = parser.parse_args()
+    return args.file
+
+
 if __name__ == "__main__":
-    config_yml = "../../../config.yml"
-    run_pommes_dispatch(config_yml)
+    config_yml = add_args()
+    run_dispatch_model(config_yml)
