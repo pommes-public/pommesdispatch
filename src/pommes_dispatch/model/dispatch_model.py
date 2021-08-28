@@ -59,100 +59,121 @@ from yaml.loader import SafeLoader
 
 from pommes_dispatch.model_funcs import model_control
 
-# ---- MODEL CONFIGURATION ----
 
-# Import model config from yml config file
-with open("../../../config.yml") as file:
-    config = yaml.load(file, Loader=SafeLoader)
+def run_pommes_dispatch(config_file="../../../config.yml"):
+    """
+    Run a pommes-dispatch model.
 
-dm = model_control.DispatchModel()
-dm.update_model_configuration(
-    config["control_parameters"],
-    config["time_parameters"],
-    config["input_output_parameters"],
-    nolog=True)
+    Read in config information from a yaml file, initialize and run a
+    dispatch model and process results.
 
-if dm.rolling_horizon:
-    dm.add_rolling_horizon_configuration(
-        config["rolling_horizon_parameters"],
+    Parameters
+    ----------
+    config_file: str
+        A file holding the necessary configuration information for
+        a pommes-dispatch model
+    """
+    # ---- MODEL CONFIGURATION ----
+
+    # Import model config from yaml config file
+    with open(config_file) as file:
+        config = yaml.load(file, Loader=SafeLoader)
+
+    dm = model_control.DispatchModel()
+    dm.update_model_configuration(
+        config["control_parameters"],
+        config["time_parameters"],
+        config["input_output_parameters"],
         nolog=True)
 
-dm.initialize_logging()
-dm.check_model_configuration()
-dm.show_configuration_log()
+    if dm.rolling_horizon:
+        dm.add_rolling_horizon_configuration(
+            config["rolling_horizon_parameters"],
+            nolog=True)
 
-# ---- MODEL RUN ----
+    dm.initialize_logging()
+    dm.check_model_configuration()
+    dm.show_configuration_log()
 
-# Initialize model meta information and results DataFrames
-model_meta = {
-    "overall_objective": 0,
-    "overall_time": 0,
-    "overall_solution_time": 0
-}
-ts = time.gmtime()
-dispatch_results = pd.DataFrame()
-power_prices = pd.DataFrame()
+    # ---- MODEL RUN ----
 
-# Model run for integral optimization horizon (simple model set up)
-if not dm.rolling_horizon:
-    dm.build_simple_model()
-
-    dm.om.receive_duals()
-    logging.info("Obtaining dual values and reduced costs from the model\n"
-                 "in order to calculate power prices.")
-
-    dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
-    meta_results = processing.meta_results(dm.om)
-
-    power_prices = dm.get_power_prices_from_duals()
-
-    model_meta["overall_objective"] = meta_results["objective"]
-    model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
-
-# Model run for rolling horizon optimization
-if dm.rolling_horizon:
-    logging.info("Creating a LP optimization model for dispatch optimization\n"
-                 "using a ROLLING HORIZON approach for model solution.")
-
-    # Initialization of rolling horizon model run
-    counter = 0
-    iteration_results = {
-        "storages_initial": pd.DataFrame(),
-        "model_results": {},
-        "dispatch_results": dispatch_results,
-        "power_prices": power_prices
+    # Initialize model meta information and results DataFrames
+    model_meta = {
+        "overall_objective": 0,
+        "overall_time": 0,
+        "overall_solution_time": 0
     }
+    ts = time.gmtime()
+    dispatch_results = pd.DataFrame()
+    power_prices = pd.DataFrame()
 
-    for counter in range(getattr(dm, "amount_of_time_slices")):
-        # rebuild the EnergySystem in each iteration
-        dm.build_rolling_horizon_model(counter, iteration_results)
+    # Model run for integral optimization horizon (simple model set up)
+    if not dm.rolling_horizon:
+        dm.build_simple_model()
 
-        # Solve rolling horizon model
-        dm.solve_rolling_horizon_model(counter, iteration_results, model_meta)
+        dm.om.receive_duals()
+        logging.info("Obtaining dual values and reduced costs from the model\n"
+                     "in order to calculate power prices.")
 
-        # Get initial states for the next model run from results
-        dm.retrieve_initial_states_rolling_horizon(iteration_results)
+        dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
+        meta_results = processing.meta_results(dm.om)
 
-model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
+        power_prices = dm.get_power_prices_from_duals()
 
-# ---- MODEL RESULTS PROCESSING ----
+        model_meta["overall_objective"] = meta_results["objective"]
+        model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
 
-model_control.show_meta_logging_info(model_meta)
+    # Model run for rolling horizon optimization
+    if dm.rolling_horizon:
+        logging.info(
+            "Creating a LP optimization model for dispatch optimization\n"
+            "using a ROLLING HORIZON approach for model solution.")
 
-if not dm.rolling_horizon:
-    model_results = processing.results(dm.om)
+        # Initialization of rolling horizon model run
+        counter = 0
+        iteration_results = {
+            "storages_initial": pd.DataFrame(),
+            "model_results": {},
+            "dispatch_results": dispatch_results,
+            "power_prices": power_prices
+        }
 
-    buses_el_views = [country + '_bus_el' for country in dm.countries]
-    dispatch_results = pd.concat(
-        [views.node(model_results, bus_el)['sequences']
-         for bus_el in buses_el_views], axis=1
-    )
+        for counter in range(getattr(dm, "amount_of_time_slices")):
+            # rebuild the EnergySystem in each iteration
+            dm.build_rolling_horizon_model(counter, iteration_results)
 
-if dm.save_production_results:
-    dispatch_results.to_csv(dm.path_folder_output + getattr(dm, "filename")
-                            + '_production.csv', sep=',', decimal='.')
+            # Solve rolling horizon model
+            dm.solve_rolling_horizon_model(counter, iteration_results,
+                                           model_meta)
 
-if dm.save_price_results:
-    power_prices.to_csv(
-        dm.path_folder_output + getattr(dm, "filename")
-        + '_power-prices.csv', sep=',', decimal='.')
+            # Get initial states for the next model run from results
+            dm.retrieve_initial_states_rolling_horizon(iteration_results)
+
+    model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
+
+    # ---- MODEL RESULTS PROCESSING ----
+
+    model_control.show_meta_logging_info(model_meta)
+
+    if not dm.rolling_horizon:
+        model_results = processing.results(dm.om)
+
+        buses_el_views = [country + '_bus_el' for country in dm.countries]
+        dispatch_results = pd.concat(
+            [views.node(model_results, bus_el)['sequences']
+             for bus_el in buses_el_views], axis=1
+        )
+
+    if dm.save_production_results:
+        dispatch_results.to_csv(dm.path_folder_output + getattr(dm, "filename")
+                                + '_production.csv', sep=',', decimal='.')
+
+    if dm.save_price_results:
+        power_prices.to_csv(
+            dm.path_folder_output + getattr(dm, "filename")
+            + '_power-prices.csv', sep=',', decimal='.')
+
+
+if __name__ == "__main__":
+    config_yml = "../../../config.yml"
+    run_pommes_dispatch(config_yml)
