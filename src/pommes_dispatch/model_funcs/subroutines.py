@@ -115,9 +115,11 @@ def create_buses(input_data, node_dict):
     return node_dict
 
 
-def create_interconnection_transformers(input_data, dispatch_model, node_dict):
-    r"""Create interconnection transformers and add them to the dict of nodes.
-    
+def create_linking_transformers(input_data, dispatch_model, node_dict):
+    r"""Create linking transformers and add them to the dict of nodes.
+
+    Linking transformers serve for modeling interconnector capacities
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -137,7 +139,7 @@ def create_interconnection_transformers(input_data, dispatch_model, node_dict):
         the interconnection transformers elements
     """
     # try and except statement since not all countries might be modeled
-    for i, l in input_data['links'].iterrows():
+    for i, l in input_data['linking_transformers'].iterrows():
         try:
             if l['type'] == 'DC':
                 node_dict[i] = solph.Transformer(
@@ -159,7 +161,7 @@ def create_interconnection_transformers(input_data, dispatch_model, node_dict):
                         node_dict[l['from']]:
                             solph.Flow(
                                 nominal_value=l[dispatch_model.year],
-                                max=input_data['links_ts'][i][
+                                max=input_data['linking_transformers_ts'][i][
                                     dispatch_model.start_time
                                     :dispatch_model.end_time].to_numpy())},
                     outputs={node_dict[l['to']]: solph.Flow()},

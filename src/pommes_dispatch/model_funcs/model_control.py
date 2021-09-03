@@ -24,12 +24,13 @@ from oemof.solph import (constraints, views,
 from oemof.tools import logger
 
 from pommes_dispatch.model_funcs import helpers
-from .data_input import nodes_from_csv, nodes_from_csv_rh
+from pommes_dispatch.model_funcs.data_input import (nodes_from_csv,
+                                                    nodes_from_csv_rh)
 
 
 def show_meta_logging_info(model_meta):
     """Show some logging information on model meta data"""
-    logging.info(f"***** MODEL RUN TERMINATED SUCESSFULLY :-) *****")
+    logging.info(f"***** MODEL RUN TERMINATED SUCCESSFULLY :-) *****")
     logging.info(f"Overall objective value: "
                  + f"{model_meta['overall_objective']:.2f}")
     logging.info(f"Overall solution time: "
