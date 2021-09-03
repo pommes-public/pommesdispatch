@@ -16,7 +16,7 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 """
 
 from pommes_dispatch.model_funcs import helpers
-from .subroutines import *
+from pommes_dispatch.model_funcs.subroutines import *
 
 
 def parse_input_data(dispatch_model):
