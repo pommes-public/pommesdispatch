@@ -48,6 +48,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
@@ -66,7 +67,7 @@ setup(
         'oemof.solph == 0.4.4',
         'pyyaml'
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     extras_require={'test': ['pytest', 'sphinx', 'sphinx_rtd_theme']},
     include_package_data=True,
     zip_safe=False,
