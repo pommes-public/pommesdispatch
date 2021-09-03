@@ -78,13 +78,14 @@ preparation routine. ``pommes-data`` can be found
 Configuring the model
 +++++++++++++++++++++
 
-Open the module ``dispatch_model.py`` from the model package in your python
-editor of choice (we recommend `PyCharm <https://www.jetbrains.com/pycharm/>`_).
+Open the file ``config.yml`` that is stored in the repository or create
+a config file yourself. If you want to use the default configuration
+and simulate 2017, you have to ensure that you have cloned the repository and
+the config file available. If this holds for you, you can skip this section
+and move right to the next one, :ref:`running`.
 
-If you want to use the default configuration and simulate 2017, you can
-skip this section and move right to the next one, :ref:`running`.
-
-You'll find dictionaries for controlling the simulation in it.
+You'll find dictionary-alike hierarchical entries in the ``config.yml``
+file for controlling the simulation in it.
 In the first section, you can change general model settings, e.g. if
 you want to use another solver or if you want to run a rolling horizon
 model. You can play around with the boolean values, but we recommend to
@@ -190,8 +191,19 @@ Running the model
 +++++++++++++++++
 Once you have configured your model, running it is fairly simple.
 
-Just run ``pommes_dispatch.py`` in your editor. You'll see some
-logging information on the console.
+Just either run ``pommes_dispatch.py`` in your python editor of choice
+(we recommend `PyCharm <https://www.jetbrains.com/pycharm/>`_) or
+run the script ``run_pommes_dispatch`` in a command line shell.
+To do so, just type
+
+.. code::
+
+    run_pommes_dispatch <-f "path-to-your-config-file.yml">
+
+You may leave out the specification for the YAML file and use the default
+value if you have cloned the repository. This will lead to using the
+``config.yml`` file stored at the top level of the repository.
+You'll see some logging information on the console when your run the model.
 
 Once the model run is finished, you can find, inspect, analyze and plot your
 results in the results folder (or the folder you have specified to store
