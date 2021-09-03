@@ -20,7 +20,7 @@ def readme():
 
 
 setup(
-    name='pommes-dispatch',
+    name='pommes_dispatch',
     version='0.0.2',
     description='A bottom-up fundamental power market model '
                 'for the German electricity sector',
@@ -35,7 +35,7 @@ setup(
                        ''',
     keywords=['power market', 'fundamental model', 'dispatch', 'power price',
               'Germany', 'oemof', 'oemof.solph', 'pyomo'],
-    url='https://github.com/pommes-public/pommes-dispatch/',
+    url='https://github.com/pommes-public/pommes_dispatch/',
     author=', '.join(__author__),
     author_email=__email__,
     license=__license__,
@@ -48,17 +48,18 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     project_urls={
-        "Documentation": "https://pommes-dispatch.readthedocs.io/",
+        "Documentation": "https://pommes_dispatch.readthedocs.io/",
         "Changelog": (
-            "https://pommes-dispatch.readthedocs.io/en/latest/changelog.html"
+            "https://pommes_dispatch.readthedocs.io/en/latest/changelog.html"
         ),
         "Issue Tracker":
-            "https://github.com/pommes-public/pommes-dispatch/issues",
+            "https://github.com/pommes-public/pommes_dispatch/issues",
     },
     install_requires=[
         'numpy',
