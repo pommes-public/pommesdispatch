@@ -1,6 +1,9 @@
 # Ignore (files stored at) a given path
 /results
 /inputs
+/build
+/dist
+*.egg-info
 
 # Ignore files with a special ending (or content)
 *__pycache__*
