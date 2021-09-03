@@ -110,26 +110,24 @@ Pay attention to the allowed values for the string values:
   and a `comparison from the INREC 2020 <https://github.com/jokochems/DR_modeling_oemof/blob/master/Kochems_Demand_Response_INREC.pdf>`_
   for details.
 
-.. code:: python
+.. code:: yaml
 
-    # 1) Determine model configuration through control parameters
-
-    control_parameters = {
-        "rolling_horizon": False,
-        "aggregate_input": False,
-        "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL',
-                      'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
-                      'SE1', 'SE2', 'SE3', 'SE4'],
-        "solver": "gurobi",
-        "fuel_cost_pathway": "middle",
-        "activate_emissions_limit": False,
-        "emissions_pathway": "100_percent_linear",
-        "activate_demand_response": False,
-        "demand_response_approach": "DLR",
-        "demand_response_scenario": "50",
-        "save_production_results": True,
-        "save_price_results": True,
-    }
+    # 1) Set overall workflow control parameters
+    control_parameters:
+        rolling_horizon: False
+        aggregate_input: False
+        countries: ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR', 'NL',
+                    'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
+                    'SE1', 'SE2', 'SE3', 'SE4']
+        solver: "gurobi"
+        fuel_cost_pathway: "middle"
+        activate_emissions_limit: False
+        emissions_pathway: "100_percent_linear"
+        activate_demand_response: False
+        demand_response_approach: "DLR"
+        demand_response_scenario: "50"
+        save_production_results: True
+        save_price_results: True
 
 .. note::
     | Including an emissions limit usually leads to an infeasible model formulation.
@@ -144,27 +142,23 @@ to the date format (pre-)defined. You have to ensure that the input data
 time series match the time frame you want to simulate. As a default, you'll
 find data for 2017 and 2030.
 
-.. code:: python
+.. code:: yaml
 
-    # 2) Set model optimization time and frequency for simple model runs
-
-    time_parameters = {
-        "start_time": "2017-01-01 00:00:00",
-        "end_time": "2017-01-02 23:00:00",
-        "freq": "60min"
-    }
+    # 2) Set model optimization time and frequency
+    time_parameters:
+        start_time: "2017-01-01 00:00:00"
+        end_time: "2017-01-02 23:00:00"
+        freq: "60min"
 
 In the third section, you specify where your inputs and outputs are stored.
 You can use the default values here.
 
-.. code:: python
+.. code:: yaml
 
     # 3) Set input and output data paths
-
-    input_output_parameters = {
-        "path_folder_input": "../../../inputs/",
-        "path_folder_output": "../../../results/"
-    }
+    input_output_parameters:
+        path_folder_input: "../../../inputs/"
+        path_folder_output: "../../../results/"
 
 The last section is only applicable if you want to run a rolling
 horizon simulation, see :ref:`rolling-horizon` for background information
@@ -176,14 +170,12 @@ if you are not familiar with the concept.
   of hours that will be dropped and are only introduced to prevent end-time
   effects.
 
-.. code::
+.. code:: yaml
 
     # 4) Set rolling horizon parameters (optional)
-
-    rolling_horizon_parameters = {
-        "time_slice_length_wo_overlap_in_hours": 24,
-        "overlap_in_hours": 12
-    }
+    rolling_horizon_parameters:
+        time_slice_length_wo_overlap_in_hours: 24
+        overlap_in_hours: 12
 
 .. _running:
 
