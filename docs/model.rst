@@ -95,14 +95,15 @@ bottom-up power market modeling using a linear programming approach.
 
 From a mathematical point of view, our model is formulated as a linear program
 with the following characteristics:
-* goal: Minimize total power system costs
-* constraints:
-    * demand coverage
-    * power plants constraints: capacity limits, ramping constraints
-    * storage constraints: power limits, energy limits, storage losses, storage transition
-    * demand response constraints: power limits, energy limits, time restrictions
-    * constraints for interconnection: power limits, transmission losses
-    * optional emissions constraint
+
+- goal: Minimize total power system costs
+- constraints:
+    - demand coverage
+    - power plants constraints: capacity limits, ramping constraints
+    - storage constraints: power limits, energy limits, storage losses, storage transition
+    - demand response constraints: power limits, energy limits, time restrictions
+    - constraints for interconnection: power limits, transmission losses
+    - optional emissions constraint
 
 Fixed time series, such as the demand time series or the fixed renewable infeed,
 as well as scalar values we read in, are provided as parameters from a mathematical point of view.
