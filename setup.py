@@ -14,9 +14,8 @@ __email__ = "jokochems@web.de"
 __status__ = "Production"
 
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 
 setup(
@@ -24,15 +23,7 @@ setup(
     version='0.0.2',
     description='A bottom-up fundamental power market model '
                 'for the German electricity sector',
-    long_description='''
-                       A bottom-up fundamental power market model for the 
-                       German electricity sector.
-                       pommes-dispatch allows for running dispatch models 
-                       for the German electricity sector, taking into account 
-                       conventional and renewable power plants, storages, 
-                       demand response and exchange with the electrical 
-                       neighbors.
-                       ''',
+    long_description=long_description,
     keywords=['power market', 'fundamental model', 'dispatch', 'power price',
               'Germany', 'oemof', 'oemof.solph', 'pyomo'],
     url='https://github.com/pommes-public/pommes_dispatch/',
