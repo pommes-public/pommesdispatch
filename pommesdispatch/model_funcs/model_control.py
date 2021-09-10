@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 General description
-------------------
+-------------------
 This file contains all class and function definitions for controlling the model
 workflow of the dispatch variant of POMMES.
 
@@ -113,10 +113,6 @@ class DispatchModel(object):
     end_time : str
         A date string of format "YYYY-MM-DD hh:mm:ss" defining the end time
         of the simulation
-
-    save_price_results : boolean
-        boolean control variable indicating whether to save the power price
-        results of the model run to a .csv file
 
     path_folder_input : str
         The path to the folder where the input data is stored

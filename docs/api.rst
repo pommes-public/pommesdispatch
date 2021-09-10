@@ -12,7 +12,7 @@ pommes_dispatch.model.dispatch_model
 pommes_dispatch.model_funcs.data_input
 --------------------------------------
 
-.. automodule:: pommesdispatch.model_funcs.dispatch_model
+.. automodule:: pommesdispatch.model_funcs.data_input
     :members:
 
 pommes_dispatch.model_funcs.helpers

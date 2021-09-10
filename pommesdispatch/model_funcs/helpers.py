@@ -17,7 +17,7 @@ from datetime import datetime
 def days_between(d1, d2):
     """Calculate the difference in days between two days
     
-    Parameters:
+    Parameters
     ----------
     d1 : str
         The first date string
@@ -39,7 +39,7 @@ def days_between(d1, d2):
 def time_steps_between_timestamps(ts1, ts2, freq):
     """Calculate the difference in hours between two timesteps
     
-    Parameters:
+    Parameters
     ----------
     ts1 : pd.Timestamp
         The first timestamp
