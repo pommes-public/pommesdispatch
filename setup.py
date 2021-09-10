@@ -19,7 +19,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 setup(
-    name='pommes_dispatch',
+    name='pommesdispatch',
     version='0.0.2',
     description='A bottom-up fundamental power market model '
                 'for the German electricity sector',
@@ -34,7 +34,7 @@ setup(
     packages=find_packages(where='src'),
     entry_points={
         'console_scripts': [
-            'run_pommes_dispatch=pommes_dispatch.model:run_pommes_dispatch'
+            'run_pommes_dispatch=pommesdispatch.model:run_pommes_dispatch'
         ],
     },
     classifiers=[

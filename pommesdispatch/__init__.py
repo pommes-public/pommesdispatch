@@ -1,5 +1,5 @@
 """
-pommes_dispatch
+pommesdispatch
 ---------------
 
 A bottom-up fundamental power market model for the German electricity sector

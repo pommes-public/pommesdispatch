@@ -13,12 +13,11 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-print(sys.path)
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'pommes-dispatch'
+project = 'pommesdispatch'
 copyright = '2021, pommes developer group'
 author = 'pommes developer group'
 

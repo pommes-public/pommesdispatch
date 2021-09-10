@@ -58,10 +58,11 @@ from oemof.solph import processing
 from oemof.solph import views
 from yaml.loader import SafeLoader
 
-from pommes_dispatch.model_funcs import model_control
+from pommesdispatch import cli
+from pommesdispatch.model_funcs import model_control
 
 
-def run_dispatch_model(config_file="../../../config.yml"):
+def run_dispatch_model(config_file="../../config.yml"):
     """
     Run a pommes-dispatch model.
 
@@ -179,12 +180,14 @@ def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", required=False,
-                        default="../../../config.yml",
+                        default="../../config.yml",
                         help="Specify input config file")
+    parser.add_argument("--init", required=False,
+                        action="store_true",
+                        help="Automatically generate default config")
     args = parser.parse_args()
-    return args.file
+    return args
 
 
 if __name__ == "__main__":
-    config_yml = add_args()
-    run_dispatch_model(config_yml)
+    cli.run_pommes_dispatch()

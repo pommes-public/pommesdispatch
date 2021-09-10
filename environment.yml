@@ -1,4 +1,4 @@
-name: pommes_dispatch
+name: pommesdispatch
 channels:
   - anaconda
   - conda-forge

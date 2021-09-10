@@ -23,9 +23,9 @@ from oemof.solph import (constraints, views,
                          models, network, processing)
 from oemof.tools import logger
 
-from pommes_dispatch.model_funcs import helpers
-from pommes_dispatch.model_funcs.data_input import (nodes_from_csv,
-                                                    nodes_from_csv_rh)
+from pommesdispatch.model_funcs import helpers
+from pommesdispatch.model_funcs.data_input import (nodes_from_csv,
+                                                   nodes_from_csv_rh)
 
 
 def show_meta_logging_info(model_meta):
