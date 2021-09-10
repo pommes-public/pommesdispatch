@@ -11,13 +11,12 @@ Usage of the model is highly encouraged. Contributing is welcome as well.
 
 Repository, Documentation, Installation
 ---------------------------------------
-All founds are hosted on GitHub:
-`https://github.com/pommes-public/pommesdispatch <https://github.com/pommes-public/pommesdispatch>`_
+All founds are hosted on
+`GitHub <https://github.com/pommes-public/pommesdispatch>`_
 
 To install, simply type ``pip install pommesdispatch``
 
-Please find the documentation here
-`https://pommesdispatch.readthedocs.io/ <https://pommesdispatch.readthedocs.io/>`_
+Please find the documentation `here <https://pommesdispatch.readthedocs.io/>`_
 
 Licensing information and Disclaimer
 ------------------------------------
