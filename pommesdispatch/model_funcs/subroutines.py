@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 General description
-------------------
+-------------------
 This file contains all subroutines used for reading in input data
 for the dispatch variant of POMMES.
 

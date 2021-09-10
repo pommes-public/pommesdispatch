@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 General description
-------------------
+-------------------
 This file contains all class and function definitions for controlling the model
 workflow of the dispatch variant of POMMES.
 
@@ -23,9 +23,9 @@ from oemof.solph import (constraints, views,
                          models, network, processing)
 from oemof.tools import logger
 
-from pommes_dispatch.model_funcs import helpers
-from pommes_dispatch.model_funcs.data_input import (nodes_from_csv,
-                                                    nodes_from_csv_rh)
+from pommesdispatch.model_funcs import helpers
+from pommesdispatch.model_funcs.data_input import (nodes_from_csv,
+                                                   nodes_from_csv_rh)
 
 
 def show_meta_logging_info(model_meta):
@@ -113,10 +113,6 @@ class DispatchModel(object):
     end_time : str
         A date string of format "YYYY-MM-DD hh:mm:ss" defining the end time
         of the simulation
-
-    save_price_results : boolean
-        boolean control variable indicating whether to save the power price
-        results of the model run to a .csv file
 
     path_folder_input : str
         The path to the folder where the input data is stored

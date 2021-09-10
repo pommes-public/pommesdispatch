@@ -1,35 +1,33 @@
 API Reference
 =============
 
-TODO: Fix path for building autodocs!
-
-pommes_dispatch.model.dispatch_model
+pommesdispatch.model.dispatch_model
 ------------------------------------
 
-.. automodule:: src.pommes_dispatch.model
+.. automodule:: pommesdispatch.model.dispatch_model
     :members:
 
-pommes_dispatch.model_funcs.data_input
+pommesdispatch.model_funcs.data_input
 --------------------------------------
 
-.. automodule:: pommes_dispatch.model_funcs.dispatch_model
+.. automodule:: pommesdispatch.model_funcs.data_input
     :members:
 
-pommes_dispatch.model_funcs.helpers
+pommesdispatch.model_funcs.helpers
 -----------------------------------
 
-.. automodule:: pommes_dispatch.model_funcs.helpers
+.. automodule:: pommesdispatch.model_funcs.helpers
     :members:
 
-pommes_dispatch.model_funcs.model_control
+pommesdispatch.model_funcs.model_control
 -----------------------------------------
 
-.. automodule:: pommes_dispatch.model_funcs.model_control
+.. automodule:: pommesdispatch.model_funcs.model_control
     :members:
 
 
-pommes_dispatch.model_funcs.subroutines
+pommesdispatch.model_funcs.subroutines
 ---------------------------------------
 
-.. automodule:: pommes_dispatch.model_funcs.subroutines
+.. automodule:: pommesdispatch.model_funcs.subroutines
     :members:

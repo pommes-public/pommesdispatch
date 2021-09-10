@@ -9,11 +9,14 @@ at TU Berlin and is now maintained by a developer group of alumni.
 The source code is freely available under MIT license.
 Usage of the model is highly encouraged. Contributing is welcome as well.
 
-Git And Documentation
----------------------
-The project files contain extensive DocString as well as inline comments.
-For additional information, see the wiki: 
-https://git.tu-berlin.de/POMMES/POMMES/wikis/home
+Repository, Documentation, Installation
+---------------------------------------
+All founds are hosted on
+`GitHub <https://github.com/pommes-public/pommesdispatch>`_
+
+To install, simply type ``pip install pommesdispatch``
+
+Please find the documentation `here <https://pommesdispatch.readthedocs.io/>`_
 
 Licensing information and Disclaimer
 ------------------------------------
@@ -29,14 +32,12 @@ or its data inputs.
 
 Input Data
 ----------
-Input data can be compiled using the POMMES_data package.
+Input data can be compiled using the ``pommesdata`` package.
 A precompiled version is distributed with the dispatch model.
 
 Installation requirements
 -------------------------
-Python version >= 3.8
-oemof version 0.4.4
-
+See `environments.yml` file
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
 Benjamin Grosse
@@ -58,10 +59,11 @@ from oemof.solph import processing
 from oemof.solph import views
 from yaml.loader import SafeLoader
 
-from pommes_dispatch.model_funcs import model_control
+from pommesdispatch import cli
+from pommesdispatch.model_funcs import model_control
 
 
-def run_dispatch_model(config_file="../../../config.yml"):
+def run_dispatch_model(config_file="../../config.yml"):
     """
     Run a pommes-dispatch model.
 
@@ -179,12 +181,14 @@ def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", required=False,
-                        default="../../../config.yml",
+                        default="../../config.yml",
                         help="Specify input config file")
+    parser.add_argument("--init", required=False,
+                        action="store_true",
+                        help="Automatically generate default config")
     args = parser.parse_args()
-    return args.file
+    return args
 
 
 if __name__ == "__main__":
-    config_yml = add_args()
-    run_dispatch_model(config_yml)
+    cli.run_pommes_dispatch()
