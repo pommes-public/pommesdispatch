@@ -9,11 +9,15 @@ at TU Berlin and is now maintained by a developer group of alumni.
 The source code is freely available under MIT license.
 Usage of the model is highly encouraged. Contributing is welcome as well.
 
-Git And Documentation
----------------------
-The project files contain extensive DocString as well as inline comments.
-For additional information, see the wiki: 
-https://git.tu-berlin.de/POMMES/POMMES/wikis/home
+Repository, Documentation, Installation
+---------------------------------------
+All founds are hosted on GitHub:
+`https://github.com/pommes-public/pommesdispatch <https://github.com/pommes-public/pommesdispatch>`_
+
+To install, simply type ``pip install pommesdispatch``
+
+Please find the documentation here
+`https://pommesdispatch.readthedocs.io/ <https://pommesdispatch.readthedocs.io/>`_
 
 Licensing information and Disclaimer
 ------------------------------------
@@ -29,14 +33,12 @@ or its data inputs.
 
 Input Data
 ----------
-Input data can be compiled using the POMMES_data package.
+Input data can be compiled using the ``pommesdata`` package.
 A precompiled version is distributed with the dispatch model.
 
 Installation requirements
 -------------------------
-Python version >= 3.8
-oemof version 0.4.4
-
+See `environments.yml` file
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
 Benjamin Grosse

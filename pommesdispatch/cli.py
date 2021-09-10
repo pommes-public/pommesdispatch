@@ -1,5 +1,4 @@
 from pommesdispatch.model.dispatch_model import run_dispatch_model, add_args
-import yaml
 
 
 def create_default_config():
