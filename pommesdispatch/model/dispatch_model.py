@@ -65,7 +65,7 @@ from pommesdispatch.model_funcs import model_control
 
 def run_dispatch_model(config_file="./config.yml"):
     """
-    Run a pommes-dispatch model.
+    Run a pommesdipatch model.
 
     Read in config information from a yaml file, initialize and run a
     dispatch model and process results.
@@ -74,7 +74,7 @@ def run_dispatch_model(config_file="./config.yml"):
     ----------
     config_file: str
         A file holding the necessary configuration information for
-        a pommes-dispatch model
+        a pommesdipatch model
     """
     # ---- MODEL CONFIGURATION ----
 

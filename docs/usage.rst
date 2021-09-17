@@ -6,19 +6,19 @@ Installation and User's guide
 
 Installation
 ------------
-To set up ``pommes-dispatch``, you have to set up a virtual environment
+To set up ``pommesdipatch``, you have to set up a virtual environment
 (e.g. using conda) or add the required packages to your python installation.
 Additionally, you have to install a solver in order to solve
 the mathematical optimization problem.
 
 Setting up the environment
 ++++++++++++++++++++++++++
-``pommes-dispatch`` is (to be) hosted on `PyPI <https://pypi.org/>`_.
+``pommesdipatch`` is (to be) hosted on `PyPI <https://pypi.org/>`_.
 To install it, please use the following command
 
 .. code::
 
-    pip install pommes-dispatch
+    pip install pommesdipatch
 
 
 For now, you still have to clone the environment and
@@ -26,7 +26,7 @@ copy the files locally by typing
 
 .. code::
 
-    git clone https://github.com/pommes-public/pommes-dispatch.git
+    git clone https://github.com/pommes-public/pommesdipatch.git
 
 | After cloning the repository, you have to install the required dependencies.
  Make sure you have conda installed as a package manager.
@@ -47,11 +47,11 @@ Activate your environment by typing
 
 Installing a solver
 +++++++++++++++++++
-In order to solve a ``pommes-dispatch`` model instance,
+In order to solve a ``pommesdipatch`` model instance,
 you need a solver installed.
 Please see
 `oemof.solph's information on solvers <https://github.com/oemof/oemof-solph#installing-a-solver>`_.
-As a default, gurobi is used for ``pommes-dispatch`` models.
+As a default, gurobi is used for ``pommesdipatch`` models.
 It is a commercial solver, but provides academic licenses, though,
 if this applies to you. Elsewhise, we recommend to use CBC
 as the solver oemof recommends. To test your solver
@@ -61,7 +61,7 @@ again see information from
 
 .. _using:
 
-Using pommes-dispatch
+Using pommesdipatch
 ---------------------
 
 Providing input data

@@ -10,7 +10,7 @@ Background
 
 Overview
 ++++++++
-The **dispatch variant** of the power market model *POMMES* ``pommes-dispatch``
+The **dispatch variant** of the power market model *POMMES* ``pommesdipatch``
 enables the user to simulate the **dispatch of backup power plants,
 storages as well as demand response units for the Federal Republic of Germany**
 for an arbitrary year or timeframe between 2017 and 2030.
@@ -133,7 +133,7 @@ with the individual components.
 
 Technical background
 ++++++++++++++++++++
-``pommes-dispatch`` builds on the framework `oemof.solph <https://github.com/oemof/oemof-solph>`_
+``pommesdipatch`` builds on the framework `oemof.solph <https://github.com/oemof/oemof-solph>`_
 which allows to model energy systems in a graph-based representation
 with the underlying mathematical constraints and objective function terms
 implemented in `pyomo <https://pyomo.readthedocs.io/en/stable/>`_.
@@ -177,7 +177,7 @@ Image based on Büllesbach (2018), p. 62 and Marquant et al. (2015), p. 2141
 
 The model results are then obtained by concatenating the results for the individual
 time slices. There is a rolling horizon implementation integrated as an
-alternative to a perfect foresight simulation in ``pommes-dispatch``, see
+alternative to a perfect foresight simulation in ``pommesdipatch``, see
 :ref:`using`.
 
 .. _characteristics:

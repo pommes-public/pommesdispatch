@@ -3,17 +3,17 @@ Reference docs
 
 .. contents::
 
-pommes_dispatch.model
+pommesdipatch.model
 ---------------------
-The ``pommes_dispatch.model`` package contains the actual model which
+The ``pommesdipatch.model`` package contains the actual model which
 is a single file ``dispatch_model.py`` that can be run in a python editor.
 For usage please see :ref:`using`.
 
-pommes_dispatch.model_funcs
+pommesdipatch.model_funcs
 ---------------------------
-The ``pommes_dispatch.model_funcs`` package contains a collection of functions,
+The ``pommesdipatch.model_funcs`` package contains a collection of functions,
 classes and methods that are needed to run a dispatch model in
-``pommes_dispatch.model.dispatch_model.py``.
+``pommesdipatch.model.dispatch_model.py``.
 
 Modules
 +++++++
