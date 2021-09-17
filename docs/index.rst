@@ -22,7 +22,7 @@ The investment model is described
    usage
    model
    reference
-   api
+   api/api
    changelog
 
 Indices and tables
