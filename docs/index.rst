@@ -11,7 +11,7 @@ fundamental power market model *POMMES* (**PO**\wer
 **M**\arket **M**\odel of **E**\nergy and re **S**\ources).
 
 If you are intested in the data preparation routine,
-you can find a description `here <https://pommes-data.readthedocs.io>`_.
+you can find a description `here <https://pommesdata.readthedocs.io>`_.
 The investment model is described
 `here <https://pommes-invest.readthedocs.io>`_.
 

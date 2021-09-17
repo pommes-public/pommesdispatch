@@ -8,12 +8,17 @@ Installation
 ------------
 To set up ``pommesdipatch``, you have to set up a virtual environment
 (e.g. using conda) or add the required packages to your python installation.
+This is taken care of by the pip installation. When you clone the environment,
+you have to install the packages for the requirements file (see :ref:`setup`).
+
 Additionally, you have to install a solver in order to solve
-the mathematical optimization problem.
+the mathematical optimization problem (see :ref:`solver`).
+
+.. _setup:
 
 Setting up the environment
 ++++++++++++++++++++++++++
-``pommesdipatch`` is (to be) hosted on `PyPI <https://pypi.org/>`_.
+``pommesdipatch`` is hosted on `PyPI <https://pypi.org/>`_.
 To install it, please use the following command
 
 .. code::
@@ -21,12 +26,12 @@ To install it, please use the following command
     pip install pommesdipatch
 
 
-For now, you still have to clone the environment and
-copy the files locally by typing
+If you want to contribute as a developer, you fist have to **fork** it and then
+clone the environment, in order to copy the files locally by typing
 
 .. code::
 
-    git clone https://github.com/pommes-public/pommesdipatch.git
+    git clone https://github.com/your-github-username/pommesdipatch.git
 
 | After cloning the repository, you have to install the required dependencies.
  Make sure you have conda installed as a package manager.
@@ -45,6 +50,8 @@ Activate your environment by typing
 
     conda activate pommes_dispatch
 
+.. _solver:
+
 Installing a solver
 +++++++++++++++++++
 In order to solve a ``pommesdipatch`` model instance,
@@ -53,7 +60,7 @@ Please see
 `oemof.solph's information on solvers <https://github.com/oemof/oemof-solph#installing-a-solver>`_.
 As a default, gurobi is used for ``pommesdipatch`` models.
 It is a commercial solver, but provides academic licenses, though,
-if this applies to you. Elsewhise, we recommend to use CBC
+if this applies to you. Elsewise, we recommend to use CBC
 as the solver oemof recommends. To test your solver
 and oemof.solph installation,
 again see information from
@@ -71,9 +78,9 @@ We provide input data for simulating the years 2017 and 2030 along with the
 code. You can use this to simulate these years.
 
 If you are interested in other years or want to change the power plant park,
-feel free to do so by adjusting and running the ``pommes-data`` data
-preparation routine. ``pommes-data`` can be found
-`in this repository <https://github.com/pommes-public/pommes-data>`_
+feel free to do so by adjusting and running the ``pommesdata`` data
+preparation routine. ``pommesdata`` can be found
+`in this repository <https://github.com/pommes-public/pommesdata>`_
 
 Configuring the model
 +++++++++++++++++++++

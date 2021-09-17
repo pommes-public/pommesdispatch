@@ -19,7 +19,7 @@ Please navigate to the section of interest to find out more.
 *POMMES* itself is a cosmos consisting of a **dispatch model** (stored in this repository and described here), a **data preparation routine** and an **investment model** for the German wholesale power market. The model was originally developed by a group of researchers and students at the [chair of Energy and Resources Management of TU Berlin](https://www.er.tu-berlin.de/menue/home/) and is now maintained by a group of alumni and open for other contributions.
 
 If you are interested in the data preparation routines used or investment modeling, please find more information here:
-- [pommes-data](https://github.com/pommes-public/pommes-data): A full-featured transparent data preparation routine from raw data to POMMES model inputs
+- [pommesdata](https://github.com/pommes-public/pommesdata): A full-featured transparent data preparation routine from raw data to POMMES model inputs
 - pommes-invest: A multi-period integrated investment and dispatch model for the German power sector (upcoming).
 
 ### Purpose and model characterization
@@ -31,7 +31,7 @@ The **dispatch variant** of the power market model *POMMES* `pommesdipatch` enab
 | Spatial coverage | - Germany (DE-LU) + electrical neighbours (NTC approach) |
 | Time horizon | - usually 1 year in hourly resolution |
 | Technologies | - conventional power plants, storages, demand response (optimized)<br> - renewable generators (fixed)<br> - demand: exogenous time series |
-| Data sources | - OPSD, BNetzA, ENTSO-E, others (see [pommes-data](https://github.com/pommes-public/pommes-data)) |
+| Data sources | - OPSD, BNetzA, ENTSO-E, others (see [pommesdata](https://github.com/pommes-public/pommesdata)) |
 | Implementation | - graph representation & linear optimization: oemof.solph / pyomo<br> - data management: python / .csv |
 
 ### Mathematical and technical implementation
