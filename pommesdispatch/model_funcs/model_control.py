@@ -32,7 +32,7 @@ def show_meta_logging_info(model_meta):
     """Show some logging information on model meta data"""
     logging.info(f"***** MODEL RUN TERMINATED SUCCESSFULLY :-) *****")
     logging.info(f"Overall objective value: "
-                 + f"{model_meta['overall_objective']:.2f}")
+                 + f"{model_meta['overall_objective']:,.0f}")
     logging.info(f"Overall solution time: "
                  + f"{model_meta['overall_solution_time']:.2f}")
     logging.info(f"Overall time: "
