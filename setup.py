@@ -20,21 +20,21 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pommesdispatch',
-    version='0.0.2',
+    version='0.1.0',
     description='A bottom-up fundamental power market model '
                 'for the German electricity sector',
     long_description=long_description,
     keywords=['power market', 'fundamental model', 'dispatch', 'power price',
-              'Germany', 'oemof', 'oemof.solph', 'pyomo'],
-    url='https://github.com/pommes-public/pommes_dispatch/',
+              'oemof.solph'],
+    url='https://github.com/pommes-public/pommesdispatch/',
     author=', '.join(__author__),
     author_email=__email__,
     license=__license__,
-    package_dir={'': 'src'},
-    packages=find_packages(where='src'),
+    package_dir={'': ''},
+    packages=find_packages(where=''),
     entry_points={
         'console_scripts': [
-            'run_pommes_dispatch=pommesdispatch.model:run_pommes_dispatch'
+            'run_pommes_dispatch=pommesdispatch.cli:run_pommes_dispatch'
         ],
     },
     classifiers=[
@@ -45,21 +45,20 @@ setup(
         "Operating System :: OS Independent",
     ],
     project_urls={
-        "Documentation": "https://pommes_dispatch.readthedocs.io/",
+        "Documentation": "https://pommesdispatch.readthedocs.io/",
         "Changelog": (
-            "https://pommes_dispatch.readthedocs.io/en/latest/changelog.html"
+            "https://pommesdispatch.readthedocs.io/en/latest/changelog.html"
         ),
         "Issue Tracker":
-            "https://github.com/pommes-public/pommes_dispatch/issues",
+            "https://github.com/pommes-public/pommesdispatch/issues",
     },
     install_requires=[
         'numpy',
         'pandas',
-        'matplotlib',
         'oemof.solph == 0.4.4',
         'pyyaml'
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     extras_require={'test': ['pytest', 'sphinx', 'sphinx_rtd_theme']},
     include_package_data=True,
     zip_safe=False,

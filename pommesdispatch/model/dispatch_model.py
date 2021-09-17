@@ -63,7 +63,7 @@ from pommesdispatch import cli
 from pommesdispatch.model_funcs import model_control
 
 
-def run_dispatch_model(config_file="../../config.yml"):
+def run_dispatch_model(config_file="./config.yml"):
     """
     Run a pommes-dispatch model.
 
@@ -181,7 +181,7 @@ def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", required=False,
-                        default="../../config.yml",
+                        default="./config.yml",
                         help="Specify input config file")
     parser.add_argument("--init", required=False,
                         action="store_true",
