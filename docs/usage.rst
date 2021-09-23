@@ -26,8 +26,9 @@ To install it, please use the following command
     pip install pommesdispatch
 
 
-If you want to contribute as a developer, you fist have to **fork** it and then
-clone the environment, in order to copy the files locally by typing
+If you want to contribute as a developer, you fist have to
+`fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_
+it and then clone the environment, in order to copy the files locally by typing
 
 .. code::
 
