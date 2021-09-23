@@ -6,7 +6,7 @@ Installation and User's guide
 
 Installation
 ------------
-To set up ``pommesdipatch``, you have to set up a virtual environment
+To set up ``pommesdispatch``, you have to set up a virtual environment
 (e.g. using conda) or add the required packages to your python installation.
 This is taken care of by the pip installation. When you clone the environment,
 you have to install the packages for the requirements file (see :ref:`setup`).
@@ -18,12 +18,12 @@ the mathematical optimization problem (see :ref:`solver`).
 
 Setting up the environment
 ++++++++++++++++++++++++++
-``pommesdipatch`` is hosted on `PyPI <https://pypi.org/>`_.
+``pommesdispatch`` is hosted on `PyPI <https://pypi.org/>`_.
 To install it, please use the following command
 
 .. code::
 
-    pip install pommesdipatch
+    pip install pommesdispatch
 
 
 If you want to contribute as a developer, you fist have to **fork** it and then
@@ -31,7 +31,7 @@ clone the environment, in order to copy the files locally by typing
 
 .. code::
 
-    git clone https://github.com/your-github-username/pommesdipatch.git
+    git clone https://github.com/your-github-username/pommesdispatch.git
 
 | After cloning the repository, you have to install the required dependencies.
  Make sure you have conda installed as a package manager.
@@ -54,11 +54,11 @@ Activate your environment by typing
 
 Installing a solver
 +++++++++++++++++++
-In order to solve a ``pommesdipatch`` model instance,
+In order to solve a ``pommesdispatch`` model instance,
 you need a solver installed.
 Please see
 `oemof.solph's information on solvers <https://github.com/oemof/oemof-solph#installing-a-solver>`_.
-As a default, gurobi is used for ``pommesdipatch`` models.
+As a default, gurobi is used for ``pommesdispatch`` models.
 It is a commercial solver, but provides academic licenses, though,
 if this applies to you. Elsewise, we recommend to use CBC
 as the solver oemof recommends. To test your solver
@@ -68,7 +68,7 @@ again see information from
 
 .. _using:
 
-Using pommesdipatch
+Using pommesdispatch
 ---------------------
 
 Providing input data

@@ -21,7 +21,7 @@ v0.0.2 (2021-09-03)
 v0.0.1 (2021-08-05)
 -------------------
 
-Initial release of ``pommesdipatch``
+Initial release of ``pommesdispatch``
 
 Welcome to the *POMMES* cosmos!
 
@@ -29,10 +29,10 @@ Welcome to the *POMMES* cosmos!
 
 Features:
 
-* ``pommesdipatch`` is the **dispatch** variant of *POMMES* that allows
+* ``pommesdispatch`` is the **dispatch** variant of *POMMES* that allows
   to simulate dispatch decisions and power prices for Germany
   in hourly resolution for one year (or shorter time frames).
-* ``pommesdipatch`` allows for negative power prices
+* ``pommesdispatch`` allows for negative power prices
   due to its in-depth representation of renewable plants in the market premium scheme.
 * Consistent input data sets for *POMMES* models can be obtained from
   `pommesdata <https://github.com/pommes-public/pommesdata>`_,

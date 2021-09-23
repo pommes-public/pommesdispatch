@@ -1,4 +1,4 @@
-# pommesdipatch
+# pommesdispatch
 
 **A bottom-up fundamental power market model for the German electricity sector**
 
@@ -23,7 +23,7 @@ If you are interested in the data preparation routines used or investment modeli
 - pommes-invest: A multi-period integrated investment and dispatch model for the German power sector (upcoming).
 
 ### Purpose and model characterization
-The **dispatch variant** of the power market model *POMMES* `pommesdipatch` enables the user to simulate the **dispatch of backup power plants, storages as well as demand response units for the Federal Republic of Germany** for an arbitrary year or timeframe between 2017 and 2030. The dispatch of renewable power plants is exogeneously determined by normalized infeed time series and capacity values. The models' overall goal is to minimize power system costs occuring from wholesale markets whereby no network constraints are considered except for the existing bidding zone configuration used for modeling electricity exchange. Thus, the model purpose is to simulate **dispatch decisions** and the resulting **day-ahed market prices**. A brief categorization of the model is given in the following table. An extensive categorization can be found in the [model documentation]().
+The **dispatch variant** of the power market model *POMMES* `pommesdispatch` enables the user to simulate the **dispatch of backup power plants, storages as well as demand response units for the Federal Republic of Germany** for an arbitrary year or timeframe between 2017 and 2030. The dispatch of renewable power plants is exogeneously determined by normalized infeed time series and capacity values. The models' overall goal is to minimize power system costs occuring from wholesale markets whereby no network constraints are considered except for the existing bidding zone configuration used for modeling electricity exchange. Thus, the model purpose is to simulate **dispatch decisions** and the resulting **day-ahed market prices**. A brief categorization of the model is given in the following table. An extensive categorization can be found in the [model documentation]().
 
 | **criterion** | **manifestation** |
 | ---- | ---- |
@@ -40,20 +40,20 @@ The models' underlying mathematical method is a **linear programming** approach,
 The model builds on the framework **[oemof.solph](https://github.com/oemof/oemof-solph)** which allows to model energy systems in a graph-based representation with the underlying mathematical constraints and objective function terms implemented in **[pyomo](https://pyomo.readthedocs.io/en/stable/)**. Some of the required oemof.solph features - such as demand response modeling - have been provided by the *POMMES* core developers which are also active in the oemof community. Users not familiar with oemof.solph may find further information in the [oemof.solph documentation](https://oemof-solph.readthedocs.io/en/latest/readme.html).
 
 ## Documentation
-An extensive **[documentation of pommesdipatch]()** can be found on readthedocs. It contains a model categorization, some energy economic and technical background information as well as documentation of the model functions and classes. 
+An extensive **[documentation of pommesdispatch]()** can be found on readthedocs. It contains a model categorization, some energy economic and technical background information as well as documentation of the model functions and classes. 
 
 ## Installation
-To set up `pommesdipatch`, you have to set up a virtual environment (e.g. using conda) or add the required packages to your python installation. Additionally, you have to install a solver in order to solve the mathematical optimization problem.
+To set up `pommesdispatch`, you have to set up a virtual environment (e.g. using conda) or add the required packages to your python installation. Additionally, you have to install a solver in order to solve the mathematical optimization problem.
 
 ### Setting up the environment
-`pommesdipatch` is (to be) hosted on [PyPI](). To install it, please use the following command
+`pommesdispatch` is (to be) hosted on [PyPI](). To install it, please use the following command
 ```
-pip install pommesdipatch
+pip install pommesdispatch
 ```
 
 For now, you still have to clone the environment and copy the files locally by typing
 ```
-git clone https://github.com/pommes-public/pommesdipatch.git
+git clone https://github.com/pommes-public/pommesdispatch.git
 ```
 After cloning the repository, you have to install the required dependencies. Make sure you have conda installed as a package manager. If not, you can download it [here](https://www.anaconda.com/). Open a command shell and navigate to the folder where you copied the environment to. Use the following command to install dependencies
 ```
@@ -65,17 +65,17 @@ conda activate pommes_dispatch
 ```
 
 ### Installing a solver
-In order to solve a `pommesdipatch` model instance, you need a solver installed. Please see [oemof.solph's information on solvers](https://github.com/oemof/oemof-solph#installing-a-solver). As a default, gurobi is used for `pommesdipatch` models. It is a commercial solver, but provides academic licenses, though, if this applies to you. Elsewhise, we recommend to use CBC as the solver oemof recommends. To test your solver and oemof.solph installation, again see information from [oemof.solph](https://github.com/oemof/oemof-solph#installation-test).
+In order to solve a `pommesdispatch` model instance, you need a solver installed. Please see [oemof.solph's information on solvers](https://github.com/oemof/oemof-solph#installing-a-solver). As a default, gurobi is used for `pommesdispatch` models. It is a commercial solver, but provides academic licenses, though, if this applies to you. Elsewhise, we recommend to use CBC as the solver oemof recommends. To test your solver and oemof.solph installation, again see information from [oemof.solph](https://github.com/oemof/oemof-solph#installation-test).
 
 ## Contributing
 Every kind of contribution or feedback is warmly welcome.<br>
 We use the GitHub issue management as well as pull requests for collaboration. We try to stick to the PEP8 coding standards.
 
 ## Citing
-A publication using and introducing `pommesdipatch` is currently in preparation.
+A publication using and introducing `pommesdispatch` is currently in preparation.
 
-If you are using `pommesdipatch` for your own analyses, please cite as:<br>
-*Kochems, J.; Werner, Y.; Giehl, J.; Grosse, B. et al. (2021): pommesdipatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdipatch, accessed YYYY-MM-DD.*
+If you are using `pommesdispatch` for your own analyses, please cite as:<br>
+*Kochems, J.; Werner, Y.; Giehl, J.; Grosse, B. et al. (2021): pommesdispatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdispatch, accessed YYYY-MM-DD.*
 
 We furthermore recommend to name the version tag or the commit hash used for the sake of transparancy and reproducibility.
 

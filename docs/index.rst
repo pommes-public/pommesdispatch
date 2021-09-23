@@ -1,12 +1,12 @@
-.. pommesdipatch documentation master file
+.. pommesdispatch documentation master file
 
-Welcome to pommesdipatch's documentation!
+Welcome to pommesdispatch's documentation!
 ===========================================
 
 **A bottom-up fundamental power market model
 for the German electricity sector**
 
-This is the documentation of pommesdipatch, the dispatch variant of the
+This is the documentation of pommesdispatch, the dispatch variant of the
 fundamental power market model *POMMES* (**PO**\wer
 **M**\arket **M**\odel of **E**\nergy and re **S**\ources).
 
