@@ -231,43 +231,78 @@ Mathematical description
 
 Mathematical formulation
 ------------------------
+
 All constraints formulations can be found in the
 `oemof.solph documentation <https://oemof-solph.readthedocs.io/en/latest/reference/oemof.solph.html>`_.
 We'll provide a complete mathematical description for the parts we
 used here soon.
 
-Sets and variables
-++++++++++++++++++
+Nomenclature
+++++++++++++
 
-.. csv-table::
+.. csv-table:: Sets, variables and parameters
     :header: **name**, **type**, **description**
+    :widths: 15, 15, 70
 
-    ":math:`NODES`", "set", "all nodes of the energy system. This comprises (among others) Sources, Sinks, Buses, Transformers and Generic Storages"
-    ":math:`TIMESTEPS`", "set", "all timesteps within the optimization timeframe (and time increment, i.e. frequency) chosen"
-    ":math:`FLOWS`", "set", "all flows of the energy system. A flow is a directed connection between node A and B and has a value (i.e. capacity flow) for every timestep"
-    ":math:`POSITIVE\_GRADIENT\_FLOWS`", "set", "all flows imposing a limit to the positive gradient"
-    ":math:`NEGATIVE\_GRADIENT\_FLOWS`", "set", "all flows imposing a limit to the negative gradient"
-    ":math:`STORAGES`", "set", "set of all storage units"
-    ":math:`flow(i,o,t)`", "variable", "Flow from node i (input) to node o (output) at timestep t"
+    ":math:`N`", "set", "| all nodes of the energy system.
+    | This comprises Sources, Sinks, Buses, Transformers,
+    | Generic Storages and optionally DSMSinks"
+    ":math:`T`", "set", "| all time steps within the optimization timeframe
+    | (and time increment, i.e. frequency) chosen"
+    ":math:`F`", "set", "| all flows of the energy system.
+    | A flow is a directed connection between node A and B
+    | and has a value (i.e. capacity flow) for every time step"
+    ":math:`PGF`", "set", "all flows imposing a limit to the positive gradient"
+    ":math:`NGF`", "set", "all flows imposing a limit to the negative gradient"
+    ":math:`B`", "set", "all buses (fictious busbars to connect capacity resp. energy flows)"
+    ":math:`S`", "set", "all storage units"
+    ":math:`I(n)`", "set", "all inputs for node n"
+    ":math:`O(n)`", "set", "all outputs for node n"
+    ":math:`f(i,o,t)`", "variable", "Flow from node i (input) to node o (output) at time step t"
+    ":math:`E(s, t)`", "variable", "energy currently stored in storage s"
+    ":math:`c_{var}(i, o, t)`", "parameter", "variable costs for flow from input i to output o at time step t"
+    ":math:`\tau(t)`", "parameter", "time increment of the model for time step t"
+    ":math:`\Delta P_{pos}(i, o, t)`", "parameter", "| maximum allowed positive gradient for flow from input i to output o
+    | at time step t (transition from t-1 to t)"
+    ":math:`\Delta P_{neg}(i, o, t)`", "parameter", "| maximum allowed negative gradient for flow from input i to output o
+    | at time step t (transition from t-1 to t)"
+    ":math:`P_{nom}(i, o)`", "parameter", "| installed capacity (all except RES outside Germany)
+    | or maximum achievable output value (RES outside Germany)"
+    ":math:`min(i, o, t)`", "parameter", "normalized minimum output for flow from input i to output o"
+    ":math:`max(i, o, t)`", "parameter", "normalized maximum output for flow from input i to output o"
+    ":math:`E_{s, nom}`", "parameter", "| nominal capacity of storage s (maximum achievable capacity
+    | based on historic utilization, not the installed one)"
+    ":math:`E_{min}(s, t)`", "parameter", "minimum allowed storage level for storage s"
+    ":math:`E_{max}(s, t)`", "parameter", "maximum allowed storage level for storage s"
+    ":math:`\beta(s, t)`", "parameter", "fraction of lost energy as share of :math:`E(s, t)`"
+    ":math:`\gamma(s, t)`", "parameter", "fixed loss of energy relative to :math:`E_{s, nom}` per time unit"
+    ":math:`\delta(s, t)`", "parameter", "absolute fixed loss of energy per time unit"
+    ":math:`\dot{E}_i(s, t)`", "parameter", "energy flowing into storage s at time step t"
+    ":math:`\dot{E}_o(s, t)`", "parameter", "energy extracted from storage s at time step t"
+    ":math:`\eta_i(s, t)`", "parameter", "conversion factor (i.e. efficiency) of storage s for storing energy"
+    ":math:`\eta_o(s, t)`", "parameter", "conversion factor (i.e. efficiency) of storage s for withdrawing stored energy"
+    ":math:`t_u`", "parameter", "time unit of losses :math:`\beta(t)`, :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
 
 
 Target function
 +++++++++++++++
 The target function is build together by the _objective_expression terms of all
-oemof.solph components used (`see the oemof.solph.models module <https://github.com/oemof/oemof-solph/blob/d7ca5aa440d4f8c0f88e464eed3678f6d08e1d14/src/oemof/solph/models.py>`_):
+oemof.solph components used (
+`see the oemof.solph.models module <https://github.com/oemof/oemof-solph/blob/dev/src/oemof/solph/models.py>`_):
 
 
 Variable costs for all flows (commodity / fuel, emissions and operation costs):
 
 .. math::
 
-    & \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t) \\
-    & \forall \space i \in INPUTS(n), \space o \in OUTPUTS(n), \\
-    & n \in \mathrm{BUSES}, \space t \in \mathrm{TIMESTEPS}
+    & \sum_{(i,o)} \sum_t f(i, o, t) \cdot c_{var}(i, o, t) \\
+    & \forall \space i \in I(n), \space o \in O(n), \\
+    & n \in \mathrm{B}, \space t \in \mathrm{T}
 
 
 Constraints of the core model
 +++++++++++++++++++++++++++++
+
 The following constraints apply to a model in its basic formulation (i.e.
 not including demand response and emissions limits):
 
@@ -275,11 +310,11 @@ not including demand response and emissions limits):
 
 .. math::
 
-    & \sum_{i \in INPUTS(n)} flow(i, n, t) \cdot \tau
-    = \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau \\
-    & \forall \space n \in \mathrm{BUSES}, \space t \in \mathrm{TIMESTEPS}
+    & \sum_{i \in I(n)} f(i, n, t) \cdot \tau(t)
+    = \sum_{o \in O(n)} f(n, o, t) \cdot \tau(t) \\
+    & \forall \space n \in \mathrm{B}, \space t \in \mathrm{T}
 
-with :math:`\tau` equalling to the time increment (defaults to 1 hour)
+with :math:`\tau(t)` equalling to the time increment (defaults to 1 hour)
 
 .. note::
 
@@ -291,30 +326,31 @@ with :math:`\tau` equalling to the time increment (defaults to 1 hour)
 
 .. math::
 
-    & flow(i, o, t) - flow(i, o, t-1) \leq positive\__gradient(i, o, t) \\
-    & \forall \space (i, o) \in \mathrm{POSITIVE\_GRADIENT\_FLOWS}, \space t \in \mathrm{TIMESTEPS}
-
-
-    & flow(i, o, t-1) - flow(i, o, t) \leq negative\__gradient(i, o, t) \\
-    & \forall \space (i, o) \in \mathrm{NEGATIVE\_GRADIENT\_FLOWS}, \space t \in \mathrm{TIMESTEPS}
+    & f(i, o, t) - f(i, o, t-1) \leq \Delta P_{pos}(i, o, t) \\
+    & \forall \space (i, o) \in \mathrm{PGF},
+    \space t \in \mathrm{T} \\
+    & \\
+    & f(i, o, t-1) - f(i, o, t) \leq \Delta P_{neg}(i, o, t) \\
+    & \forall \space (i, o) \in \mathrm{NGF},
+    \space t \in \mathrm{T}
 
 
 * minimum and maximum load requirements
 
-    & flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value(i, o) \\
-    & \forall \space (i, o) \in \mathrm{FLOWS}, \space t \in \mathrm{TIMESTEPS}
+    & f(i, o, t) \geq min(i, o, t) \cdot P_{nom}(i, o) \\
+    & \forall \space (i, o) \in \mathrm{F}, \space t \in \mathrm{T} \\
+    & \\
+    & f(i, o, t) \leq max(i, o, t) \cdot P_{nom}(i, o) \\
+    & \forall \space (i, o) \in \mathrm{F}, \space t \in \mathrm{T}
 
-    & flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value(i, o) \\
-    & \forall \space (i, o) \in \mathrm{FLOWS}, \space t \in \mathrm{TIMESTEPS}
-
-with :math:`nominal\_value(i, o)` equalling to the installed resp. maximum capacity,
+with :math:`P_{nom}(i, o)` equalling to the installed resp. maximum capacity,
 :math:`min(i, o, t)` as the normalized minimum flow value and :math:`max(i, o, t)`
 as the normalized maximum flow value.
 
 .. note::
 
-    Whereas the maximum value is fixed and set to 1 for all time steps, the minimum
-    value of some generator types may alter over time.
+    Whereas the maximum value is fixed and set to 1 for all units and time steps,
+    the minimum value of some generator types may alter over time.
     This is especially true for CHP and IPP plants, where a minimum load pattern
     is fed in in order to serve the heating or process steam demand.
 
@@ -325,73 +361,35 @@ as the normalized maximum flow value.
 
     .. math::
 
-        E(|T|) = &E(-1)
+        E(s, | \mathrm{T} |) = &E(s, -1)
 
     * Storage balance:
 
     .. math::
 
-        & E(t) = &E(t-1) \cdot
-        (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
-        & - \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)} \\
+        & E(s, t) = &E(s, t-1) \cdot (1 - \beta(s, t)) ^{\tau(t)/(t_u)} \\
+        & - \gamma(s, t)\cdot E_{s, nom} \cdot {\tau(t)/(t_u)} \\
         & - \delta(t) \cdot {\tau(t)/(t_u)} \\
-        & - \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t) \\
-        & + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t) \\
+        & - \frac{\dot{E}_o(s, t)}{\eta_o(s, t)} \cdot \tau(t) \\
+        & + \dot{E}_i(s, t) \cdot \eta_i(s, t) \cdot \tau(t) \\
         & \forall \space t in mathrm{TIMESTEPS}
 
     * Storage level limits:
 
     .. math::
 
-        & E_{min} \leq E(t) \leq E_{max} \\
+        & E_{s, min} \leq E(s, t) \leq E_{s, max} \\
         & \forall \space t in mathrm{TIMESTEPS}
 
 
+Constraints for core model extensions
++++++++++++++++++++++++++++++++++++++
 
-    =========================== ======================= =========
-    symbol                      explanation             attribute
-    =========================== ======================= =========
-    :math:`E(t)`                energy currently stored `storage_content`
-    :math:`E_{nom}`             nominal capacity of     `nominal_storage_capacity`
-                                the energy storage
-    :math:`c(-1)`               state before            `initial_storage_level`
-                                initial time step
-    :math:`c_{min}(t)`          minimum allowed storage `min_storage_level[t]`
-    :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
-    :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
-                                as share of
-                                :math:`E(t)`
-                                per time unit
-    :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
-                                relative to
-                                :math:`E_{nom}` per
-                                time unit
-    :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
-                                of energy per
-                                time unit
-    :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
-    :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
-    :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                when storing energy
-    :math:`\eta_o(t)`           conversion factor when  `outflow_conversion_factor[t]`
-                                (i.e. efficiency)
-                                taking stored energy
-    :math:`\tau(t)`             duration of time step
-    :math:`t_u`                 time unit of losses
-                                :math:`\beta(t)`,
-                                :math:`\gamma(t)`
-                                :math:`\delta(t)` and
-                                timeincrement
-                                :math:`\tau(t)`
-    =========================== ======================= =========
-
-## Constraints for core model extensions
 The following constraints are not part of the core model and were individually formulated though the emissions limit as well as the investment budget limit are available as predefined Pyomo constraints within `oemof.solph.constraints`.
 
 ### Emissions limit
 ```math
-\sum_{(i,o)} \sum_t flow(i, o, t) \cdot \tau \cdot emission\_factor(i, o) \leq emission\_limit
+\sum_{(i,o)} \sum_t f(i, o, t) \cdot \tau(t) \cdot emission\_factor(i, o) \leq emission\_limit
 ```
 
 ### Investment budget limit
