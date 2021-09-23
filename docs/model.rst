@@ -236,6 +236,190 @@ All constraints formulations can be found in the
 We'll provide a complete mathematical description for the parts we
 used here soon.
 
+Sets and variables
+++++++++++++++++++
+
+.. csv-table::
+    :header: **name**, **type**, **description**
+
+    ":math:`NODES`", "set", "all nodes of the energy system. This comprises (among others) Sources, Sinks, Buses, Transformers and Generic Storages"
+    ":math:`TIMESTEPS`", "set", "all timesteps within the optimization timeframe (and time increment, i.e. frequency) chosen"
+    ":math:`FLOWS`", "set", "all flows of the energy system. A flow is a directed connection between node A and B and has a value (i.e. capacity flow) for every timestep"
+    ":math:`POSITIVE\_GRADIENT\_FLOWS`", "set", "all flows imposing a limit to the positive gradient"
+    ":math:`NEGATIVE\_GRADIENT\_FLOWS`", "set", "all flows imposing a limit to the negative gradient"
+    ":math:`STORAGES`", "set", "set of all storage units"
+    ":math:`flow(i,o,t)`", "variable", "Flow from node i (input) to node o (output) at timestep t"
+
+
+Target function
++++++++++++++++
+The target function is build together by the _objective_expression terms of all
+oemof.solph components used (`see the oemof.solph.models module <https://github.com/oemof/oemof-solph/blob/d7ca5aa440d4f8c0f88e464eed3678f6d08e1d14/src/oemof/solph/models.py>`_):
+
+
+Variable costs for all flows (commodity / fuel, emissions and operation costs):
+
+.. math::
+
+    & \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t) \\
+    & \forall \space i \in INPUTS(n), \space o \in OUTPUTS(n), \\
+    & n \in \mathrm{BUSES}, \space t \in \mathrm{TIMESTEPS}
+
+
+Constraints of the core model
++++++++++++++++++++++++++++++
+The following constraints apply to a model in its basic formulation (i.e.
+not including demand response and emissions limits):
+
+* flow balance(s):
+
+.. math::
+
+    & \sum_{i \in INPUTS(n)} flow(i, n, t) \cdot \tau
+    = \sum_{o \in OUTPUTS(n)} flow(n, o, t) \cdot \tau \\
+    & \forall \space n \in \mathrm{BUSES}, \space t \in \mathrm{TIMESTEPS}
+
+with :math:`\tau` equalling to the time increment (defaults to 1 hour)
+
+.. note::
+
+    This is equal to an overall energy balance requirement, but build up
+    decentrally from a balancing requirement of every bus, thus allowing for
+    a flexible expansion of the system size.
+
+* gradient limits for generators
+
+.. math::
+
+    & flow(i, o, t) - flow(i, o, t-1) \leq positive\__gradient(i, o, t) \\
+    & \forall \space (i, o) \in \mathrm{POSITIVE\_GRADIENT\_FLOWS}, \space t \in \mathrm{TIMESTEPS}
+
+
+    & flow(i, o, t-1) - flow(i, o, t) \leq negative\__gradient(i, o, t) \\
+    & \forall \space (i, o) \in \mathrm{NEGATIVE\_GRADIENT\_FLOWS}, \space t \in \mathrm{TIMESTEPS}
+
+
+* minimum and maximum load requirements
+
+    & flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value(i, o) \\
+    & \forall \space (i, o) \in \mathrm{FLOWS}, \space t \in \mathrm{TIMESTEPS}
+
+    & flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value(i, o) \\
+    & \forall \space (i, o) \in \mathrm{FLOWS}, \space t \in \mathrm{TIMESTEPS}
+
+with :math:`nominal\_value(i, o)` equalling to the installed resp. maximum capacity,
+:math:`min(i, o, t)` as the normalized minimum flow value and :math:`max(i, o, t)`
+as the normalized maximum flow value.
+
+.. note::
+
+    Whereas the maximum value is fixed and set to 1 for all time steps, the minimum
+    value of some generator types may alter over time.
+    This is especially true for CHP and IPP plants, where a minimum load pattern
+    is fed in in order to serve the heating or process steam demand.
+
+* storages
+
+    * Storage roundtrip:
+      Set storage_content of last time step to the one at t=0
+
+    .. math::
+
+        E(|T|) = &E(-1)
+
+    * Storage balance:
+
+    .. math::
+
+        & E(t) = &E(t-1) \cdot
+        (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
+        & - \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)} \\
+        & - \delta(t) \cdot {\tau(t)/(t_u)} \\
+        & - \frac{\dot{E}_o(t)}{\eta_o(t)} \cdot \tau(t) \\
+        & + \dot{E}_i(t) \cdot \eta_i(t) \cdot \tau(t) \\
+        & \forall \space t in mathrm{TIMESTEPS}
+
+    * Storage level limits:
+
+    .. math::
+
+        & E_{min} \leq E(t) \leq E_{max} \\
+        & \forall \space t in mathrm{TIMESTEPS}
+
+
+
+    =========================== ======================= =========
+    symbol                      explanation             attribute
+    =========================== ======================= =========
+    :math:`E(t)`                energy currently stored `storage_content`
+    :math:`E_{nom}`             nominal capacity of     `nominal_storage_capacity`
+                                the energy storage
+    :math:`c(-1)`               state before            `initial_storage_level`
+                                initial time step
+    :math:`c_{min}(t)`          minimum allowed storage `min_storage_level[t]`
+    :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
+    :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
+                                as share of
+                                :math:`E(t)`
+                                per time unit
+    :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
+                                relative to
+                                :math:`E_{nom}` per
+                                time unit
+    :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
+                                of energy per
+                                time unit
+    :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
+    :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
+    :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                when storing energy
+    :math:`\eta_o(t)`           conversion factor when  `outflow_conversion_factor[t]`
+                                (i.e. efficiency)
+                                taking stored energy
+    :math:`\tau(t)`             duration of time step
+    :math:`t_u`                 time unit of losses
+                                :math:`\beta(t)`,
+                                :math:`\gamma(t)`
+                                :math:`\delta(t)` and
+                                timeincrement
+                                :math:`\tau(t)`
+    =========================== ======================= =========
+
+## Constraints for core model extensions
+The following constraints are not part of the core model and were individually formulated though the emissions limit as well as the investment budget limit are available as predefined Pyomo constraints within `oemof.solph.constraints`.
+
+### Emissions limit
+```math
+\sum_{(i,o)} \sum_t flow(i, o, t) \cdot \tau \cdot emission\_factor(i, o) \leq emission\_limit
+```
+
+### Investment budget limit
+```math
+\sum_{(i,o)} invest(i, o) \cdot ep\_cost(i, o) \leq investment\_budget\_limit
+```
+
+### Demand response constraints
+The constraints used are taken from Zerrahn and Schill (2015, pp. 842-843), Gils (2015, pp. 67-70), Steurer (2017, pp. 80-82) and Ladwig (2018, pp. 90-93) respectively.
+*See page [Modelling of demand response](modelling-of-demand-response) for details.*
+
+## Power price calculation
+In the LP dispatch model, the German day ahead power price is calculated. For this purpose, the **dual values of the bus balance constraint of the German electricity bus** are evaluated. These due to the underlying merit order rationale can be evaluated as the marginal costs of the last power plant producing.
+
+# Bibliography
+Gils, Hans Christian (2015): Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage. Dissertation. Universität Stuttgart, Stuttgart.
+
+Ladwig, Theresa (2018): Demand Side Management in Deutschland zur Systemintegration erneuerbarer Energien. Dissertation. Technische Universität Dresden, Dresden.
+
+oemof (2019a): oemof documentation, oemof-solph, https://oemof.readthedocs.io/en/stable/oemof_solph.html, last accessed 04.01.2019.
+
+oemof (2019b): oemof API, oemof.solph package, https://oemof.readthedocs.io/en/stable/api/oemof.solph.html, last accessed 04.01.2019.
+
+Steurer, Martin (2017): Analyse von Demand Side Integration im Hinblick auf eine effiziente und umweltfreundliche Energieversorgung. Dissertation. Universität Stuttgart, Stuttgart. Institut für Energiewirtschaft und Rationelle Energieanwendung (IER).
+
+Zerrahn, Alexander; Schill, Wolf-Peter (2015): On the representation of demand-side man-agement in power system models. In: Energy 84, S. 840–845. DOI: 10.1016/j.energy.2015.03.037.
+
+
 References
 ----------
 Büllesbach, Fabian (2018): Simulation von Stromspeichertechnologien
