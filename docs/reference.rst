@@ -36,4 +36,4 @@ Modules
   model, but facilitating its setup and parameterization.
 
 For an in-depth documentation of all modules, functions, classes and methods,
-see the :doc:`api`.
+see the :doc:`api/api`.
