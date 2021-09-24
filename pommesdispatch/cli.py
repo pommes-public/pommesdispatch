@@ -46,3 +46,7 @@ def run_pommes_dispatch():
         create_default_config()
         return
     run_dispatch_model(args.file)
+
+
+if __name__ == "__main__":
+    run_pommes_dispatch()

@@ -49,9 +49,9 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
+import argparse
 import logging
 import time
-import argparse
 
 import pandas as pd
 import yaml
@@ -59,7 +59,6 @@ from oemof.solph import processing
 from oemof.solph import views
 from yaml.loader import SafeLoader
 
-from pommesdispatch import cli
 from pommesdispatch.model_funcs import model_control
 
 
@@ -188,7 +187,3 @@ def add_args():
                         help="Automatically generate default config")
     args = parser.parse_args()
     return args
-
-
-if __name__ == "__main__":
-    cli.run_pommes_dispatch()
