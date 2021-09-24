@@ -141,7 +141,7 @@ The following countries and bidding zones are considered by default:
     "AT", "Austria", "AT"
     "BE", "Belgium", "BE"
     "CH", "Switzerland", "CH"
-    "CZ", "Czech Republic", "CZ",
+    "CZ", "Czech Republic", "CZ"
     "DE", "Germany", "DE-LU"
     "DK", "Denmark", "DK1, DK2"
     "FR", "France", "FR"
