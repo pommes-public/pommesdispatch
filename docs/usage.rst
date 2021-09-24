@@ -28,7 +28,7 @@ To install it, please use the following command
 
 If you want to contribute as a developer, you fist have to
 `fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_
-it and then clone the environment, in order to copy the files locally by typing
+it and then clone the repository, in order to copy the files locally by typing
 
 .. code::
 
