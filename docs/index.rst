@@ -20,7 +20,7 @@ The investment model is described
    :caption: Contents:
 
    usage
-   model
+   model/model
    reference
    api/api
    changelog

@@ -91,6 +91,8 @@ of .csv files with the oemof.solph components names in their file name.
 Whe using ``pommesdata``, feel free to adjust assumptions on
 the power plant park, according to your needs.
 
+.. _config:
+
 Configuring the model
 +++++++++++++++++++++
 
