@@ -79,6 +79,28 @@ In order to solve a `pommesdispatch` model instance, you need a solver installed
 Every kind of contribution or feedback is warmly welcome.<br>
 We use the GitHub issue management as well as pull requests for collaboration. We try to stick to the PEP8 coding standards.
 
+The following people have contributed in the following manner to `pommesdispatch`:
+
+| Name | Contribution | Status |
+| ---- | ---- | ---- |
+| Johannes Kochems | major development<br>conzeptualization, core functionality (esp. dispatch, power prices, rolling horizon modeling), architecture, publishing process | coordinator & maintainer,<br>developer & corresponding author |
+| Yannick Werner | major development<br>conzeptualization, core functionality (esp. exchange, RES, CHP modeling), interface to pommesdata  | developer & corresponding author |
+| Johannes Giehl | development<br>early-stage core functionality | developer |
+| Benjamin Grosse | development<br>support for conzeptualization, early-stage contributions at the interface to pommesdata | developer |
+| Sophie Westphal | development<br>early-stage contributions at the interface to pommesdata | former developer |
+| Flora von Mikulicz-Radecki | testing<br>early-stage comprehensive testing | former tester (student assistent) |
+| Carla Spiller | development<br>early-stage rolling horizon and cross-border exchange integration | former developer (student assistent) |
+| Fabian Büllesbach | development<br>early-stage rolling horizon implementation | former developer (master's student) |
+| Timona Ghosh | development<br>early-stage cross-border exchange implementation | former developer (master's student) |
+| Paul Verwiebe | support<br>support of early-stage core functionality development | former supporter (research associate) |
+| Leticia Encinas Rosa | support<br>support of early-stage core functionality development | former supporter (research associate) |
+| Joachim Müller-Kirchenbauer | support<br>support for early-stage conzeptualization, funding | supporter (university professor) |
+
+*Note: Not every single contribution is reflected in the current version of
+`pommesdispatch`. This is especially true for those marked as early-stage 
+contributions. Dedicated contributions to `pommesdata` and `pommesinvest` are not included
+in the list, but listed individually for these projects.*
+
 ## Citing
 A publication using and introducing `pommesdispatch` is currently in preparation.
 
