@@ -5,7 +5,7 @@ pommesdispatch
 A bottom-up fundamental power market model for the German electricity sector
 """
 
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 __author__ = ("Johannes Kochems, Yannick Werner, "
               "Johannes Giehl, Benjamin Grosse")
 __credits__ = ("Sophie Westphal, Flora von Mikulicz-Radecki, Carla Spiller, "
