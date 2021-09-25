@@ -31,7 +31,7 @@ build-backend = "poetry.core.masonry.api"
 run_pommes_dispatch = "pommesdispatch.cli:run_pommes_dispatch"
 
 [tool.poetry.extras]
-test = ["pytest", "sphinx", "sphinx_rtd_theme"]
+dev = ["pytest", "sphinx", "sphinx_rtd_theme"]
 
 [tool.poetry.urls]
 "Changelog" = "https://pommesdispatch.readthedocs.io/en/latest/changelog.html"
