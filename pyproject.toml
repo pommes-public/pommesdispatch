@@ -1,12 +1,25 @@
 [tool.poetry]
 name = "pommesdispatch"
-version = "0.0.2"
-description = ""
-authors = ["Johannes Kochems <jokochems@web.de>"]
+version = "0.1.0"
+description = "A bottom-up fundamental power market model for the German electricity sector"
+authors = ["Johannes Kochems <jokochems@web.de>", "Yannick Werner <>", "Johannes Giehl <>", "Benjamin Grosse <>"]
+maintainers = ["Johannes Kochems <jokochems@web.de>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/pommes-public/pommesdispatch/"
+documentation = "https://pommesdispatch.readthedocs.io/"
+keywords = ["power market", "fundamental model", "dispatch", "power price",
+            "oemof.solph"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable"
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+numpy = "*"
+pandas = "*"
+"oemof.solph" = "0.4.4"
+pyyaml = "*"
 
 [tool.poetry.dev-dependencies]
 
@@ -16,3 +29,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 run_pommes_dispatch = "pommesdispatch.cli:run_pommes_dispatch"
+
+[tool.poetry.extras]
+dev = ["pytest", "sphinx", "sphinx_rtd_theme"]
+
+[tool.poetry.urls]
+"Changelog" = "https://pommesdispatch.readthedocs.io/en/latest/changelog.html"
+"Issue Tracker" = "https://github.com/pommes-public/pommesdispatch/issues"

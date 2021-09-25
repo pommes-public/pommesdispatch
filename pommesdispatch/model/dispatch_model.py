@@ -49,9 +49,9 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
+import argparse
 import logging
 import time
-import argparse
 
 import pandas as pd
 import yaml
@@ -59,13 +59,12 @@ from oemof.solph import processing
 from oemof.solph import views
 from yaml.loader import SafeLoader
 
-from pommesdispatch import cli
 from pommesdispatch.model_funcs import model_control
 
 
-def run_dispatch_model(config_file="../../config.yml"):
+def run_dispatch_model(config_file="./config.yml"):
     """
-    Run a pommes-dispatch model.
+    Run a pommesdispatch model.
 
     Read in config information from a yaml file, initialize and run a
     dispatch model and process results.
@@ -74,7 +73,7 @@ def run_dispatch_model(config_file="../../config.yml"):
     ----------
     config_file: str
         A file holding the necessary configuration information for
-        a pommes-dispatch model
+        a pommesdispatch model
     """
     # ---- MODEL CONFIGURATION ----
 
@@ -181,14 +180,10 @@ def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", required=False,
-                        default="../../config.yml",
+                        default="./config.yml",
                         help="Specify input config file")
     parser.add_argument("--init", required=False,
                         action="store_true",
                         help="Automatically generate default config")
     args = parser.parse_args()
     return args
-
-
-if __name__ == "__main__":
-    cli.run_pommes_dispatch()

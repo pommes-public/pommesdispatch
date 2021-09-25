@@ -1,39 +1,7 @@
-Model description
-=================
-
-.. contents::
-
-Feel free to directly jump to the section of interest.
+.. _background:
 
 Background
 ----------
-
-Overview
-++++++++
-The **dispatch variant** of the power market model *POMMES* ``pommes-dispatch``
-enables the user to simulate the **dispatch of backup power plants,
-storages as well as demand response units for the Federal Republic of Germany**
-for an arbitrary year or timeframe between 2017 and 2030.
-The dispatch of renewable power plants is exogenously determined
-by normalized infeed time series which are multiplied with capacity values
-(maximum capacities for foreign countries, installed ones for Germany).
-The models' overall goal is to minimize power system costs
-occurring from wholesale markets, whereby no network constraints
-are considered except for the existing bidding zone configuration
-used for modeling electricity exchange.
-Thus, the model purpose is to simulate **dispatch decisions**
-and the resulting **day-ahed market prices**.
-
-You can find the following information on this page:
-
-- :ref:`economics`: Some basics of power wholesale markets design and how our model
-  fits in there.
-- :ref:`maths`: A brief mathematical characterisation of our linear programming
-  model
-- :ref:`techs`: Information on the main python packages used, such as ``oemof.solph``.
-- :ref:`characteristics`: An in-depth characterization of our model, following
-  the proposed scheme from Hall and Buckley (2016).
-- :ref:`formulas`: All (in)equations of the model.
 
 .. _economics:
 
@@ -86,6 +54,102 @@ that are empirically derived to serve heat demands)
 or adjusting parameter values (such as the overall
 capacities of coal power plants that has not been fully made use of).
 
+.. _granularity:
+
+Model granularity
++++++++++++++++++
+
+* Technical granularity:
+
+For Germany, every **conventional block or power plant** is modelled individually,
+whereas **storages** are aggregated to one cluster per technology.
+**Renewable energy sources (RES)** units are clustered based on
+their value applied from the market premium model leading to
+roughly 20 units per technology as a default. For the neigbouring countries
+which have interconnections with Germany, we consider one cluster per technology.
+
+The following fuels and technologies are considered by default:
+
+.. csv-table:: Renewable technologies
+    :header: "fuel", "technologies"
+
+    "Solar", "solar PV plants"
+    "Wind onshore", "wind onshore plants"
+    "Wind offshore", "wind offshore plants"
+    "Run of River", "run of river plants"
+    "Biomass", "solid biomass ST, biogas GT, biogas ST, biogas M"
+
+.. csv-table:: Conventional / backup technologies
+    :header: "fuel", "technologies"
+
+    "Uranium", "Nuclear ST"
+    "Lignite", "Lignite ST"
+    "Hard coal", "Hard coal ST"
+    "Natural gas", "Natural gas CC, natural gas GT, natural gas M"
+    "Oil", "Oil CC, oil GT"
+    "waste / mixed / other fossils", "other CC, other GT, other M"
+
+All conventionals and backup plants as well as biomass plants may optionally
+be combined heat and power (CHP) or industrial power plant (IPP). This
+alters their minimum output profile.
+
+.. csv-table:: Storage technologies
+    :header: "energy source", "technologies"
+
+    "electricity", "pumped hydro energy storage"
+    "electricity", "reservoir energy storage"
+
+Battery energy storage systems (BESS) are not yet considered since these are
+mostly used for own consumption or provision of ancillary services and
+not so much for arbitrage trading (as of now).
+Since net network extraction as well as net feedin of
+PV power plants are modelled, the BESS used for own consumption
+in combination with PV are already taken care of.
+Since the usage of BESS in the DA market is limited, their price effect is
+(assumed to be) not very big. What is more, is that remaining system
+is already parameterized to be quite flexible.
+
+*Abbreviations:*
+
+- BESS: battery energy storage systems
+- CC: combined cycle (gas turbine)
+- CHP: combined heat and power
+- GT: gas turbine
+- IPP: industry power plants
+- M: combustion engine (German: "Motor")
+- PV: photovoltaics
+- RES: renewable energy sources
+- ST: steam turbine
+
+* Temporal granularity:
+
+The default model resolution is **hourly** due to the resolution of the given
+time series inputs, either as an integral optimization run for all hours of
+a year (or another simulation time frame) or using a :ref:`rolling-horizon`.
+
+* Spatial granularity:
+
+There is one spatial node **per bidding zone for Germany and its 10 electric neighbours**,
+thus representing real market area boundaries and processes without taking network congestions
+within bidding zones into account.
+
+The following countries and bidding zones are considered by default:
+
+.. csv-table::
+    :header: "country code", "country", "bidding zone(s)"
+
+    "AT", "Austria", "AT"
+    "BE", "Belgium", "BE"
+    "CH", "Switzerland", "CH"
+    "CZ", "Czech Republic", "CZ"
+    "DE", "Germany", "DE-LU"
+    "DK", "Denmark", "DK1, DK2"
+    "FR", "France", "FR"
+    "NL", "Netherlands", "NL"
+    "NO", "Norway", "NO1, NO2, NO3, NO4, NO5"
+    "PL", "Poland", "PL"
+    "SE", "Sweden", "SE1, SE2, SE3, SE4"
+
 .. _maths:
 
 Mathematical background
@@ -112,8 +176,10 @@ Our model has a block-angular structure since the constraint formulations and
 objective terms are encapsulated in the components definitions of oemof.solph.
 Thus, in general decomposition techniques could be applied to speed up computation.
 
-The model formulation ends in a sparse matrix. The model statistics are
-summarized in the table below (48 hours simulation time frame):
+The model formulation ends in a sparse matrix. The complexity of the model is
+determined by the :ref:`granularity` which may be altered. The model statistics
+for the default granularity used are summarized in the table below
+(48 hours simulation time frame):
 
 ======== =======
 element  No.
@@ -133,7 +199,7 @@ with the individual components.
 
 Technical background
 ++++++++++++++++++++
-``pommes-dispatch`` builds on the framework `oemof.solph <https://github.com/oemof/oemof-solph>`_
+``pommesdispatch`` builds on the framework `oemof.solph <https://github.com/oemof/oemof-solph>`_
 which allows to model energy systems in a graph-based representation
 with the underlying mathematical constraints and objective function terms
 implemented in `pyomo <https://pyomo.readthedocs.io/en/stable/>`_.
@@ -165,87 +231,29 @@ A rolling horizon approach can be used for multiple use cases, e.g.
 - to reduce model complexity and ensure model solvability.
 
 The idea is to slice your overall optimization time frame
-into shorter horizons and thus loose the perfect assumption as well as the
-global optimum over the entire simulation time frame. In order to prevent
-storage units from being emptied at the end of each time slice, an overlap
-should be defined. I.e., only parts of the next time slice are used while the
-overlap is dropped. The following figure explains the basic idea.
+into shorter horizons and thus loose the perfect foresight assumption
+as well as the global optimum over the entire simulation time frame.
+In order to prevent storage units from being emptied at the end of each
+time slice, an overlap should be defined. I.e., only parts of the next
+time slice are used while the overlap is dropped.
 
-.. image:: figs/rolling_horizon.png
+The following figure explains the basic idea.
 
-Image based on Büllesbach (2018), p. 62 and Marquant et al. (2015), p. 2141
+.. image:: ../figs/rolling_horizon.png
+
+*Image based on Büllesbach (2018), p. 62 and Marquant et al. (2015), p. 2141*
 
 The model results are then obtained by concatenating the results for the individual
 time slices. There is a rolling horizon implementation integrated as an
-alternative to a perfect foresight simulation in ``pommes-dispatch``, see
+alternative to a perfect foresight simulation in ``pommesdispatch``, see
 :ref:`using`.
 
-.. _characteristics:
-
-Model categorization
---------------------
-The model in brief can be characterized as a **bottom-up electricity market optimization model**.
-In the following, a model characterization based on Hall and Buckley (2016) is introduced:
-
-Model purpose and structure
-+++++++++++++++++++++++++++
-
-.. csv-table::
-    :widths: 30 70
-    :header: "**criterion**", "**manifestation**"
-
-    "Purpose of the model", "| General: scenario analyses (forecasting)
-    | Specific: power supply and power prices"
-    "Structure of the model", "| Demand: exogenously (except for demand response)
-    | Supply: RES exogenously; All other power sources endogenously optimized"
-    "Geographical coverage", "Na tional: Federal Republic of Germany + imports / exports from / to adjacent electric neighbors"
-    "Sectoral coverage", "Power market (effectively day-ahead) from a macroeconomic point of view (no bidding simulation)"
-    "Time horizon", "Short-term (<= 1 year)"
-    "Time step", "Hourly"
-
-Technological detail
-++++++++++++++++++++
-
-.. csv-table::
-    :widths: 30 70
-    :header: "**criterion**", "**manifestation**"
-
-    "Renewable Techology inclusion", "Hydro (run of river), Solar, Wind, Biomass"
-    "Storage Technology Inclusion ", "Pumped-hydro energy storage, Reservoir energy storage, Battery energy storage"
-    "Demand Characteristic Inclusion", "Aggregated demand for Industry, Residential Sector, Commercial Sector and Transportation"
-    "Cost Inclusion", "Fuel prices, Operations and Maintenance Costs, CO2-costs"
-
-Mathematical description
-++++++++++++++++++++++++
-
-.. csv-table::
-    :widths: 30 70
-    :header: "**criterion**", "**manifestation**"
-
-    "Analytical Approach", "Bottom-Up (fundamental)"
-    "Underlying Methodology", "Optimization / Spreadsheet / Toolbox"
-    "Mathematical Approach", "Linear programming"
-    "Data Requirements", "Quantitative, Monetary, Disaggregated by technologies and bidding zones"
-
-.. _formulas:
-
-Mathematical formulation
-------------------------
-All constraints formulations can be found in the
-`oemof.solph documentation <https://oemof-solph.readthedocs.io/en/latest/reference/oemof.solph.html>`_.
-We'll provide a complete mathematical description for the parts we
-used here soon.
-
 References
-----------
+++++++++++
 Büllesbach, Fabian (2018): Simulation von Stromspeichertechnologien
 in regionaler und technischer Differenzierung.
 Freie wissenschaftliche Arbeit zur Erlangung des Grades eines
 Master of Science am Fachgebiet Energie- und Ressourcenmanagement der TU Berlin.
-
-Hall, Lisa M.H.; Buckley, Alastair R. (2016):
-A review of energy systems models in the UK. Prevalent usage and categorisation.
-In: Applied Energy 169, S. 607–628. DOI: 10.1016/j.apenergy.2016.02.044.
 
 Marquant, Julien F. ; Evins, Ralph and Carmeliet, Jan (2015): Reducing
 Computation Time with a Rolling Horizon Approach Applied to a MILP Formulation

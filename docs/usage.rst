@@ -6,27 +6,33 @@ Installation and User's guide
 
 Installation
 ------------
-To set up ``pommes-dispatch``, you have to set up a virtual environment
+To set up ``pommesdispatch``, you have to set up a virtual environment
 (e.g. using conda) or add the required packages to your python installation.
+This is taken care of by the pip installation. When you clone the environment,
+you have to install the packages for the requirements file (see :ref:`setup`).
+
 Additionally, you have to install a solver in order to solve
-the mathematical optimization problem.
+the mathematical optimization problem (see :ref:`solver`).
+
+.. _setup:
 
 Setting up the environment
 ++++++++++++++++++++++++++
-``pommes-dispatch`` is (to be) hosted on `PyPI <https://pypi.org/>`_.
+``pommesdispatch`` is hosted on `PyPI <https://pypi.org/>`_.
 To install it, please use the following command
 
 .. code::
 
-    pip install pommes-dispatch
+    pip install pommesdispatch
 
 
-For now, you still have to clone the environment and
-copy the files locally by typing
+If you want to contribute as a developer, you fist have to
+`fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_
+it and then clone the repository, in order to copy the files locally by typing
 
 .. code::
 
-    git clone https://github.com/pommes-public/pommes-dispatch.git
+    git clone https://github.com/your-github-username/pommesdispatch.git
 
 | After cloning the repository, you have to install the required dependencies.
  Make sure you have conda installed as a package manager.
@@ -45,15 +51,17 @@ Activate your environment by typing
 
     conda activate pommes_dispatch
 
+.. _solver:
+
 Installing a solver
 +++++++++++++++++++
-In order to solve a ``pommes-dispatch`` model instance,
+In order to solve a ``pommesdispatch`` model instance,
 you need a solver installed.
 Please see
 `oemof.solph's information on solvers <https://github.com/oemof/oemof-solph#installing-a-solver>`_.
-As a default, gurobi is used for ``pommes-dispatch`` models.
+As a default, gurobi is used for ``pommesdispatch`` models.
 It is a commercial solver, but provides academic licenses, though,
-if this applies to you. Elsewhise, we recommend to use CBC
+if this applies to you. Elsewise, we recommend to use CBC
 as the solver oemof recommends. To test your solver
 and oemof.solph installation,
 again see information from
@@ -61,31 +69,46 @@ again see information from
 
 .. _using:
 
-Using pommes-dispatch
+Using pommesdispatch
 ---------------------
 
 Providing input data
 ++++++++++++++++++++
 
-We provide input data for simulating the years 2017 and 2030 along with the
-code. You can use this to simulate these years.
+You can obtain pommes input data either by
 
-If you are interested in other years or want to change the power plant park,
-feel free to do so by adjusting and running the ``pommes-data`` data
-preparation routine. ``pommes-data`` can be found
-`in this repository <https://github.com/pommes-public/pommes-data>`_
+* extracting `this .zip file <https://myfantasyzipfile.com>`_ which has
+  been created using ``pommesdata`` or
+* from running ``pommesdata`` which you can find
+  `in this repository <https://github.com/pommes-public/pommesdata>`_
+
+``pommesdata`` provides input data for simulating years between 2017 and 2030.
+Once you have run it, you have to copy the output of ``pommesdata`` which
+is stored in the folder "prepared_data"
+to the "inputs" folder of ``pommesdispatch``. You should now have a bunch
+of .csv files with the oemof.solph components names in their file name.
+
+Whe using ``pommesdata``, feel free to adjust assumptions on
+the power plant park, according to your needs.
+
+.. _config:
 
 Configuring the model
 +++++++++++++++++++++
 
-Open the file ``config.yml`` that is stored in the repository or create
-a config file yourself. If you want to use the default configuration
-and simulate 2017, you have to ensure that you have cloned the repository and
-the config file available. If this holds for you, you can skip this section
+We provide a default model configuration coming with the installation.
+To make use of this, you have to run a console script by typing
+
+.. code::
+
+    run_pommes_dispatch --init
+
+Once you have created the config file, you can adjust it to your needs.
+If you do not wish to do so and use the default, you can skip this section
 and move right to the next one, :ref:`running`.
 
 You'll find dictionary-alike hierarchical entries in the ``config.yml``
-file for controlling the simulation in it.
+file which control the simulation.
 In the first section, you can change general model settings, e.g. if
 you want to use another solver or if you want to run a rolling horizon
 model. You can play around with the boolean values, but we recommend to
@@ -95,7 +118,7 @@ keep the parameters for storing result files, i.e.
 Pay attention to the allowed values for the string values:
 
 - ``countries``: The maximum of countries allowed is the default. You can just
-  remove if you wish to have a smaller coverage
+  remove countries if you wish to have a smaller coverage
 - ``fuel_cost_pathway``: allowed values are *lower*, *middle* and *upper* for
   a rather low, middle or rather high future fuel costs increase
 - ``emissions_pathway``: allowed values are *BAU*, *80_percent_linear*,
@@ -107,7 +130,7 @@ Pay attention to the allowed values for the string values:
 - ``demand_response_approach``: allowed values are *DLR*, *DIW* and *oemof*.
   These describe different options for demand response modeling implemented in
   oemof.solph, see `this oemof.solph module <https://github.com/oemof/oemof-solph/blob/dev/src/oemof/solph/custom/sink_dsm.py>`_
-  and a `comparison from the INREC 2020 <https://github.com/jokochems/DR_modeling_oemof/blob/master/Kochems_Demand_Response_INREC.pdf>`_
+  and an `comparison of approaches from the INREC 2020 <https://github.com/jokochems/DR_modeling_oemof/blob/master/Kochems_Demand_Response_INREC.pdf>`_
   for details.
 
 .. code:: yaml
@@ -151,14 +174,15 @@ find data for 2017 and 2030.
         freq: "60min"
 
 In the third section, you specify where your inputs and outputs are stored.
-You can use the default values here.
+You can use the default values here. Please ensure that you have provided
+the necessary input data.
 
 .. code:: yaml
 
     # 3) Set input and output data paths
     input_output_parameters:
-        path_folder_input: "../../../inputs/"
-        path_folder_output: "../../../results/"
+        path_folder_input: "./inputs/"
+        path_folder_output: "./results/"
 
 The last section is only applicable if you want to run a rolling
 horizon simulation, see :ref:`rolling-horizon` for background information
@@ -183,20 +207,27 @@ Running the model
 +++++++++++++++++
 Once you have configured your model, running it is fairly simple.
 
-Just either run ``pommes_dispatch.py`` in your python editor of choice
-(we recommend `PyCharm <https://www.jetbrains.com/pycharm/>`_) or
-run the script ``run_pommes_dispatch`` in a command line shell.
-To do so, just type
+You can directly run the console script ``run_pommes_dispatch``
+in a command line shell by typing
 
 .. code::
 
     run_pommes_dispatch <-f "path-to-your-config-file.yml">
 
-You may leave out the specification for the YAML file and use the default
-value if you have cloned the repository. This will lead to using the
-``config.yml`` file stored at the top level of the repository.
-You'll see some logging information on the console when your run the model.
+You may leave out the specification for the YAML file.
+This will lead to using the ``config.yml`` file you have created when
+initializing the config.
 
+Whe you run the script, you'll see
+some logging information on the console when your run the model.
 Once the model run is finished, you can find, inspect, analyze and plot your
 results in the results folder (or the folder you have specified to store
 model results).
+
+Another way is to run ``pommes_dispatch.py`` in your python editor of choice
+(we recommend `PyCharm <https://www.jetbrains.com/pycharm/>`_).
+In this case, you have to specify the path to your config file as a run
+argument ``-f ../../config.yml``.
+Also, in the config file, you have to specify the relative
+relations to the input and output folder, so you probably have to replace
+``./inputs`` with ``../../inputs`` and ``./outputs`` with ``../../ouputs``.
