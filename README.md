@@ -46,16 +46,24 @@ An extensive **[documentation of pommesdispatch]()** can be found on readthedocs
 To set up `pommesdispatch`, you have to set up a virtual environment (e.g. using conda) or add the required packages to your python installation. Additionally, you have to install a solver in order to solve the mathematical optimization problem.
 
 ### Setting up the environment
-`pommesdispatch` is (to be) hosted on [PyPI](). To install it, please use the following command
+`pommesdispatch` is hosted on [PyPI](). To install it, please use the following command
 ```
 pip install pommesdispatch
 ```
 
-For now, you still have to clone the environment and copy the files locally by typing
+If you want to contribute as a developer, you fist have to
+[fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo>)
+it and then clone the repository, in order to copy the files locally by typing
 ```
-git clone https://github.com/pommes-public/pommesdispatch.git
+git clone https://github.com/your-github-username/pommesdispatch.git
 ```
-After cloning the repository, you have to install the required dependencies. Make sure you have conda installed as a package manager. If not, you can download it [here](https://www.anaconda.com/). Open a command shell and navigate to the folder where you copied the environment to. Use the following command to install dependencies
+After cloning the repository, you have to install the required dependencies.
+Make sure you have conda installed as a package manager.
+If not, you can download it [here](https://www.anaconda.com/).
+Open a command shell and navigate to the folder
+where you copied the environment to.
+
+Use the following command to install dependencies
 ```
 conda env create -f environment.yml
 ```
@@ -77,7 +85,7 @@ A publication using and introducing `pommesdispatch` is currently in preparation
 If you are using `pommesdispatch` for your own analyses, please cite as:<br>
 *Kochems, J.; Werner, Y.; Giehl, J.; Grosse, B. et al. (2021): pommesdispatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdispatch, accessed YYYY-MM-DD.*
 
-We furthermore recommend to name the version tag or the commit hash used for the sake of transparancy and reproducibility.
+We furthermore recommend to name the version tag or the commit hash used for the sake of transparency and reproducibility.
 
 ## License
 This software is licensed under MIT License.
