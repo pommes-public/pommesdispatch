@@ -98,7 +98,10 @@ The following people have contributed in the following manner to `pommesdispatch
 
 *Note: Not every single contribution is reflected in the current version of
 `pommesdispatch`. This is especially true for those marked as early-stage 
-contributions. Dedicated contributions to `pommesdata` and `pommesinvest` are not included
+contributions that may have been extended, altered or sometimes discarded. 
+Nonetheless, all people listed have made valuable contributions. The ones
+discarded might be re-integrated at some point in time.
+Dedicated contributions to `pommesdata` and `pommesinvest` are not included
 in the list, but listed individually for these projects.*
 
 ## Citing
