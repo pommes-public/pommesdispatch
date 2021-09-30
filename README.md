@@ -83,8 +83,8 @@ The following people have contributed in the following manner to `pommesdispatch
 
 | Name | Contribution | Status |
 | ---- | ---- | ---- |
-| Johannes Kochems | major development<br>conzeptualization, core functionality (esp. dispatch, power prices, rolling horizon modeling), architecture, publishing process | coordinator & maintainer,<br>developer & corresponding author |
-| Yannick Werner | major development<br>conzeptualization, core functionality (esp. exchange, RES, CHP modeling), interface to pommesdata  | developer & corresponding author |
+| Johannes Kochems | major development & conzeptualization<br>conzeptualization, core functionality (esp. dispatch, power prices, rolling horizon modeling), architecture, publishing process | coordinator & maintainer,<br>developer & corresponding author |
+| Yannick Werner | major development & conzeptualization<br>conzeptualization, core functionality (esp. exchange, RES, CHP modeling), interface to pommesdata  | developer & corresponding author |
 | Johannes Giehl | development<br>early-stage core functionality | developer |
 | Benjamin Grosse | development<br>support for conzeptualization, early-stage contributions at the interface to pommesdata | developer |
 | Sophie Westphal | development<br>early-stage contributions at the interface to pommesdata | former developer |
@@ -94,7 +94,7 @@ The following people have contributed in the following manner to `pommesdispatch
 | Timona Ghosh | development<br>early-stage cross-border exchange implementation | former developer (master's student) |
 | Paul Verwiebe | support<br>support of early-stage core functionality development | former supporter (research associate) |
 | Leticia Encinas Rosa | support<br>support of early-stage core functionality development | former supporter (research associate) |
-| Joachim Müller-Kirchenbauer | support<br>support for early-stage conzeptualization, funding | supporter (university professor) |
+| Joachim Müller-Kirchenbauer | support & conzeptualization<br>early-stage conzeptualization, funding | supporter (university professor) |
 
 *Note: Not every single contribution is reflected in the current version of
 `pommesdispatch`. This is especially true for those marked as early-stage 
