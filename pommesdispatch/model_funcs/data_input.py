@@ -85,7 +85,7 @@ def parse_input_data(dispatch_model):
                 + dispatch_model.demand_response_scenario)
 
     # Use data for the respective simulation year
-    files = {k: v + dispatch_model.year for k, v in files.items()}
+    files = {k: v + "_" + dispatch_model.year for k, v in files.items()}
 
     files = {**files, **cost_files, **other_files}
 
