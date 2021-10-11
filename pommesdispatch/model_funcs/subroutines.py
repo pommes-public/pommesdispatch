@@ -27,8 +27,9 @@ import pandas as pd
 
 
 def load_input_data(filename=None,
-                    path_folder_input='../../data/input/',
+                    path_folder_input='.inputs/',
                     countries=None,
+                    year=2017,
                     reindex=False):
     r"""Load input data from csv files.
 
@@ -46,9 +47,12 @@ def load_input_data(filename=None,
     countries : :obj:`list` of str
         List of countries to be simulated
 
+    year : :obj:`str`
+        The simulation year
+
     reindex : boolean
-        If reindex is True, the year 2030 will be used for reindexing
-        time series data
+        If reindex is True, reindex in order to create a time index for
+        the current simulation year. Slice 8760 hours and ignore leap years.
 
     Returns
     -------
@@ -60,7 +64,7 @@ def load_input_data(filename=None,
     if 'country' in df.columns and countries is not None:
         df = df[df['country'].isin(countries)]
 
-    # TODO: Adjust data prep so this can be removed!
+    # TODO: Adjust data prep so this can be removed here!
     if (('_ts' in filename
          or 'market_values' in filename
          or 'min_loads' in filename)
@@ -70,7 +74,7 @@ def load_input_data(filename=None,
         date_diff = (df.index[0]
                      - pd.Timestamp("2017-01-01 00:00:00",
                                     tz=df.index.tz))
-        ts_start = (pd.Timestamp("2030-01-01 00:00:00",
+        ts_start = (pd.Timestamp(year + "-01-01 00:00:00",
                                  tz=df.index.tz)
                     + date_diff)
         # account for leap years

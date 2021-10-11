@@ -98,6 +98,7 @@ def parse_input_data(dispatch_model):
             filename=name,
             path_folder_input=dispatch_model.path_folder_input,
             countries=dispatch_model.countries,
+            year=dispatch_model.year,
             reindex=reindex
         )
         for key, name in files.items()}
