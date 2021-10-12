@@ -49,9 +49,7 @@ def parse_input_data(dispatch_model):
         'storages_el': 'storages_el',
         'transformers': 'transformers',
         'transformers_minload_ts': 'transformers_minload_ts',
-        'transformers_renewables': 'transformers_renewables'}
-
-    cost_files = {
+        'transformers_renewables': 'transformers_renewables',
         'costs_fuel':
             'costs_fuel_' + dispatch_model.fuel_cost_pathway,
         'costs_ramping': 'costs_ramping',
@@ -87,7 +85,7 @@ def parse_input_data(dispatch_model):
     # Use data for the respective simulation year
     files = {k: v + "_" + dispatch_model.year for k, v in files.items()}
 
-    files = {**files, **cost_files, **other_files}
+    files = {**files, **other_files}
 
     input_data = {
         key: load_input_data(
