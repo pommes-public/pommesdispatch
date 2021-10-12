@@ -40,15 +40,15 @@ def parse_input_data(dispatch_model):
         'sinks_demand_el': 'sinks_demand_el',
         'sinks_demand_el_ts': 'sinks_demand_el_ts',
         'sources_shortage': 'sources_shortage',
-        'sources_renewables_fluc': 'sources_renewables_fluc',
+        'sources_renewables_fluc': 'sources_fluc_res',
         'costs_market_values': 'costs_market_values',
-        'emission_limits': 'emission_limits',
         'buses': 'buses',
         'sources_commodity': 'sources_commodity',
         'sources_renewables': 'sources_renewables',
         'sources_renewables_ts': 'sources_renewables_ts',
         'storages_el': 'storages_el',
         'transformers': 'transformers',
+        'transformers_minload_ts': 'transformers_minload_ts',
         'transformers_renewables': 'transformers_renewables'}
 
     cost_files = {
@@ -61,7 +61,7 @@ def parse_input_data(dispatch_model):
         'costs_operation_storages': 'costs_operation_storages'}
 
     other_files = {
-        'transformers_minload_ts': 'transformers_minload_ts',
+        'emission_limits': 'emission_limits',
         'min_loads_dh': 'min_loads_dh',
         'min_loads_ipp': 'min_loads_ipp'}
 
@@ -89,17 +89,11 @@ def parse_input_data(dispatch_model):
 
     files = {**files, **cost_files, **other_files}
 
-    reindex = False
-    if not dispatch_model.year == str(2017):
-        reindex = True
-
     input_data = {
         key: load_input_data(
             filename=name,
             path_folder_input=dispatch_model.path_folder_input,
             countries=dispatch_model.countries,
-            year=dispatch_model.year,
-            reindex=reindex
         )
         for key, name in files.items()}
 
