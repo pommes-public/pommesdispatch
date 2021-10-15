@@ -117,6 +117,9 @@ def run_dispatch_model(config_file="./config.yml"):
         logging.info("Obtaining dual values and reduced costs from the model\n"
                      "in order to calculate power prices.")
 
+        if dm.write_lp_file:
+            dm.om.write(dm.path_folder_output + "pommesdispatch_model.lp",
+                        io_options={"symbolic_solver_labels": True})
         dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
         meta_results = processing.meta_results(dm.om)
 

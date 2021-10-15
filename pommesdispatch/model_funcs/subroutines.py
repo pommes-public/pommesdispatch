@@ -27,9 +27,8 @@ import pandas as pd
 
 
 def load_input_data(filename=None,
-                    path_folder_input='../../data/input/',
-                    countries=None,
-                    reindex=False):
+                    path_folder_input='.inputs/',
+                    countries=None):
     r"""Load input data from csv files.
 
     Optionally reindex time series in order to simulate 2030 (or another year).
@@ -46,10 +45,6 @@ def load_input_data(filename=None,
     countries : :obj:`list` of str
         List of countries to be simulated
 
-    reindex : boolean
-        If reindex is True, the year 2030 will be used for reindexing
-        time series data
-
     Returns
     -------
     df : :class:`pandas.DataFrame`
@@ -59,27 +54,6 @@ def load_input_data(filename=None,
 
     if 'country' in df.columns and countries is not None:
         df = df[df['country'].isin(countries)]
-
-    # TODO: Adjust data prep so this can be removed!
-    if (('_ts' in filename
-         or 'market_values' in filename
-         or 'min_loads' in filename)
-            and reindex is True):
-        df.index = pd.DatetimeIndex(df.index)
-        df.index.freq = 'H'
-        date_diff = (df.index[0]
-                     - pd.Timestamp("2017-01-01 00:00:00",
-                                    tz=df.index.tz))
-        ts_start = (pd.Timestamp("2030-01-01 00:00:00",
-                                 tz=df.index.tz)
-                    + date_diff)
-        # account for leap years
-        if ts_start.month == 12:
-            ts_start = ts_start + pd.Timedelta("1 days")
-        new_index = pd.date_range(start=ts_start,
-                                  periods=df.shape[0],
-                                  freq=df.index.freq)
-        df.index = new_index
 
     if df.isna().any().any() and '_ts' in filename:
         print(

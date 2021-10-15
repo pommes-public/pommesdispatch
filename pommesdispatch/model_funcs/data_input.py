@@ -40,18 +40,15 @@ def parse_input_data(dispatch_model):
         'sinks_demand_el': 'sinks_demand_el',
         'sinks_demand_el_ts': 'sinks_demand_el_ts',
         'sources_shortage': 'sources_shortage',
-        'sources_renewables_fluc': 'sources_renewables_fluc',
+        'sources_renewables_fluc': 'sources_fluc_res',
         'costs_market_values': 'costs_market_values',
-        'emission_limits': 'emission_limits'}
-
-    # TODO: Adjust to be able to choose an arbitrary year between 2017 and 2030
-    files_by_year = {
         'buses': 'buses',
         'sources_commodity': 'sources_commodity',
         'sources_renewables': 'sources_renewables',
         'sources_renewables_ts': 'sources_renewables_ts',
         'storages_el': 'storages_el',
         'transformers': 'transformers',
+        'transformers_minload_ts': 'transformers_minload_ts',
         'transformers_renewables': 'transformers_renewables',
         'costs_fuel':
             'costs_fuel_' + dispatch_model.fuel_cost_pathway,
@@ -62,50 +59,41 @@ def parse_input_data(dispatch_model):
         'costs_operation_storages': 'costs_operation_storages'}
 
     other_files = {
-        'transformers_minload_ts': 'transformers_minload_ts',
+        'emission_limits': 'emission_limits',
         'min_loads_dh': 'min_loads_dh',
         'min_loads_ipp': 'min_loads_ipp'}
 
     # Optionally use aggregated transformer data instead
     if dispatch_model.aggregate_input:
-        files_by_year['transformers'] = 'transformers_clustered'
+        files['transformers'] = 'transformers_clustered'
 
     # Add demand response units
     if dispatch_model.activate_demand_response:
-        files_by_year['sinks_dr_el'] = (
+        files['sinks_dr_el'] = (
                 'sinks_demand_response_el_'
                 + dispatch_model.demand_response_scenario)
-        files_by_year['sinks_dr_el_ts'] = (
+        files['sinks_dr_el_ts'] = (
                 'sinks_demand_response_el_ts_'
                 + dispatch_model.demand_response_scenario)
-        files_by_year['sinks_dr_el_ava_pos_ts'] = (
+        files['sinks_dr_el_ava_pos_ts'] = (
                 'sinks_demand_response_el_ava_pos_ts_'
                 + dispatch_model.demand_response_scenario)
-        files_by_year['sinks_dr_el_ava_neg_ts'] = (
+        files['sinks_dr_el_ava_neg_ts'] = (
                 'sinks_demand_response_el_ava_neg_ts_'
                 + dispatch_model.demand_response_scenario)
 
-    # Use dedicated 2030 data
-    if dispatch_model.year == str(2030):
-        files_by_year = {k: v + '_2030' for k, v in files_by_year.items()}
+    # Use data for the respective simulation year
+    files = {k: v + "_" + dispatch_model.year for k, v in files.items()}
 
-    files = {**files, **files_by_year, **other_files}
+    files = {**files, **other_files}
 
-    if not dispatch_model.year == str(2030):
-        input_data = {
-            key: load_input_data(
-                filename=name,
-                path_folder_input=dispatch_model.path_folder_input,
-                countries=dispatch_model.countries)
-            for key, name in files.items()}
-    else:
-        input_data = {
-            key: load_input_data(
-                filename=name,
-                path_folder_input=dispatch_model.path_folder_input,
-                countries=dispatch_model.countries,
-                reindex=True)
-            for key, name in files.items()}
+    input_data = {
+        key: load_input_data(
+            filename=name,
+            path_folder_input=dispatch_model.path_folder_input,
+            countries=dispatch_model.countries,
+        )
+        for key, name in files.items()}
 
     return input_data
 

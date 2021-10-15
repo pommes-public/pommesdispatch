@@ -106,6 +106,10 @@ class DispatchModel(object):
         boolean control variable indicating whether to save the power price
         results of the model run to a .csv file
 
+    write_lp_file : boolean
+        boolean control variable indicating whether to save an lp file
+        *CAUTION*: Only use for debugging when simulating small time frames
+
     start_time : str
         A date string of format "YYYY-MM-DD hh:mm:ss" defining the start time
         of the simulation
@@ -145,6 +149,7 @@ class DispatchModel(object):
         self.demand_response_scenario = None
         self.save_production_results = None
         self.save_price_results = None
+        self.write_lp_file = None
         self.start_time = None
         self.end_time = None
         self.freq = None
@@ -451,6 +456,12 @@ class DispatchModel(object):
         logging.info(
             "Obtaining dual values and reduced costs from the model \n"
             "in order to calculate power prices.")
+
+        if self.write_lp_file:
+            self.om.write((self.path_folder_output
+                           + "pommesdispatch_model_iteration_" + str(counter)
+                           + ".lp"),
+                          io_options={"symbolic_solver_labels": True})
 
         self.om.solve(solver=self.solver, solve_kwargs={'tee': True})
         print("********************************************************")
