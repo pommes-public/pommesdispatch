@@ -16,6 +16,7 @@ control_parameters:
     demand_response_scenario: "50"
     save_production_results: True
     save_price_results: True
+    write_lp_file: False
 
 # 2) Set model optimization time and frequency
 time_parameters:
