@@ -118,7 +118,7 @@ A publication using and introducing `pommesdispatch` is currently in preparation
 If you are using `pommesdispatch` for your own analyses, we recommend citing as:<br>
 *Kochems, J.; Werner, Y.; Giehl, J.; Grosse, B. et al. (2021): pommesdispatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdispatch, accessed YYYY-MM-DD.*
 
-We furthermore recommend to name the version tag or the commit hash used for the sake of transparency and reproducibility.
+We furthermore recommend naming the version tag or the commit hash used for the sake of transparency and reproducibility.
 
 Also see the *CITATION.cff* file for citation information.
 

@@ -1,14 +1,16 @@
 Changelog
 =========
 
-v0.1.0 (2021-09-XX)
+v0.1.0 (2021-10-21)
 -------------------
 
 Initial public release of ``pommesdispatch`` available on PyPI
 
 * Fixed architecture and docs
+* Made input data dependent on years / flexible for years from ``pommesdata`` (2017 until 2030)
 * Introduced console scripts for configuring and running
 * Added poetry build
+* Included CITATION.cff
 * Used version numbering convention
 
 v0.0.2 (2021-09-03)
