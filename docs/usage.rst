@@ -9,7 +9,7 @@ Installation
 To set up ``pommesdispatch``, you have to set up a virtual environment
 (e.g. using conda) or add the required packages to your python installation.
 This is taken care of by the pip installation. When you clone the environment,
-you have to install the packages for the requirements file (see :ref:`setup`).
+you have to install the packages needed from the requirements file (see :ref:`setup`).
 
 Additionally, you have to install a solver in order to solve
 the mathematical optimization problem (see :ref:`solver`).
@@ -18,7 +18,7 @@ the mathematical optimization problem (see :ref:`solver`).
 
 Setting up the environment
 ++++++++++++++++++++++++++
-``pommesdispatch`` is hosted on `PyPI <https://pypi.org/>`_.
+``pommesdispatch`` is hosted on `PyPI <https://pypi.org/projects/pommesdispatch/>`_.
 To install it, please use the following command
 
 .. code::
@@ -75,21 +75,24 @@ Using pommesdispatch
 Providing input data
 ++++++++++++++++++++
 
-You can obtain pommes input data either by
+The input data is not stored within the ``pommesdispatch`` repository.
+You can obtain ``pommesdispatch`` **input data** either by
 
-* extracting `this .zip file <https://myfantasyzipfile.com>`_ which has
-  been created using ``pommesdata`` or
-* from running ``pommesdata`` which you can find
-  `in this repository <https://github.com/pommes-public/pommesdata>`_
+* downloading and extracting data sets created with ``pommesdata`` which
+  you can find on `zenodo <https://zenodo.org/>`_ or
+* from directly running ``pommesdata`` which you can find
+  `in this repository <https://github.com/pommes-public/pommesdata>`_.
 
-``pommesdata`` provides input data for simulating years between 2017 and 2030.
+``pommesdata`` provides input data for simulating any year between 2017 and 2030.
 Once you have run it, you have to copy the output of ``pommesdata`` which
 is stored in the folder "prepared_data"
 to the "inputs" folder of ``pommesdispatch``. You should now have a bunch
 of .csv files with the oemof.solph components names in their file name.
 
-Whe using ``pommesdata``, feel free to adjust assumptions on
-the power plant park, according to your needs.
+.. note::
+
+    ``pommesdata`` only includes time series information for 2017
+    which is reindexed to another year if needed.
 
 .. _config:
 
@@ -112,8 +115,9 @@ file which control the simulation.
 In the first section, you can change general model settings, e.g. if
 you want to use another solver or if you want to run a rolling horizon
 model. You can play around with the boolean values, but we recommend to
-keep the parameters for storing result files, i.e.
-``save_production_results`` and ``save_price_results`` set to True.
+at least keep the parameters for storing result files, i.e.
+``save_production_results`` and ``save_price_results`` set to True and
+``write_lp_file`` set to False.
 
 Pay attention to the allowed values for the string values:
 
@@ -151,6 +155,7 @@ Pay attention to the allowed values for the string values:
         demand_response_scenario: "50"
         save_production_results: True
         save_price_results: True
+        write_lp_file: False
 
 .. note::
     | Including an emissions limit usually leads to an infeasible model formulation.
@@ -162,8 +167,8 @@ Pay attention to the allowed values for the string values:
 
 In the next section, you can control the simulation time. Please stick
 to the date format (pre-)defined. You have to ensure that the input data
-time series match the time frame you want to simulate. As a default, you'll
-find data for 2017 and 2030.
+time series matches time frame you want to simulate. ``pommesdata`` takes
+care of that by reindexing your time series data accordingly.
 
 .. code:: yaml
 
@@ -224,10 +229,10 @@ Once the model run is finished, you can find, inspect, analyze and plot your
 results in the results folder (or the folder you have specified to store
 model results).
 
-Another way is to run ``pommes_dispatch.py`` in your python editor of choice
-(we recommend `PyCharm <https://www.jetbrains.com/pycharm/>`_).
+Another way is to run ``cli.run_pommes_dispatch`` in your python editor of choice
+(e.g. `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `VSCodium <https://vscodium.com/>`_).
 In this case, you have to specify the path to your config file as a run
-argument ``-f ../../config.yml``.
+argument ``-f ../config.yml``.
 Also, in the config file, you have to specify the relative
 relations to the input and output folder, so you probably have to replace
-``./inputs`` with ``../../inputs`` and ``./outputs`` with ``../../ouputs``.
+``./inputs`` with ``../inputs`` and ``./outputs`` with ``../outputs``.

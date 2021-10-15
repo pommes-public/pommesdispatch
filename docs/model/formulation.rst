@@ -40,8 +40,8 @@ Nomenclature
     ":math:`c_{var}(i, o, t)`", "parameter", "variable costs for flow from input i to output o at time step t"
     ":math:`\tau(t)`", "parameter", "time increment of the model for time step t"
     ":math:`D_{DE}(t)`", "parameter", "total load (for Germany)"
-    ":math:`eta_{o}(n, t)`", "parameter", "conversion efficiency for outflow"
-    ":math:`eta_{i}(n, t)`", "parameter", "conversion efficiency for inflow"
+    ":math:`\eta_{o}(n, t)`", "parameter", "conversion efficiency for outflow"
+    ":math:`\eta_{i}(n, t)`", "parameter", "conversion efficiency for inflow"
     ":math:`\Delta P_{pos}(i, o, t)`", "parameter", "| maximum allowed positive gradient for flow from input i to output o
     | at time step t (transition from t-1 to t)"
     ":math:`\Delta P_{neg}(i, o, t)`", "parameter", "| maximum allowed negative gradient for flow from input i to output o
@@ -70,8 +70,7 @@ Nomenclature
 Target function
 +++++++++++++++
 The target function is build together by the ``_objective_expression`` terms of all
-oemof.solph components used (
-`see the oemof.solph.models module <https://github.com/oemof/oemof-solph/blob/dev/src/oemof/solph/models.py>`_):
+oemof.solph components used (`see the oemof.solph.models module <https://github.com/oemof/oemof-solph/blob/dev/src/oemof/solph/models.py>`_):
 
 
 System costs: sum of the costs for all flows (commodity / fuel, emissions and operation costs):
@@ -79,9 +78,7 @@ System costs: sum of the costs for all flows (commodity / fuel, emissions and op
 .. math::
 
     & Min \space C = \sum_{(i,o)} \sum_t f(i, o, t) \cdot c_{var}(i, o, t) \\
-    & \forall \space i \in I(n), \space o \in O(n),
-    \space n \in \mathrm{B}, \space t \in \mathrm{T}
-
+    & \forall \space (i, o) \in \mathrm{F}, \space t \in \mathrm{T}
 
 Constraints of the core model
 +++++++++++++++++++++++++++++
@@ -121,14 +118,14 @@ of the flow balance for the German electricity price:
     \space i \in \mathrm{I(n)}, \space o \in \mathrm{O(n)}
 
 with :math:`P_{i}(n, t)` as the inflow into the transformer node n,
-:math:`P_{o}(n, t)` as the transformer outflow, :math:`eta_{o}(n, t)` the
-conversion efficiency for outputs and :math:`eta_{i}(n, t)` the conversion
+:math:`P_{o}(n, t)` as the transformer outflow, :math:`\eta_{o}(n, t)` the
+conversion efficiency for outputs and :math:`\eta_{i}(n, t)` the conversion
 factors for inflows. We only use the conversion factor for outflows to account
 for losses from the conversion (within the power plant).
-:math:`mathrm{TF}` is the set of transformers, i.e. any kind of energy conversion
+:math:`\mathrm{TF}` is the set of transformers, i.e. any kind of energy conversion
 unit. We use this for conventional generators, renewable energy sources (RES)
 within the market premium scheme in Germany (with 100% efficiency -
-used just to steer the price-based output in times RES are price setting)
+used just to steer the price-based output in times, RES are price setting)
 as well as interconnection line losses.
 
 * gradient limits for generators
@@ -262,8 +259,6 @@ are three different implementations which can be chosen from:
 
 For the sake of readability, the variables and parameters used for demand
 response modeling are listed separately in the following table:
-
-**Table: Symbols and attribute names of variables and parameters**
 
 .. table:: Sets (S), Variables (V) and Parameters (P)
     :widths: 1, 1, 1, 1
@@ -431,13 +426,13 @@ are given separately for each approach:
     & \quad \quad \quad \quad \forall tt \in \mathbb{T} \\
     & \\
     &
-    (8) \quad \sum_{tt=t}^{t+\R_{shi}-1} DSM_{tt}^{up}
+    (8) \quad \sum_{tt=t}^{t+R_{shi}-1} DSM_{tt}^{up}
     \leq E_{t}^{up} \cdot E_{up, max} \cdot L \cdot \Delta t \\
     & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
     & \\
     &
-    (9) \quad \sum_{tt=t}^{t+\R_{she}-1} DSM_{tt}^{do, shed}
-    \leq E_{t}^{do} \cdot E_{do, max} \cdot \t_{shed} \cdot \Delta t \\
+    (9) \quad \sum_{tt=t}^{t+R_{she}-1} DSM_{tt}^{do, shed}
+    \leq E_{t}^{do} \cdot E_{do, max} \cdot t_{shed} \cdot \Delta t \\
     & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
 
 * Objective function term:
@@ -593,7 +588,7 @@ References
 Gils, Hans Christian (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage`, Stuttgart,
 `http://dx.doi.org/10.18419/opus-6888 <http://dx.doi.org/10.18419/opus-6888>`_, accessed 24.09.2021, pp. 67-70.
 
-Kochems, Johannes (2020b): Demand response potentials for Germany: potential clustering and comparison of modeling approaches, presentation at the 9th international Ruhr Energy Conference (INREC 2020), 10th September 2020,
+Kochems, Johannes (2020): Demand response potentials for Germany: potential clustering and comparison of modeling approaches, presentation at the 9th international Ruhr Energy Conference (INREC 2020), 10th September 2020,
 `https://github.com/jokochems/DR_modeling_oemof/blob/master/Kochems_Demand_Response_INREC.pdf <https://github.com/jokochems/DR_modeling_oemof/blob/master/Kochems_Demand_Response_INREC.pdf>`_, accessed 24.09.2021.
 
 Zerrahn, Alexander and Schill, Wolf-Peter (2015): On the representation of demand-side management in power system models,

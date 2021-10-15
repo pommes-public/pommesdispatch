@@ -27,14 +27,14 @@ capacities at their marginal costs in a perfectly competitive
 **quasi day-ahead market** in order
 to serve an inflexible and exogenously given demand. We also include power storages and demand
 response. The latter enables parts of the demand to adjust in a flexible manner.
-Thus, the aggregated power plants capacities which are sorted by their marginal costs
+Thus, the aggregated power plants' capacities which are sorted by their marginal costs
 result in a merit order that is similar to the aggregated supply curves in
 the real day-ahead auction procedure in competitive power markets.
 
 The perspective of our model is to assume that there is a "social planner"
 optimizing the power system in terms of minimizing its overall (dispatch) costs
 under the prevalent constraints, such as demand coverage or power plants capacity limits.
-We assume this social planner to have **perfect** foresight over the entire
+We assume this social planner to have **perfect foresight** over the entire
 simulation time frame. We offer a :ref:`rolling-horizon` to break with
 this assumption. Our basic approach is quite common
 for **fundamental bottom-up modeling** of power systems
@@ -129,7 +129,7 @@ a year (or another simulation time frame) or using a :ref:`rolling-horizon`.
 
 * Spatial granularity:
 
-There is one spatial node **per bidding zone for Germany and its 10 electric neighbours**,
+There is one spatial node **per bidding zone for Germany and its 10 electric neighbors**,
 thus representing real market area boundaries and processes without taking network congestions
 within bidding zones into account.
 
@@ -189,7 +189,7 @@ columns  129653
 nonzeros 309613
 ======== =======
 
-For the mathematical formulation, please see below.
+For the mathematical formulation, please see :ref:`formulas`.
 You may also refer to the
 `oemof.solph API reference <https://oemof-solph.readthedocs.io/en/latest/reference/oemof.solph.html>`_
 for a documentation of the constraints and objective terms introduced
@@ -204,7 +204,7 @@ which allows to model energy systems in a graph-based representation
 with the underlying mathematical constraints and objective function terms
 implemented in `pyomo <https://pyomo.readthedocs.io/en/stable/>`_.
 Some of the required oemof.solph features - such as demand response modeling -
-have been provided by the *POMMES* core developers which are also active in
+have been provided by the *POMMES* main developers which are also active in
 the oemof community.
 Users not familiar with oemof.solph may find further information
 in the `oemof.solph documentation <https://oemof-solph.readthedocs.io/en/latest/readme.html>`_.
@@ -213,7 +213,7 @@ We use the following components from the ``oemof.solph`` framework in order
 to represent the following units of the power system:
 
 - Transformer: (conventional) power plants, renewable units for Germany in the
-  market premium scheme, interconnetors to other bidding zones
+  market premium scheme, interconnectors to other bidding zones
 - Source: commodity sources, fixed renewable units infeed
 - Sink: national electricity demands
 - GenericStorage: electricity storage units (pumped storage and reservoir)
