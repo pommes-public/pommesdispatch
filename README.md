@@ -2,14 +2,14 @@
 
 **A bottom-up fundamental power market model for the German electricity sector**
 
-This is the **dispatch variant** of the fundamental power market model *POMMES* (**PO**wer **M**arket **M**odel of **E**nergy and re**S**ources).<br>
+This is the **dispatch variant** of the fundamental power market model *POMMES* (**PO**wer **M**arket **M**odel of **E**nergy and re**S**ources).
 Please navigate to the section of interest to find out more.
 
 ## Contents
 * [Introduction](#introduction)
 * [Documentation](#documentation)
 * [Installation](#installation)
-    * [Setting up the environment](#setting-up-the-environment)
+    * [Setting up pommesdispatch](#setting-up-pommesdispatch)
     * [Installing a solver](#installing-a-solver)
 * [Contributing](#contributing)
 * [Citing](#citing)
@@ -20,7 +20,7 @@ Please navigate to the section of interest to find out more.
 
 If you are interested in the data preparation routines used or investment modeling, please find more information here:
 - [pommesdata](https://github.com/pommes-public/pommesdata): A full-featured transparent data preparation routine from raw data to POMMES model inputs
-- pommes-invest: A multi-period integrated investment and dispatch model for the German power sector (upcoming).
+- pommesinvest: A multi-period integrated investment and dispatch model for the German power sector (upcoming).
 
 ### Purpose and model characterization
 The **dispatch variant** of the power market model *POMMES* `pommesdispatch` enables the user to simulate the **dispatch of backup power plants, storages as well as demand response units for the Federal Republic of Germany** for an arbitrary year or timeframe between 2017 and 2030. The dispatch of renewable power plants is exogeneously determined by normalized infeed time series and capacity values. The models' overall goal is to minimize power system costs occuring from wholesale markets whereby no network constraints are considered except for the existing bidding zone configuration used for modeling electricity exchange. Thus, the model purpose is to simulate **dispatch decisions** and the resulting **day-ahed market prices**. A brief categorization of the model is given in the following table. An extensive categorization can be found in the [model documentation]().
@@ -31,22 +31,29 @@ The **dispatch variant** of the power market model *POMMES* `pommesdispatch` ena
 | Spatial coverage | - Germany (DE-LU) + electrical neighbours (NTC approach) |
 | Time horizon | - usually 1 year in hourly resolution |
 | Technologies | - conventional power plants, storages, demand response (optimized)<br> - renewable generators (fixed)<br> - demand: exogenous time series |
-| Data sources | - OPSD, BNetzA, ENTSO-E, others (see [pommesdata](https://github.com/pommes-public/pommesdata)) |
-| Implementation | - graph representation & linear optimization: oemof.solph / pyomo<br> - data management: python / .csv |
+| Data sources | - input data not shipped out, but can be obtained from [pommesdata](https://github.com/pommes-public/pommesdata); OPSD, BNetzA, ENTSO-E, others |
+| Implementation | - graph representation & linear optimization: [oemof.solph](https://github.com/oemof/oemof-solph) / [pyomo](https://github.com/Pyomo/pyomo) <br> - data management: python / .csv |
 
 ### Mathematical and technical implementation
-The models' underlying mathematical method is a **linear programming** approach, seeking to minimize overall power system costs under constraints such as satisfying power demand at all times and not violating power generation capacity or storage limits. Thus, binary variables such as units' status, startups and shutdowns are not accounted for.
+The models' underlying mathematical method is a **linear programming** approach, seeking to minimize overall 
+power system costs under constraints such as satisfying power demand at all times and not violating power generation 
+capacity or storage limits. Thus, binary variables such as units' status, startups and shutdowns are not accounted for.
 
-The model builds on the framework **[oemof.solph](https://github.com/oemof/oemof-solph)** which allows to model energy systems in a graph-based representation with the underlying mathematical constraints and objective function terms implemented in **[pyomo](https://pyomo.readthedocs.io/en/stable/)**. Some of the required oemof.solph features - such as demand response modeling - have been provided by the *POMMES* core developers which are also active in the oemof community. Users not familiar with oemof.solph may find further information in the [oemof.solph documentation](https://oemof-solph.readthedocs.io/en/latest/readme.html).
+The model builds on the framework **[oemof.solph](https://github.com/oemof/oemof-solph)** which allows to model 
+energy systems in a graph-based representation with the underlying mathematical constraints and objective function 
+terms implemented in **[pyomo](https://pyomo.readthedocs.io/en/stable/)**. Some of the required oemof.solph featuresm - such as demand response modeling - have been provided by the *POMMES* main developers which are also active in the 
+oemof community. Users not familiar with oemof.solph may find further information in the 
+[oemof.solph documentation](https://oemof-solph.readthedocs.io/en/latest/readme.html).
 
 ## Documentation
-An extensive **[documentation of pommesdispatch]()** can be found on readthedocs. It contains a model categorization, some energy economic and technical background information as well as documentation of the model functions and classes. 
+An extensive **[documentation of pommesdispatch](https://pommesdispatch.readthedocs.io/)** can be found on readthedocs. It contains a user's guide, a model categorization, some energy economic and technical background information, a complete model formulation as well as documentation of the model functions and classes. 
 
 ## Installation
-To set up `pommesdispatch`, you have to set up a virtual environment (e.g. using conda) or add the required packages to your python installation. Additionally, you have to install a solver in order to solve the mathematical optimization problem.
+To set up `pommesdispatch`, set up a virtual environment (e.g. using conda) or add the required packages to your python installation. Additionally, you have to install a solver in order to solve the mathematical optimization problem.
 
-### Setting up the environment
-`pommesdispatch` is hosted on [PyPI](). To install it, please use the following command
+### Setting up pommesdispatch
+`pommesdispatch` is hosted on [PyPI](https://pypi.org/project/pommesdispatch/). 
+To install it, please use the following command
 ```
 pip install pommesdispatch
 ```
@@ -77,13 +84,14 @@ In order to solve a `pommesdispatch` model instance, you need a solver installed
 
 ## Contributing
 Every kind of contribution or feedback is warmly welcome.<br>
-We use the GitHub issue management as well as pull requests for collaboration. We try to stick to the PEP8 coding standards.
+We use the [GitHub issue management](https://github.com/pommes-public/pommesdispatch/issues) as well as 
+[pull requests](https://github.com/pommes-public/pommesdispatch/pulls) for collaboration. We try to stick to the PEP8 coding standards.
 
 The following people have contributed in the following manner to `pommesdispatch`:
 
 | Name | Contribution | Status |
 | ---- | ---- | ---- |
-| Johannes Kochems | major development & conceptualization<br>conceptualization, core functionality (esp. dispatch, power prices, rolling horizon modeling), architecture, publishing process | coordinator & maintainer,<br>developer & corresponding author |
+| Johannes Kochems | major development & conceptualization<br>conceptualization, core functionality (esp. dispatch, power prices, demand response, rolling horizon modeling), architecture, publishing process | coordinator & maintainer,<br>developer & corresponding author |
 | Yannick Werner | major development & conceptualization<br>conceptualization, core functionality (esp. exchange, RES, CHP modeling), interface to pommesdata  | developer & corresponding author |
 | Johannes Giehl | development<br>early-stage core functionality | developer |
 | Benjamin Grosse | development<br>support for conceptualization, early-stage contributions at the interface to pommesdata | developer |
@@ -107,10 +115,12 @@ in the list, but listed individually for these projects.*
 ## Citing
 A publication using and introducing `pommesdispatch` is currently in preparation.
 
-If you are using `pommesdispatch` for your own analyses, please cite as:<br>
+If you are using `pommesdispatch` for your own analyses, we recommend citing as:<br>
 *Kochems, J.; Werner, Y.; Giehl, J.; Grosse, B. et al. (2021): pommesdispatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdispatch, accessed YYYY-MM-DD.*
 
 We furthermore recommend to name the version tag or the commit hash used for the sake of transparency and reproducibility.
+
+Also see the *CITATION.cff* file for citation information.
 
 ## License
 This software is licensed under MIT License.

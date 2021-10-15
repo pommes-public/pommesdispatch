@@ -32,7 +32,7 @@ Technological detail
 
     "Renewable Techology inclusion", "Hydro (run of river), Solar, Wind, Biomass"
     "Storage Technology Inclusion ", "| Pumped-hydro energy storage, Reservoir energy storage,
-    | Battery energy storage"
+    | (Battery energy storage)"
     "Demand Characteristic Inclusion", "| Aggregated demand for Industry, Residential Sector,
     | Commercial Sector and Transportation"
     "Cost Inclusion", "Fuel prices, Operations and Maintenance Costs, CO2-costs"
