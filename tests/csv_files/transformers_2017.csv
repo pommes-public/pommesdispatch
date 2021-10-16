@@ -1,0 +1,2 @@
+label,identifier,capacity,fuel,country,efficiency_el,type,max_load_factor,part_load_losses,min_uptime,min_downtime,cold_startup_time,warm_startup_time,hot_startup_time,cold_startup_costs,warm_startup_costs,hot_startup_costs,outages,initial_status,unit_lifetime,min_load_factor,grad_pos,grad_neg,tech_fuel,load_grad_relative,from,to_el
+DE_transformer_hardcoal_BNA0232b,BNA0232b,8.0,hardcoal,DE,0.38,chp,1.0,0.05,5.0,7.0,2.0,1.0,0.1,0.0,0.0,0.0,20.0,0.5,41.0,0.0,1.0,1.0,,,DE_bus_hardcoal,DE_bus_el
