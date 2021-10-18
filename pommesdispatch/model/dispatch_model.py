@@ -135,7 +135,6 @@ def run_dispatch_model(config_file="./config.yml"):
             "using a ROLLING HORIZON approach for model solution.")
 
         # Initialization of rolling horizon model run
-        counter = 0
         iteration_results = {
             "storages_initial": pd.DataFrame(),
             "model_results": {},
