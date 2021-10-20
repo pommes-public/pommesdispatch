@@ -1,3 +1,4 @@
+import numpy as np
 import oemof.solph
 import pandas as pd
 
@@ -143,7 +144,6 @@ class TestSubroutines:
             assert (node_dict["DE_sink_el_excess"].inputs[node_dict[key]]
                     is not None)
 
-    # TODO: Include further assert statements and check parameterization
     def test_create_transformers_conventional(self):
         """test function create_transformers_conventional"""
         input_data, dm, node_dict = create_inputs_model_and_nodes()
@@ -153,6 +153,37 @@ class TestSubroutines:
 
         assert len(node_dict) == 9
 
+        # Check basic transformer attributes
+        assert np.round(
+            node_dict[
+                "DE_transformer_hardcoal_BNA0019"].outputs[
+                node_dict["DE_bus_el"]].nominal_value,
+            4) == 227.8669
+        assert np.round(
+            node_dict[
+                "DE_transformer_hardcoal_BNA0019"].conversion_factors[
+                node_dict["DE_bus_el"]].default, 3) == 0.438
+        assert node_dict[
+                   "DE_transformer_hardcoal_BNA0019"].outputs[
+                   node_dict["DE_bus_el"]].positive_gradient[
+                   "ub"].default == 1.0
+
+        # Check minimum loads for CHP unit
+        assert len(node_dict[
+                       "DE_transformer_hardcoal_BNA0019"].outputs[
+                       node_dict["DE_bus_el"]].min) == 2
+        assert node_dict[
+                   "DE_transformer_hardcoal_BNA0019"].outputs[
+                   node_dict["DE_bus_el"]].min.max() == 0.75
+
+        # Check minimum loads for IPP unit
+        assert len(node_dict[
+                       "DE_transformer_hardcoal_BNA0216a"].outputs[
+                       node_dict["DE_bus_el"]].min) == 2
+        assert node_dict[
+                   "DE_transformer_hardcoal_BNA0216a"].outputs[
+                   node_dict["DE_bus_el"]].min.max() == 1.0
+
     def test_create_transformers_res(self):
         """test function create_transformers_res"""
         input_data, dm, node_dict = create_inputs_model_and_nodes()
@@ -161,6 +192,18 @@ class TestSubroutines:
             input_data, dm, node_dict)
 
         assert len(node_dict) == 12
+        assert np.round(
+            node_dict[
+                "DE_solarPV_cluster_1"].outputs[
+                node_dict["DE_bus_el"]].nominal_value,
+            4) == 309.13
+        assert len(
+            node_dict[
+                "DE_solarPV_cluster_1"].outputs[
+                node_dict["DE_bus_el"]].variable_costs) == 2
+        assert np.round(node_dict[
+                            "DE_windonshore_cluster_1"].outputs[
+                            node_dict["DE_bus_el"]].max.max(), 4) == 0.2479
 
     def test_create_storages(self):
         """test function create_storages"""
@@ -170,6 +213,20 @@ class TestSubroutines:
             input_data, dm, node_dict)
 
         assert len(node_dict) == 7
+        assert node_dict["DE_storage_el_PHS"].balanced is True
+        assert node_dict["DE_storage_el_PHS"].initial_storage_level == 0.5
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].nominal_storage_capacity,
+            1) == 25116.0
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].inputs[
+                node_dict["DE_bus_el"]].nominal_value, 2) == 8680.75
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].outputs[
+                node_dict["DE_bus_el"]].nominal_value, 2) == 4475.25
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].inflow_conversion_factor.default,
+            1) == 0.9
 
     def test_create_storages_rolling_horizon(self):
         """test function create_storages_rolling_horizon"""
@@ -186,4 +243,17 @@ class TestSubroutines:
                 input_data, dm, node_dict, iteration_results))
 
         assert len(node_dict) == 7
-        assert storage_labels == ["DE_storage_el_PHS"]
+        assert node_dict["DE_storage_el_PHS"].balanced is True
+        assert node_dict["DE_storage_el_PHS"].initial_storage_level == 0.5
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].nominal_storage_capacity,
+            1) == 25116.0
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].inputs[
+                node_dict["DE_bus_el"]].nominal_value, 2) == 8680.75
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].outputs[
+                node_dict["DE_bus_el"]].nominal_value, 2) == 4475.25
+        assert np.round(
+            node_dict["DE_storage_el_PHS"].inflow_conversion_factor.default,
+            1) == 0.9
