@@ -187,12 +187,17 @@ class DispatchModel(object):
 
     def check_model_configuration(self):
         """Checks if any necessary model parameter hasn't been set yet"""
+        missing_parameters = []
+
         for entry in dir(self):
             if not entry.startswith("_"):
                 if entry != "om" and getattr(self, entry) is None:
+                    missing_parameters.append(entry)
                     logging.warning(
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!")
+
+        return missing_parameters
 
     def add_rolling_horizon_configuration(self, rolling_horizon_parameters,
                                           nolog=False):
@@ -243,6 +248,8 @@ class DispatchModel(object):
 
         setattr(self, "filename", filename)
         logger.define_logging(logfile=filename + ".log")
+
+        return filename
 
     def show_configuration_log(self):
         """Show some logging info dependent on model configuration"""
