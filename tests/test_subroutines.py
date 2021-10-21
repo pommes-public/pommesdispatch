@@ -174,7 +174,7 @@ class TestSubroutines:
         # Check minimum loads for CHP unit
         assert len(node_dict[
                        "DE_transformer_hardcoal_BNA0019"].outputs[
-                       node_dict["DE_bus_el"]].min) == 2
+                       node_dict["DE_bus_el"]].min) == 5
         assert node_dict[
                    "DE_transformer_hardcoal_BNA0019"].outputs[
                    node_dict["DE_bus_el"]].min.max() == 0.75
@@ -182,7 +182,7 @@ class TestSubroutines:
         # Check minimum loads for IPP unit
         assert len(node_dict[
                        "DE_transformer_hardcoal_BNA0216a"].outputs[
-                       node_dict["DE_bus_el"]].min) == 2
+                       node_dict["DE_bus_el"]].min) == 5
         assert node_dict[
                    "DE_transformer_hardcoal_BNA0216a"].outputs[
                    node_dict["DE_bus_el"]].min.max() == 1.0
