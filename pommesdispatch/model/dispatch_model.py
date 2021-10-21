@@ -135,7 +135,6 @@ def run_dispatch_model(config_file="./config.yml"):
             "using a ROLLING HORIZON approach for model solution.")
 
         # Initialization of rolling horizon model run
-        counter = 0
         iteration_results = {
             "storages_initial": pd.DataFrame(),
             "model_results": {},
@@ -153,6 +152,9 @@ def run_dispatch_model(config_file="./config.yml"):
 
             # Get initial states for the next model run from results
             dm.retrieve_initial_states_rolling_horizon(iteration_results)
+
+        dispatch_results = iteration_results["dispatch_results"]
+        power_prices = iteration_results["power_prices"]
 
     model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
 

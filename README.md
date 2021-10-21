@@ -39,7 +39,7 @@ The models' underlying mathematical method is a **linear programming** approach,
 power system costs under constraints such as satisfying power demand at all times and not violating power generation 
 capacity or storage limits. Thus, binary variables such as units' status, startups and shutdowns are not accounted for.
 
-The model builds on the framework **[oemof.solph](https://github.com/oemof/oemof-solph)** which allows to model 
+The model builds on the framework **[oemof.solph](https://github.com/oemof/oemof-solph)** which allows modeling
 energy systems in a graph-based representation with the underlying mathematical constraints and objective function 
 terms implemented in **[pyomo](https://pyomo.readthedocs.io/en/stable/)**. Some of the required oemof.solph featuresm - such as demand response modeling - have been provided by the *POMMES* main developers which are also active in the 
 oemof community. Users not familiar with oemof.solph may find further information in the 

@@ -166,9 +166,9 @@ and :math:`f_{max}(i, o, t)` as the normalized maximum flow value.
 
     Whereas the maximum value is fixed and set to 1 for all units and time steps,
     the minimum value of some generator types may alter over time.
-    This is especially true for combined heat an power (CHP) plants and
+    This is especially true for combined heat and power (CHP) plants
     and industrial power plants (IPP), where a minimum load pattern
-    is fed in in order to serve the heating or process steam demand.
+    is fed in, in order to serve the heating or process steam demand.
 
 * storages
 

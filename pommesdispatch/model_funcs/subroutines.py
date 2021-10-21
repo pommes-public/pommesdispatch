@@ -758,7 +758,7 @@ def create_transformers_res(input_data,
 
 
 def create_storages(input_data, dispatch_model, node_dict):
-    r"""Create storages and add the to the dict of nodes.
+    r"""Create storages and add them to the dict of nodes.
     
     Parameters
     ----------   
