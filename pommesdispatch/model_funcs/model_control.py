@@ -254,19 +254,25 @@ class DispatchModel(object):
     def show_configuration_log(self):
         """Show some logging info dependent on model configuration"""
         if self.aggregate_input:
-            logging.info("Using the AGGREGATED POWER PLANT DATA SET")
+            agg_string = "Using the AGGREGATED POWER PLANT DATA SET"
         else:
-            logging.info("Using the COMPLETE POWER PLANT DATA SET.\n"
-                         "Minimum power output constraint of (individual)\n"
-                         "transformers will be neglected.")
+            agg_string = ("Using the COMPLETE POWER PLANT DATA SET.\n"
+                          "Minimum power output constraint of (individual)\n"
+                          "transformers will be neglected.")
 
         if self.activate_demand_response:
-            logging.info(
+            dr_string = (
                 f"Using approach '{self.demand_response_approach}' "
                 f"for DEMAND RESPONSE modeling\n"
                 f"Considering a {self.demand_response_scenario}% scenario")
+
         else:
-            logging.info("Running a model WITHOUT DEMAND RESPONSE")
+            dr_string = "Running a model WITHOUT DEMAND RESPONSE"
+
+        logging.info(agg_string)
+        logging.info(dr_string)
+
+        return agg_string, dr_string
 
     def build_simple_model(self):
         r"""Set up and return a simple model
@@ -363,32 +369,6 @@ class DispatchModel(object):
 
         return power_prices
 
-    def retrieve_initial_states_rolling_horizon(self, iteration_results):
-        r"""Retrieve the initial states for the upcoming rolling horizon run
-
-        Parameters
-        ----------
-        iteration_results : dict
-            A dictionary holding the results of the previous rolling horizon
-            iteration
-        """
-        iteration_results["storages_initial"] = pd.DataFrame(
-            columns=["initial_storage_level_last_iteration"],
-            index=getattr(self, "storage_labels"))
-
-        for i, s in iteration_results["storages_initial"].iterrows():
-            storage = views.node(iteration_results["model_results"], i)
-
-            iteration_results["storages_initial"].at[
-                i, "initial_storage_level_last_iteration"] = (
-                storage["sequences"][((i, "None"),
-                                      "storage_content")].iloc[
-                    getattr(
-                        self,
-                        "time_slice_length_wo_overlap_in_time_steps") - 1])
-
-        logging.info("Obtained initial (storage) levels for next iteration")
-
     def build_rolling_horizon_model(self, counter, iteration_results):
         r"""Set up and return a rolling horizon LP dispatch model
 
@@ -443,7 +423,7 @@ class DispatchModel(object):
         self.add_further_constrs(emissions_limit)
 
     def solve_rolling_horizon_model(self, counter, iteration_results,
-                                    model_meta):
+                                    model_meta, no_solver_log=False):
         """Solve a rolling horizon optimization model
 
         Parameters
@@ -470,7 +450,12 @@ class DispatchModel(object):
                            + ".lp"),
                           io_options={"symbolic_solver_labels": True})
 
-        self.om.solve(solver=self.solver, solve_kwargs={'tee': True})
+        if no_solver_log:
+            solve_kwargs = {'tee': False}
+        else:
+            solve_kwargs = {'tee': True}
+
+        self.om.solve(solver=self.solver, solve_kwargs=solve_kwargs)
         print("********************************************************")
         logging.info(f"Model run {counter} done!")
 
@@ -498,3 +483,29 @@ class DispatchModel(object):
         iteration_results["power_prices"] = (
             iteration_results["power_prices"].append(pps)
         )
+
+    def retrieve_initial_states_rolling_horizon(self, iteration_results):
+        r"""Retrieve the initial states for the upcoming rolling horizon run
+
+        Parameters
+        ----------
+        iteration_results : dict
+            A dictionary holding the results of the previous rolling horizon
+            iteration
+        """
+        iteration_results["storages_initial"] = pd.DataFrame(
+            columns=["initial_storage_level_last_iteration"],
+            index=getattr(self, "storage_labels"))
+
+        for i, s in iteration_results["storages_initial"].iterrows():
+            storage = views.node(iteration_results["model_results"], i)
+
+            iteration_results["storages_initial"].at[
+                i, "initial_storage_level_last_iteration"] = (
+                storage["sequences"][((i, "None"),
+                                      "storage_content")].iloc[
+                    getattr(
+                        self,
+                        "time_slice_length_wo_overlap_in_time_steps") - 1])
+
+        logging.info("Obtained initial (storage) levels for next iteration")
