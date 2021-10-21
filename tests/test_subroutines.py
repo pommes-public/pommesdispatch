@@ -41,7 +41,10 @@ class TestSubroutines:
              'AT_natgas']).all()
         assert csv_file.index.all() == pd.Index(
             ['2017-01-01 00:00:00',
-             '2017-01-01 01:00:00']).all()
+             '2017-01-01 01:00:00',
+             '2017-01-01 02:00:00',
+             '2017-01-01 03:00:00',
+             '2017-01-01 04:00:00']).all()
 
     def test_create_buses(self):
         """test function create_buses"""
@@ -109,7 +112,7 @@ class TestSubroutines:
                ].variable_costs.default == 0
         assert len(node_dict["DE_source_biomassEEG"].outputs[
                        node_dict["DE_bus_el"]
-                   ].fix) == 2
+                   ].fix) == 5
         assert node_dict["DE_source_biomassEEG"].outputs[
                    node_dict["DE_bus_el"]
                ].nominal_value == 7263.8
@@ -128,7 +131,7 @@ class TestSubroutines:
                ].nominal_value == 79063
         assert len(node_dict["DE_sink_el_load"].inputs[
                        node_dict["DE_bus_el"]
-                   ].fix) == 2
+                   ].fix) == 5
 
     def test_create_excess_sinks(self):
         """test function create_excess_sinks"""
@@ -200,7 +203,7 @@ class TestSubroutines:
         assert len(
             node_dict[
                 "DE_solarPV_cluster_1"].outputs[
-                node_dict["DE_bus_el"]].variable_costs) == 2
+                node_dict["DE_bus_el"]].variable_costs) == 5
         assert np.round(node_dict[
                             "DE_windonshore_cluster_1"].outputs[
                             node_dict["DE_bus_el"]].max.max(), 4) == 0.2479
