@@ -67,7 +67,7 @@ def load_input_data(filename=None,
 
 def create_buses(input_data, node_dict):
     r"""Create buses and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -105,7 +105,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
-    
+
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -152,7 +152,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
 
 def create_commodity_sources(input_data, dispatch_model, node_dict):
     r"""Create commodity sources and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
