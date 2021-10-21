@@ -153,6 +153,9 @@ def run_dispatch_model(config_file="./config.yml"):
             # Get initial states for the next model run from results
             dm.retrieve_initial_states_rolling_horizon(iteration_results)
 
+        dispatch_results = iteration_results["dispatch_results"]
+        power_prices = iteration_results["power_prices"]
+
     model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
 
     # ---- MODEL RESULTS PROCESSING ----

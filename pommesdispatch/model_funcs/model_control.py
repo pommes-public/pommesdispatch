@@ -201,7 +201,15 @@ class DispatchModel(object):
 
     def add_rolling_horizon_configuration(self, rolling_horizon_parameters,
                                           nolog=False):
-        """Add a rolling horizon configuration to the dispatch model"""
+        r"""Add a rolling horizon configuration to the dispatch model
+
+        .. _note:
+
+            The amount of time steps is limited in such a way that only
+            complete time slices are used. If the time series do not
+            allow for adding another time slice, the last couple of time
+            steps of the time series are not used.
+        """
         self.update_model_configuration(rolling_horizon_parameters,
                                         nolog=nolog)
 
