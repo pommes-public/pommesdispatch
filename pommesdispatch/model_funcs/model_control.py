@@ -438,6 +438,9 @@ class DispatchModel(object):
         model_meta : dict
             A dictionary holding meta information on the model, such as
              solution times and objective value
+
+        no_solver_log : boolean
+            Show no solver logging if set to True
         """
         self.om.receive_duals()
         logging.info(
