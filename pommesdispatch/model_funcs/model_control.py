@@ -40,7 +40,7 @@ def show_meta_logging_info(model_meta):
 
 
 class DispatchModel(object):
-    """A class that holds an dispatch model.
+    """A class that holds a dispatch model.
 
     A dispatch model is a container for all the model parameters as well
     as for methods for controlling the model workflow.

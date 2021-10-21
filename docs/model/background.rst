@@ -200,7 +200,7 @@ with the individual components.
 Technical background
 ++++++++++++++++++++
 ``pommesdispatch`` builds on the framework `oemof.solph <https://github.com/oemof/oemof-solph>`_
-which allows to model energy systems in a graph-based representation
+which allows modeling energy systems in a graph-based representation
 with the underlying mathematical constraints and objective function terms
 implemented in `pyomo <https://pyomo.readthedocs.io/en/stable/>`_.
 Some of the required oemof.solph features - such as demand response modeling -
