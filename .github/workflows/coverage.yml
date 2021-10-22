@@ -54,7 +54,7 @@ jobs:
           coverage html
           coverage-badge
 
-      artifacts:
-        when: always
-        reports:
-          junit: report.xml
+    artifacts:
+      when: always
+      reports:
+        junit: report.xml
