@@ -1,4 +1,4 @@
-name: Coverage
+name: Packaging and tests
 
 on:
   push:
@@ -11,6 +11,27 @@ on:
       - dev
 
 jobs:
+  packaging:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+        
+      - name: Build dist and wheel
+        run:
+          python3 setup.py sdist bdist_wheel
+
+    artifacts:
+      expire_in: 1 day
+      paths:
+        - dist
+
   check-coverage:
     name: Check coverage
     runs-on: ubuntu-latest
@@ -32,3 +53,8 @@ jobs:
           coverage report -m
           coverage html
           coverage-badge
+
+      artifacts:
+        when: always
+        reports:
+          junit: report.xml
