@@ -117,10 +117,10 @@ def convert_annual_limit(annual_limit, start_time, end_time):
 
         # Add annual limits for full years within optimization time frame
         for i in range(full_years):
-            new_limit += annual_limit[start_year + i + 1]
+            new_limit += annual_limit
 
         # Add limits for fractions of the start year and end year
-        new_limit += (annual_limit[start_year] * start_year_fraction
-                      + annual_limit[end_year] * end_year_fraction)
+        new_limit += (annual_limit * start_year_fraction
+                      + annual_limit * end_year_fraction)
 
     return new_limit

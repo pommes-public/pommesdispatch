@@ -33,8 +33,8 @@ def create_test_config():
 
     # 3) Set input and output data paths
     input_output_parameters:
-        path_folder_input: "./csv_files/"
-        path_folder_output: "./csv_files/"
+        path_folder_input: "tests/csv_files/"
+        path_folder_output: "tests/csv_files/"
 
     # 4) Set rolling horizon parameters (optional)
     rolling_horizon_parameters:
@@ -46,12 +46,12 @@ def create_test_config():
 
 def change_to_rolling_horizon_config():
     """Change to a rolling horizon configuration to test the full model run"""
-    with open("./config.yml") as file:
+    with open("tests/config.yml") as file:
         test_config = yaml.load(file, Loader=SafeLoader)
 
     test_config["control_parameters"]["rolling_horizon"] = True
 
-    with open('./config.yml', 'w') as opf:
+    with open('tests/config_rolling_horizon.yml', 'w') as opf:
         yaml.dump(test_config, opf, default_flow_style=False)
 
 
@@ -64,11 +64,11 @@ class TestDispatchModel:
         dispatch_model.run_dispatch_model()
 
         power_prices = pd.read_csv((
-                "./csv_files/dispatch_LP_start"
+                "tests/csv_files/dispatch_LP_start"
                 + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
             index_col=0)
         dispatch_results = pd.read_csv((
-                "./csv_files/dispatch_LP_start"
+                "tests/csv_files/dispatch_LP_start"
                 + "-2017-01-01_0-days_simple_complete_production.csv"),
             index_col=0)
 
@@ -102,14 +102,16 @@ class TestDispatchModel:
         """test function run_dispatch_model for a rolling horizon model run"""
         create_test_config()
         change_to_rolling_horizon_config()
-        dispatch_model.run_dispatch_model()
+        dispatch_model.run_dispatch_model(
+            config_file="tests/config_rolling_horizon.yml"
+        )
 
         power_prices = pd.read_csv((
-                "./csv_files/dispatch_LP_start"
+                "tests/csv_files/dispatch_LP_start"
                 + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
             index_col=0)
         dispatch_results_de = pd.read_csv((
-                "./csv_files/dispatch_LP_start"
+                "tests/csv_files/dispatch_LP_start"
                 + "-2017-01-01_0-days_RH_complete_production.csv"),
             index_col=0)
 

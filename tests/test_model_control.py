@@ -30,8 +30,8 @@ def return_model_and_parameters():
         "freq": "60min"}
 
     input_output_parameters = {
-        "path_folder_input": "./csv_files/",
-        "path_folder_output": "./csv_files/"}
+        "path_folder_input": "tests/csv_files/",
+        "path_folder_output": "tests/csv_files/"}
 
     all_parameters = {**control_parameters, **time_parameters,
                       **input_output_parameters}
