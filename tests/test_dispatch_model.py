@@ -40,7 +40,7 @@ def create_test_config():
     rolling_horizon_parameters:
         time_slice_length_wo_overlap_in_hours: 2
         overlap_in_hours: 1"""
-    with open("./config.yml", "w") as opf:
+    with open("tests/config.yml", "w") as opf:
         opf.write(content)
 
 
