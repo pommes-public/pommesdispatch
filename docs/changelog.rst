@@ -10,6 +10,8 @@ Initial public release of ``pommesdispatch`` available on PyPI
 * Made input data dependent on years / flexible for years from ``pommesdata`` (2017 until 2030)
 * Introduced console scripts for configuring and running
 * Added poetry build
+* Added tests (with coverage of 88%)
+* Added linting CI
 * Included CITATION.cff
 * Used version numbering convention
 
