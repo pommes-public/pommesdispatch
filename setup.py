@@ -77,7 +77,7 @@ setup(
     ],
     python_requires='>=3.8',
     extras_require={'dev': ['pytest', 'sphinx', 'sphinx_rtd_theme',
-                            "sphinx-copybutton"]},
+                            "sphinx_copybutton"]},
     include_package_data=True,
     zip_safe=False,
 )
