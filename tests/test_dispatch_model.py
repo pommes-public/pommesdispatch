@@ -63,44 +63,41 @@ class TestDispatchModel:
         create_test_config()
         dispatch_model.run_dispatch_model()
 
-        try:
-            power_prices = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
-                index_col=0)
-            dispatch_results = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_simple_complete_production.csv"),
-                index_col=0)
+        power_prices = pd.read_csv((
+                "./csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
+            index_col=0)
+        dispatch_results = pd.read_csv((
+                "./csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_simple_complete_production.csv"),
+            index_col=0)
 
-            cols = [
-                "(('AT_bus_el', 'None'), 'duals')",
-                "(('DE_link_AT', 'AT_bus_el'), 'flow')",
-                "(('DE_bus_el', 'DE_link_AT'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
-                "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
-                "(('DE_bus_el', 'None'), 'duals')",
-                "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
-                "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
-                "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+        cols = [
+            "(('AT_bus_el', 'None'), 'duals')",
+            "(('DE_link_AT', 'AT_bus_el'), 'flow')",
+            "(('DE_bus_el', 'DE_link_AT'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
+            "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
+            "(('DE_bus_el', 'None'), 'duals')",
+            "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
 
-            assert power_prices.shape == (5, 1)
-            assert dispatch_results.shape == (5, 19)
-            for col in cols:
-                assert col in list(dispatch_results.columns)
+        assert power_prices.shape == (5, 1)
+        assert dispatch_results.shape == (5, 19)
+        for col in cols:
+            assert col in list(dispatch_results.columns)
 
-        except FileNotFoundError as e:
-            raise e
 
     def test_run_dispatch_model_rolling_horizon(self):
         """test function run_dispatch_model for a rolling horizon model run"""
@@ -108,39 +105,35 @@ class TestDispatchModel:
         change_to_rolling_horizon_config()
         dispatch_model.run_dispatch_model()
 
-        try:
-            power_prices = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
-                index_col=0)
-            dispatch_results_de = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_RH_complete_production.csv"),
-                index_col=0)
+        power_prices = pd.read_csv((
+                "./csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
+            index_col=0)
+        dispatch_results_de = pd.read_csv((
+                "./csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_RH_complete_production.csv"),
+            index_col=0)
 
-            cols = [
-                "(('DE_bus_el', 'DE_link_AT'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
-                "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
-                "(('DE_bus_el', 'None'), 'duals')",
-                "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
-                "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
-                "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+        cols = [
+            "(('DE_bus_el', 'DE_link_AT'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
+            "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
+            "(('DE_bus_el', 'None'), 'duals')",
+            "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
 
-            assert power_prices.shape == (4, 1)
-            assert dispatch_results_de.shape == (4, 17)
-            for col in cols:
-                assert col in list(dispatch_results_de.columns)
-
-        except FileNotFoundError as e:
-            raise e
+        assert power_prices.shape == (4, 1)
+        assert dispatch_results_de.shape == (4, 17)
+        for col in cols:
+            assert col in list(dispatch_results_de.columns)
