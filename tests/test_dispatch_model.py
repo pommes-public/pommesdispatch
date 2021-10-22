@@ -98,7 +98,6 @@ class TestDispatchModel:
         for col in cols:
             assert col in list(dispatch_results.columns)
 
-
     def test_run_dispatch_model_rolling_horizon(self):
         """test function run_dispatch_model for a rolling horizon model run"""
         create_test_config()
