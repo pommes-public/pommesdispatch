@@ -1,4 +1,4 @@
-name: Black
+name: Flake8
 
 on:
   push:
