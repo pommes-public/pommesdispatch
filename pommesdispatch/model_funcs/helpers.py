@@ -16,14 +16,14 @@ from datetime import datetime
 
 def days_between(d1, d2):
     """Calculate the difference in days between two days
-    
-    Parameters:
+
+    Parameters
     ----------
     d1 : str
         The first date string
     d2 : str
         The second date string
-    
+
     Returns
     -------
     day_diff: int
@@ -38,8 +38,8 @@ def days_between(d1, d2):
 
 def time_steps_between_timestamps(ts1, ts2, freq):
     """Calculate the difference in hours between two timesteps
-    
-    Parameters:
+
+    Parameters
     ----------
     ts1 : pd.Timestamp
         The first timestamp
@@ -47,7 +47,7 @@ def time_steps_between_timestamps(ts1, ts2, freq):
         The second timestamp
     freq: str
         The frequency information, e.g. '60min', '15min'
-    
+
     Returns
     -------
     hour_diff: int
@@ -117,10 +117,10 @@ def convert_annual_limit(annual_limit, start_time, end_time):
 
         # Add annual limits for full years within optimization time frame
         for i in range(full_years):
-            new_limit += annual_limit[start_year + i + 1]
+            new_limit += annual_limit
 
         # Add limits for fractions of the start year and end year
-        new_limit += (annual_limit[start_year] * start_year_fraction
-                      + annual_limit[end_year] * end_year_fraction)
+        new_limit += (annual_limit * start_year_fraction
+                      + annual_limit * end_year_fraction)
 
     return new_limit

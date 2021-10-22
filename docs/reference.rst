@@ -3,17 +3,21 @@ Reference docs
 
 .. contents::
 
-pommes_dispatch.model
----------------------
-The ``pommes_dispatch.model`` package contains the actual model which
-is a single file ``dispatch_model.py`` that can be run in a python editor.
-For usage please see :ref:`using`.
+pommesdispatch.cli
+------------------
+`cli.py` is the command line interface. The method `run_pommes_dispatch` triggers
+a ``pommesdispatch`` model run. For usage please see :ref:`using`.
 
-pommes_dispatch.model_funcs
+pommesdispatch.model
+---------------------
+The ``pommesdispatch.model`` package contains the actual model which
+is a single file ``dispatch_model.py``.
+
+pommesdispatch.model_funcs
 ---------------------------
-The ``pommes_dispatch.model_funcs`` package contains a collection of functions,
-classes and methods that are needed to run a dispatch model in
-``pommes_dispatch.model.dispatch_model.py``.
+The ``pommesdispatch.model_funcs`` package contains a collection of functions,
+classes and methods that are needed to create a dispatch model in
+``pommesdispatch.model.dispatch_model.py``.
 
 Modules
 +++++++
@@ -36,4 +40,4 @@ Modules
   model, but facilitating its setup and parameterization.
 
 For an in-depth documentation of all modules, functions, classes and methods,
-see the :doc:`api`.
+see the :doc:`api/api`.

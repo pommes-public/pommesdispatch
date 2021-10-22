@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 General description
-------------------
+-------------------
 This file contains all subroutines used for reading in input data
 for the dispatch variant of POMMES.
 
@@ -27,9 +27,8 @@ import pandas as pd
 
 
 def load_input_data(filename=None,
-                    path_folder_input='../../data/input/',
-                    countries=None,
-                    reindex=False):
+                    path_folder_input='.inputs/',
+                    countries=None):
     r"""Load input data from csv files.
 
     Optionally reindex time series in order to simulate 2030 (or another year).
@@ -46,10 +45,6 @@ def load_input_data(filename=None,
     countries : :obj:`list` of str
         List of countries to be simulated
 
-    reindex : boolean
-        If reindex is True, the year 2030 will be used for reindexing
-        time series data
-
     Returns
     -------
     df : :class:`pandas.DataFrame`
@@ -59,27 +54,6 @@ def load_input_data(filename=None,
 
     if 'country' in df.columns and countries is not None:
         df = df[df['country'].isin(countries)]
-
-    # TODO: Adjust data prep so this can be removed!
-    if (('_ts' in filename
-         or 'market_values' in filename
-         or 'min_loads' in filename)
-            and reindex is True):
-        df.index = pd.DatetimeIndex(df.index)
-        df.index.freq = 'H'
-        date_diff = (df.index[0]
-                     - pd.Timestamp("2017-01-01 00:00:00",
-                                    tz=df.index.tz))
-        ts_start = (pd.Timestamp("2030-01-01 00:00:00",
-                                 tz=df.index.tz)
-                    + date_diff)
-        # account for leap years
-        if ts_start.month == 12:
-            ts_start = ts_start + pd.Timedelta("1 days")
-        new_index = pd.date_range(start=ts_start,
-                                  periods=df.shape[0],
-                                  freq=df.index.freq)
-        df.index = new_index
 
     if df.isna().any().any() and '_ts' in filename:
         print(
@@ -93,7 +67,7 @@ def load_input_data(filename=None,
 
 def create_buses(input_data, node_dict):
     r"""Create buses and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -131,7 +105,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
-    
+
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -162,8 +136,8 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
                             solph.Flow(
                                 nominal_value=l[dispatch_model.year],
                                 max=input_data['linking_transformers_ts'][i][
-                                    dispatch_model.start_time
-                                    :dispatch_model.end_time].to_numpy())},
+                                    dispatch_model.start_time:
+                                    dispatch_model.end_time].to_numpy())},
                     outputs={node_dict[l['to']]: solph.Flow()},
                     conversion_factors={
                         (node_dict[l['from']], node_dict[l['to']]):
@@ -178,7 +152,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
 
 def create_commodity_sources(input_data, dispatch_model, node_dict):
     r"""Create commodity sources and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -194,7 +168,7 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Modified dictionary containing all nodes of the EnergySystem including 
+        Modified dictionary containing all nodes of the EnergySystem including
         the commodity source elements
     """
     # Regular commodity sources
@@ -222,7 +196,7 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
 # TODO: Show a warning if shortage or excess is active
 def create_shortage_sources(input_data, node_dict):
     r"""Create shortage sources and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -236,7 +210,7 @@ def create_shortage_sources(input_data, node_dict):
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Modified dictionary containing all nodes of the EnergySystem including
-        the shortage source elements 
+        the shortage source elements
     """
     for i, s in input_data["sources_shortage"].iterrows():
         node_dict[i] = solph.Source(
@@ -249,7 +223,7 @@ def create_shortage_sources(input_data, node_dict):
 
 def create_renewables(input_data, dispatch_model, node_dict):
     r"""Create renewable sources and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -275,8 +249,8 @@ def create_renewables(input_data, dispatch_model, node_dict):
                 outputs={node_dict[re['to']]: solph.Flow(
                     fix=np.array(
                         input_data['sources_renewables_ts'][i][
-                            dispatch_model.start_time
-                            :dispatch_model.end_time]),
+                            dispatch_model.start_time:
+                            dispatch_model.end_time]),
                     nominal_value=re['capacity'])})
         except KeyError:
             print(re)
@@ -287,7 +261,7 @@ def create_renewables(input_data, dispatch_model, node_dict):
 def create_demand(input_data, dispatch_model, node_dict,
                   dr_overall_load_ts_df=None):
     r"""Create demand sinks and add them to the dict of nodes.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -317,8 +291,8 @@ def create_demand(input_data, dispatch_model, node_dict,
             'label': i,
             'inputs': {node_dict[d['from']]: solph.Flow(
                 fix=np.array(input_data['sinks_demand_el_ts'][i][
-                             dispatch_model.start_time
-                             :dispatch_model.end_time]),
+                             dispatch_model.start_time:
+                             dispatch_model.end_time]),
                 nominal_value=d['maximum'])}}
 
         # TODO: Include into data preparation and write adjusted demand
@@ -329,13 +303,13 @@ def create_demand(input_data, dispatch_model, node_dict,
                 kwargs_dict['inputs'] = {node_dict[d['from']]: solph.Flow(
                     fix=np.array(
                         input_data['sinks_demand_el_ts'][i][
-                                 dispatch_model.start_time
-                                 :dispatch_model.end_time]
+                                 dispatch_model.start_time:
+                                 dispatch_model.end_time]
                         .mul(d['maximum'])
                         .sub(
                             dr_overall_load_ts_df[
-                                dispatch_model.start_time
-                                :dispatch_model.end_time])),
+                                dispatch_model.start_time:
+                                dispatch_model.end_time])),
                     nominal_value=1)}
 
         node_dict[i] = solph.Sink(**kwargs_dict)
@@ -453,21 +427,21 @@ def create_excess_sinks(input_data, node_dict):
     The German excess sink is additionally connected to the renewable buses
     including punishment costs, which is needed to model negative prices.
     It is therefore excluded in the DataFrame that is read in.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
         The input data given as a dict of DataFrames
         with component names as keys
-    
+
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Dictionary containing all nodes of the EnergySystem  
+        Dictionary containing all nodes of the EnergySystem
 
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Modified dictionary containing all nodes of the EnergySystem including 
-        the excess sink elements 
+        Modified dictionary containing all nodes of the EnergySystem including
+        the excess sink elements
     """
     for i, e in input_data["sinks_excess"].iterrows():
         node_dict[i] = solph.Sink(
@@ -493,22 +467,22 @@ def create_excess_sinks(input_data, node_dict):
 
 def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
     r"""Build a CHP transformer (fixed relation heat / power)
-    
+
     Parameters
     ----------
     i : :obj:`str`
         label of current transformer (within iteration)
-    
+
     t : :obj:`pd.Series`
         pd.Series containing attributes for transformer component
         (row-wise data entries)
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Dictionary containing all nodes of the EnergySystem     
-    
+        Dictionary containing all nodes of the EnergySystem
+
     outflow_args_el: :obj:`dict`
         Dictionary holding the values for electrical outflow arguments
-    
+
     outflow_args_th: :obj:`dict`
         Dictionary holding the values for thermal outflow arguments
 
@@ -538,22 +512,22 @@ def build_var_chp_units(i, t, node_dict, outflow_args_el,
     These are modeled as extraction turbine CHP units and can choose
     between full condensation mode, full coupling mode
     and any allowed state in between.
-    
+
     Parameters
     ----------
     i : :obj:`str`
         label of current transformer (within iteration)
-    
+
     t : :obj:`pd.Series`
         pd.Series containing attributes for transformer component
         (row-wise data entries)
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Dictionary containing all nodes of the EnergySystem     
-    
+        Dictionary containing all nodes of the EnergySystem
+
     outflow_args_el: :obj:`dict`
         Dictionary holding the values for electrical outflow arguments
-    
+
     outflow_args_th: :obj:`dict`
         Dictionary holding the values for thermal outflow arguments
 
@@ -580,19 +554,19 @@ def build_var_chp_units(i, t, node_dict, outflow_args_el,
 
 def build_condensing_transformer(i, t, node_dict, outflow_args_el):
     r"""Build a regular condensing transformer
-    
+
     Parameters
     ----------
     i : :obj:`str`
         label of current transformer (within iteration)
-    
+
     t : :obj:`pd.Series`
         pd.Series containing attributes for transformer component
         (row-wise data entries)
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
-        Dictionary containing all nodes of the EnergySystem     
-    
+        Dictionary containing all nodes of the EnergySystem
+
     outflow_args_el: :obj:`dict`
         Dictionary holding the values for electrical outflow arguments
 
@@ -615,7 +589,7 @@ def create_transformers_conventional(input_data,
                                      dispatch_model,
                                      node_dict):
     r"""Create transformers elements and add them to the dict of nodes
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
@@ -659,46 +633,46 @@ def create_transformers_conventional(input_data,
                 if t['identifier'] in input_data['min_loads_dh'].columns:
                     outflow_args_el['min'] = (
                         input_data['min_loads_dh'].loc[
-                            dispatch_model.start_time
-                            :dispatch_model.end_time,
+                            dispatch_model.start_time:
+                            dispatch_model.end_time,
                             t['identifier']].to_numpy())
                 elif t['fuel'] in ['natgas', 'hardcoal', 'lignite']:
                     outflow_args_el['min'] = (
                         input_data['transformers_minload_ts'].loc[
-                            dispatch_model.start_time
-                            :dispatch_model.end_time,
+                            dispatch_model.start_time:
+                            dispatch_model.end_time,
                             'chp_' + t['fuel']].to_numpy())
                 else:
                     outflow_args_el['min'] = (
                         input_data['transformers_minload_ts'].loc[
-                            dispatch_model.start_time
-                            :dispatch_model.end_time,
+                            dispatch_model.start_time:
+                            dispatch_model.end_time,
                             'chp'].to_numpy())
 
             if t['type'] == 'ipp':
                 if t['identifier'] in input_data['min_loads_ipp'].columns:
                     outflow_args_el['min'] = (
                         input_data['min_loads_ipp'].loc[
-                            dispatch_model.start_time
-                            :dispatch_model.end_time,
+                            dispatch_model.start_time:
+                            dispatch_model.end_time,
                             t['identifier']].to_numpy())
                 else:
                     outflow_args_el['min'] = (
                         input_data['transformers_minload_ts'].loc[
-                            dispatch_model.start_time
-                            :dispatch_model.end_time,
+                            dispatch_model.start_time:
+                            dispatch_model.end_time,
                             'ipp'].to_numpy())
 
         if t['country'] in ['AT', 'FR'] and t['country'] == 'natgas':
             outflow_args_el['min'] = (
                 input_data['transformers_minload_ts'].loc[
-                    dispatch_model.start_time
-                    :dispatch_model.end_time,
+                    dispatch_model.start_time:
+                    dispatch_model.end_time,
                     t['country'] + '_natgas'].to_numpy())
             outflow_args_el['max'] = (
                     input_data['transformers_minload_ts'].loc[
-                        dispatch_model.start_time
-                        :dispatch_model.end_time,
+                        dispatch_model.start_time:
+                        dispatch_model.end_time,
                         t['country'] + '_natgas'].to_numpy() + 0.01)
 
         node_dict[i] = build_condensing_transformer(
@@ -739,13 +713,13 @@ def create_transformers_res(input_data,
                     input_data['costs_operation_renewables'].at[i, 'costs']
                     + np.array(
                         input_data['costs_market_values'][
-                            t['from']][dispatch_model.start_time
-                                       :dispatch_model.end_time])),
+                            t['from']][dispatch_model.start_time:
+                                       dispatch_model.end_time])),
                 'min': t['min_load_factor'],
                 'max': np.array(
                     input_data['sources_renewables_ts'][
-                        t['from']][dispatch_model.start_time
-                                   :dispatch_model.end_time]),
+                        t['from']][dispatch_model.start_time:
+                                   dispatch_model.end_time]),
                 'positive_gradient': {
                     'ub': t['grad_pos'],
                     'costs': input_data['costs_ramping'].loc[
@@ -776,18 +750,18 @@ def create_transformers_res(input_data,
                             nominal_value=t['capacity'],
                             fix=np.array(
                                 input_data['sources_renewables_ts'][
-                                    t['from']][dispatch_model.start_time
-                                               :dispatch_model.end_time]))},
+                                    t['from']][dispatch_model.start_time:
+                                               dispatch_model.end_time]))},
                 conversion_factors={node_dict[t['to_el']]: t['efficiency_el']})
 
     return node_dict
 
 
 def create_storages(input_data, dispatch_model, node_dict):
-    r"""Create storages and add the to the dict of nodes.
-    
+    r"""Create storages and add them to the dict of nodes.
+
     Parameters
-    ----------   
+    ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`
         The input data given as a dict of DataFrames
         with component names as keys
@@ -797,7 +771,7 @@ def create_storages(input_data, dispatch_model, node_dict):
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
         Dictionary containing all nodes of the EnergySystem
-        
+
     Returns
     -------
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -856,7 +830,7 @@ def create_storages(input_data, dispatch_model, node_dict):
 def create_storages_rolling_horizon(input_data, dispatch_model, node_dict,
                                     iteration_results):
     r"""Create storages, add them to the dict of nodes, return storage labels.
-    
+
     Parameters
     ----------
     input_data: :obj:`dict` of :class:`pd.DataFrame`

@@ -1,0 +1,44 @@
+abstract: "pommesdispatch. A bottom-up fundamental power market model for the German electricity sector. https://github.com/pommes-public/pommesdispatch, accessed YYYY-MM-DD."
+authors: 
+  - family-names: Kochems
+    given-names: Johannes
+    orcid: "https://orcid.org/0000-0002-3461-3679"
+  - family-names: Werner
+    given-names: Yannick
+    orcid: "https://orcid.org/0000-0002-6674-805X"
+  - family-names: Giehl
+    given-names: Johannes
+    orcid: "https://orcid.org/0000-0002-1769-1907"
+  - family-names: Grosse
+    given-names: Benjamin
+    orcid: "https://orcid.org/0000-0002-3323-9734"
+  - family-names: Westphal
+    given-names: Sophie
+  - family-names: "Mikulicz-Radecki"
+    given-names: Flora
+  - family-names: Spiller
+    given-names: Carla
+  - family-names: "Büllesbach"
+    given-names: Fabian
+  - family-names: Ghosh
+    given-names: Timona
+  - family-names: Verwiebe
+    given-names: Paul
+    orcid: "https://orcid.org/0000-0002-6877-2846"
+  - family-names: "Encinas-Rosa"
+    given-names: Leticia
+  - family-names: "Müller-Kirchenbauer"
+    given-names: Joachim
+cff-version: "1.1.0"
+date-released: 2021-10-15
+doi: https://doi.org/
+keywords: 
+  - "power market"
+  - "fundamental model"
+  - "dispatch"
+  - "power price"
+  - "oemof.solph"
+license: "MIT license"
+message: "If you use this software, please cite as follows."
+title: pommesdispatch
+version: "0.1.0"

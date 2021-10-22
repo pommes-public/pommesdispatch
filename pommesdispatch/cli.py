@@ -1,4 +1,8 @@
-# Determine the model configuration
+from pommesdispatch.model.dispatch_model import run_dispatch_model, add_args
+
+
+def create_default_config():
+    content = """# Determine the model configuration
 
 # 1) Set overall workflow control parameters
 control_parameters:
@@ -32,4 +36,18 @@ input_output_parameters:
 # 4) Set rolling horizon parameters (optional)
 rolling_horizon_parameters:
     time_slice_length_wo_overlap_in_hours: 24
-    overlap_in_hours: 12
+    overlap_in_hours: 12"""
+    with open("./config.yml", "w") as opf:
+        opf.write(content)
+
+
+def run_pommes_dispatch():
+    args = add_args()
+    if args.init:
+        create_default_config()
+        return
+    run_dispatch_model(args.file)
+
+
+if __name__ == "__main__":
+    run_pommes_dispatch()

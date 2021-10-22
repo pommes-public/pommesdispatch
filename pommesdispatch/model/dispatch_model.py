@@ -9,11 +9,14 @@ at TU Berlin and is now maintained by a developer group of alumni.
 The source code is freely available under MIT license.
 Usage of the model is highly encouraged. Contributing is welcome as well.
 
-Git And Documentation
----------------------
-The project files contain extensive DocString as well as inline comments.
-For additional information, see the wiki: 
-https://git.tu-berlin.de/POMMES/POMMES/wikis/home
+Repository, Documentation, Installation
+---------------------------------------
+All founds are hosted on
+`GitHub <https://github.com/pommes-public/pommesdispatch>`_
+
+To install, simply type ``pip install pommesdispatch``
+
+Please find the documentation `here <https://pommesdispatch.readthedocs.io/>`_
 
 Licensing information and Disclaimer
 ------------------------------------
@@ -29,14 +32,12 @@ or its data inputs.
 
 Input Data
 ----------
-Input data can be compiled using the POMMES_data package.
+Input data can be compiled using the ``pommesdata`` package.
 A precompiled version is distributed with the dispatch model.
 
 Installation requirements
 -------------------------
-Python version >= 3.8
-oemof version 0.4.4
-
+See `environments.yml` file
 
 @author: Johannes Kochems (*), Yannick Werner (*), Johannes Giehl,
 Benjamin Grosse
@@ -48,9 +49,9 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 (*) Corresponding authors
 """
 
+import argparse
 import logging
 import time
-import argparse
 
 import pandas as pd
 import yaml
@@ -58,12 +59,12 @@ from oemof.solph import processing
 from oemof.solph import views
 from yaml.loader import SafeLoader
 
-from pommes_dispatch.model_funcs import model_control
+from pommesdispatch.model_funcs import model_control
 
 
-def run_dispatch_model(config_file="../../../config.yml"):
+def run_dispatch_model(config_file="./config.yml"):
     """
-    Run a pommes-dispatch model.
+    Run a pommesdispatch model.
 
     Read in config information from a yaml file, initialize and run a
     dispatch model and process results.
@@ -72,7 +73,7 @@ def run_dispatch_model(config_file="../../../config.yml"):
     ----------
     config_file: str
         A file holding the necessary configuration information for
-        a pommes-dispatch model
+        a pommesdispatch model
     """
     # ---- MODEL CONFIGURATION ----
 
@@ -85,12 +86,14 @@ def run_dispatch_model(config_file="../../../config.yml"):
         config["control_parameters"],
         config["time_parameters"],
         config["input_output_parameters"],
-        nolog=True)
+        nolog=True
+    )
 
     if dm.rolling_horizon:
         dm.add_rolling_horizon_configuration(
             config["rolling_horizon_parameters"],
-            nolog=True)
+            nolog=True
+        )
 
     dm.initialize_logging()
     dm.check_model_configuration()
@@ -113,9 +116,16 @@ def run_dispatch_model(config_file="../../../config.yml"):
         dm.build_simple_model()
 
         dm.om.receive_duals()
-        logging.info("Obtaining dual values and reduced costs from the model\n"
-                     "in order to calculate power prices.")
+        logging.info(
+            "Obtaining dual values and reduced costs from the model\n"
+            "in order to calculate power prices."
+        )
 
+        if dm.write_lp_file:
+            dm.om.write(
+                dm.path_folder_output + "pommesdispatch_model.lp",
+                io_options={"symbolic_solver_labels": True}
+            )
         dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
         meta_results = processing.meta_results(dm.om)
 
@@ -128,10 +138,10 @@ def run_dispatch_model(config_file="../../../config.yml"):
     if dm.rolling_horizon:
         logging.info(
             "Creating a LP optimization model for dispatch optimization\n"
-            "using a ROLLING HORIZON approach for model solution.")
+            "using a ROLLING HORIZON approach for model solution."
+        )
 
         # Initialization of rolling horizon model run
-        counter = 0
         iteration_results = {
             "storages_initial": pd.DataFrame(),
             "model_results": {},
@@ -144,11 +154,15 @@ def run_dispatch_model(config_file="../../../config.yml"):
             dm.build_rolling_horizon_model(counter, iteration_results)
 
             # Solve rolling horizon model
-            dm.solve_rolling_horizon_model(counter, iteration_results,
-                                           model_meta)
+            dm.solve_rolling_horizon_model(
+                counter, iteration_results, model_meta
+            )
 
             # Get initial states for the next model run from results
             dm.retrieve_initial_states_rolling_horizon(iteration_results)
+
+        dispatch_results = iteration_results["dispatch_results"]
+        power_prices = iteration_results["power_prices"]
 
     model_meta["overall_time"] = time.mktime(time.gmtime()) - time.mktime(ts)
 
@@ -159,32 +173,46 @@ def run_dispatch_model(config_file="../../../config.yml"):
     if not dm.rolling_horizon:
         model_results = processing.results(dm.om)
 
-        buses_el_views = [country + '_bus_el' for country in dm.countries]
+        buses_el_views = [country + "_bus_el" for country in dm.countries]
         dispatch_results = pd.concat(
-            [views.node(model_results, bus_el)['sequences']
-             for bus_el in buses_el_views], axis=1
+            [
+                views.node(model_results, bus_el)["sequences"]
+                for bus_el in buses_el_views
+            ],
+            axis=1
         )
 
     if dm.save_production_results:
-        dispatch_results.to_csv(dm.path_folder_output + getattr(dm, "filename")
-                                + '_production.csv', sep=',', decimal='.')
+        dispatch_results.to_csv(
+            dm.path_folder_output + getattr(dm, "filename")
+            + '_production.csv',
+            sep=',',
+            decimal='.'
+        )
 
     if dm.save_price_results:
         power_prices.to_csv(
             dm.path_folder_output + getattr(dm, "filename")
-            + '_power-prices.csv', sep=',', decimal='.')
+            + '_power-prices.csv',
+            sep=',',
+            decimal='.'
+        )
 
 
 def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", required=False,
-                        default="../../../config.yml",
-                        help="Specify input config file")
+    parser.add_argument(
+        "-f", "--file",
+        required=False,
+        default="./config.yml",
+        help="Specify input config file"
+    )
+    parser.add_argument(
+        "--init",
+        required=False,
+        action="store_true",
+        help="Automatically generate default config"
+    )
     args = parser.parse_args()
-    return args.file
-
-
-if __name__ == "__main__":
-    config_yml = add_args()
-    run_dispatch_model(config_yml)
+    return args
