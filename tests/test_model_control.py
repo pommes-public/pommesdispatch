@@ -11,8 +11,7 @@ def return_model_and_parameters():
         "rolling_horizon": False,
         "aggregate_input": False,
         "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR',
-                      'NL',
-                      'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
+                      'NL', 'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
                       'SE1', 'SE2', 'SE3', 'SE4'],
         "solver": "gurobi",
         "fuel_cost_pathway": "middle",
@@ -31,8 +30,8 @@ def return_model_and_parameters():
         "freq": "60min"}
 
     input_output_parameters = {
-        "path_folder_input": "./csv_files/",
-        "path_folder_output": "./csv_files/"}
+        "path_folder_input": "tests/csv_files/",
+        "path_folder_output": "tests/csv_files/"}
 
     all_parameters = {**control_parameters, **time_parameters,
                       **input_output_parameters}
@@ -154,9 +153,9 @@ class TestModelControl:
         agg_string, dr_string = dm.show_configuration_log()
         assert agg_string == "Using the AGGREGATED POWER PLANT DATA SET"
         assert dr_string == (
-            f"Using approach 'DLR' "
-            f"for DEMAND RESPONSE modeling\n"
-            f"Considering a 50% scenario")
+            "Using approach 'DLR' "
+            "for DEMAND RESPONSE modeling\n"
+            "Considering a 50% scenario")
 
     def test_build_simple_model(self):
         """test method build_simple_model of class DispatchModel"""

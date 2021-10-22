@@ -1,0 +1,11 @@
+[paths]
+source = pommesdispatch
+
+[run]
+source =
+    pommesdispatch
+    tests
+omit = 
+	*test*
+	*__init__*
+	*__main__*

@@ -9,7 +9,7 @@ def create_inputs_model_and_nodes():
     """Create and return input data, a dispatch model and a node dict"""
     dm = model_control.DispatchModel()
     dm.update_model_configuration(
-        {"path_folder_input": "./csv_files/",
+        {"path_folder_input": "tests/csv_files/",
          "fuel_cost_pathway": "middle",
          "start_time": "2017-01-01 00:00:00",
          "end_time": "2017-01-02 00:00:00",
@@ -32,7 +32,7 @@ class TestSubroutines:
         """test function load_input_data"""
         csv_file = subroutines.load_input_data(
             filename="transformers_minload_ts_2017_w_nans",
-            path_folder_input='./csv_files/',
+            path_folder_input='tests/csv_files/',
             countries=["DE", "AT", "FR"])
 
         assert csv_file.columns.all() == pd.Index(

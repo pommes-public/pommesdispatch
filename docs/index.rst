@@ -1,5 +1,20 @@
 .. pommesdispatch documentation master file
 
+.. image:: https://img.shields.io/pypi/v/pommesdispatch
+   :alt: PyPI
+
+.. image:: https://img.shields.io/pypi/pyversions/pommesdispatch
+   :alt: PyPI - Python Version
+
+.. image:: https://readthedocs.org/projects/pommesdispatch/badge/?version=latest
+   :target: https://vencopy.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/l/pommesdispatch
+   :alt: PyPI - License
+
+------------------------------
+
 Welcome to pommesdispatch's documentation!
 ===========================================
 

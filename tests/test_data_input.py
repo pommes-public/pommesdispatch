@@ -8,7 +8,7 @@ def create_dispatch_model():
     """Create a dispatch model and attribute it with some information"""
     dm = model_control.DispatchModel()
     dm.update_model_configuration(
-        {"path_folder_input": "./csv_files/",
+        {"path_folder_input": "tests/csv_files/",
          "fuel_cost_pathway": "middle",
          "start_time": "2017-01-01 00:00:00",
          "end_time": "2017-01-02 00:00:00",

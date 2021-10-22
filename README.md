@@ -1,3 +1,8 @@
+![PyPI](https://img.shields.io/pypi/v/pommesdispatch)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pommesdispatch)
+![Documentation Status](https://readthedocs.org/projects/pommesdispatch/badge/?version=latest)
+![PyPI - License](https://img.shields.io/pypi/l/pommesdispatch)
+
 # pommesdispatch
 
 **A bottom-up fundamental power market model for the German electricity sector**

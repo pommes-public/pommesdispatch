@@ -33,25 +33,25 @@ def create_test_config():
 
     # 3) Set input and output data paths
     input_output_parameters:
-        path_folder_input: "./csv_files/"
-        path_folder_output: "./csv_files/"
+        path_folder_input: "tests/csv_files/"
+        path_folder_output: "tests/csv_files/"
 
     # 4) Set rolling horizon parameters (optional)
     rolling_horizon_parameters:
         time_slice_length_wo_overlap_in_hours: 2
         overlap_in_hours: 1"""
-    with open("./config.yml", "w") as opf:
+    with open("tests/config.yml", "w") as opf:
         opf.write(content)
 
 
 def change_to_rolling_horizon_config():
     """Change to a rolling horizon configuration to test the full model run"""
-    with open("./config.yml") as file:
+    with open("tests/config.yml") as file:
         test_config = yaml.load(file, Loader=SafeLoader)
 
     test_config["control_parameters"]["rolling_horizon"] = True
 
-    with open('./config.yml', 'w') as opf:
+    with open('tests/config_rolling_horizon.yml', 'w') as opf:
         yaml.dump(test_config, opf, default_flow_style=False)
 
 
@@ -63,84 +63,78 @@ class TestDispatchModel:
         create_test_config()
         dispatch_model.run_dispatch_model()
 
-        try:
-            power_prices = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
-                index_col=0)
-            dispatch_results = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_simple_complete_production.csv"),
-                index_col=0)
+        power_prices = pd.read_csv((
+                "tests/csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
+            index_col=0)
+        dispatch_results = pd.read_csv((
+                "tests/csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_simple_complete_production.csv"),
+            index_col=0)
 
-            cols = [
-                "(('AT_bus_el', 'None'), 'duals')",
-                "(('DE_link_AT', 'AT_bus_el'), 'flow')",
-                "(('DE_bus_el', 'DE_link_AT'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
-                "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
-                "(('DE_bus_el', 'None'), 'duals')",
-                "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
-                "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
-                "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+        cols = [
+            "(('AT_bus_el', 'None'), 'duals')",
+            "(('DE_link_AT', 'AT_bus_el'), 'flow')",
+            "(('DE_bus_el', 'DE_link_AT'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
+            "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
+            "(('DE_bus_el', 'None'), 'duals')",
+            "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
 
-            assert power_prices.shape == (5, 1)
-            assert dispatch_results.shape == (5, 19)
-            for col in cols:
-                assert col in list(dispatch_results.columns)
-
-        except FileNotFoundError as e:
-            raise e
+        assert power_prices.shape == (5, 1)
+        assert dispatch_results.shape == (5, 19)
+        for col in cols:
+            assert col in list(dispatch_results.columns)
 
     def test_run_dispatch_model_rolling_horizon(self):
         """test function run_dispatch_model for a rolling horizon model run"""
         create_test_config()
         change_to_rolling_horizon_config()
-        dispatch_model.run_dispatch_model()
+        dispatch_model.run_dispatch_model(
+            config_file="tests/config_rolling_horizon.yml"
+        )
 
-        try:
-            power_prices = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
-                index_col=0)
-            dispatch_results_de = pd.read_csv((
-                    "./csv_files/dispatch_LP_start"
-                    + "-2017-01-01_0-days_RH_complete_production.csv"),
-                index_col=0)
+        power_prices = pd.read_csv((
+                "tests/csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
+            index_col=0)
+        dispatch_results_de = pd.read_csv((
+                "tests/csv_files/dispatch_LP_start"
+                + "-2017-01-01_0-days_RH_complete_production.csv"),
+            index_col=0)
 
-            cols = [
-                "(('DE_bus_el', 'DE_link_AT'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
-                "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
-                "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
-                "(('DE_bus_el', 'None'), 'duals')",
-                "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
-                "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
-                "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
-                "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-                "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+        cols = [
+            "(('DE_bus_el', 'DE_link_AT'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_excess'), 'flow')",
+            "(('DE_bus_el', 'DE_sink_el_load'), 'flow')",
+            "(('DE_bus_el', 'DE_storage_el_PHS'), 'flow')",
+            "(('DE_bus_el', 'None'), 'duals')",
+            "(('DE_solarPV_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
+            "(('DE_transformer_hardcoal_BNA0216a', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
 
-            assert power_prices.shape == (4, 1)
-            assert dispatch_results_de.shape == (4, 17)
-            for col in cols:
-                assert col in list(dispatch_results_de.columns)
-
-        except FileNotFoundError as e:
-            raise e
+        assert power_prices.shape == (4, 1)
+        assert dispatch_results_de.shape == (4, 17)
+        for col in cols:
+            assert col in list(dispatch_results_de.columns)

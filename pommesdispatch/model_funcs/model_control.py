@@ -30,12 +30,12 @@ from pommesdispatch.model_funcs.data_input import (nodes_from_csv,
 
 def show_meta_logging_info(model_meta):
     """Show some logging information on model meta data"""
-    logging.info(f"***** MODEL RUN TERMINATED SUCCESSFULLY :-) *****")
-    logging.info(f"Overall objective value: "
+    logging.info("***** MODEL RUN TERMINATED SUCCESSFULLY :-) *****")
+    logging.info("Overall objective value: "
                  + f"{model_meta['overall_objective']:,.0f}")
-    logging.info(f"Overall solution time: "
+    logging.info("Overall solution time: "
                  + f"{model_meta['overall_solution_time']:.2f}")
-    logging.info(f"Overall time: "
+    logging.info("Overall time: "
                  + f"{model_meta['overall_time']:.2f}")
 
 
@@ -67,7 +67,7 @@ class DispatchModel(object):
         'cbc', 'gplk', 'gurobi', 'cplex'.
 
     fuel_cost_pathway :  str
-       A predefined pathway for commodity cost develoment until 2050
+        A predefined pathway for commodity cost develoment until 2050
         Options: 'lower', 'middle', 'upper'
 
     activate_emissions_limit : boolean
