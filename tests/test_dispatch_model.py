@@ -61,7 +61,9 @@ class TestDispatchModel:
     def test_run_dispatch_model(self):
         """test function run_dispatch_model for a simple model run"""
         create_test_config()
-        dispatch_model.run_dispatch_model()
+        dispatch_model.run_dispatch_model(
+            config_file="tests/config.yml"
+        )
 
         power_prices = pd.read_csv((
                 "tests/csv_files/dispatch_LP_start"
