@@ -48,8 +48,8 @@ setup(
     author=', '.join(__author__),
     author_email=__email__,
     license=__license__,
-    package_dir={'': ''},
-    packages=find_packages(where=''),
+    package_dir={'': 'pommesdispatch'},
+    packages=find_packages(where='pommesdispatch'),
     entry_points={
         'console_scripts': [
             'run_pommes_dispatch=pommesdispatch.cli:run_pommes_dispatch'
