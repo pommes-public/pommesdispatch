@@ -56,8 +56,9 @@ jobs:
       
       - name: Build package
         run: |
-          python3 setup.py sdist bdist_wheel
-
+          python3 setup.py sdist
+          python3 setup.py bdist_wheel
+        
       - name: Run coverage
         run: |
           pip3 install dist/*.whl
