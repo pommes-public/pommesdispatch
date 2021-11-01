@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pommesdispatch"
-version = "0.1.0"
+version = "0.1.1"
 description = "A bottom-up fundamental power market model for the German electricity sector"
 authors = ["Johannes Kochems <jokochems@web.de>", "Yannick Werner <>", "Johannes Giehl <>", "Benjamin Grosse <>"]
 maintainers = ["Johannes Kochems <jokochems@web.de>"]

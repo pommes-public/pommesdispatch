@@ -1,6 +1,15 @@
 Changelog
 =========
 
+v0.1.1 (2021-11-XX)
+-------------------
+
+Fixes for initial public release of ``pommesdispatch``:
+
+* Fixed tests
+* Improved CI pipeline
+* ...
+
 v0.1.0 (2021-10-21)
 -------------------
 
