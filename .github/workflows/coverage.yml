@@ -28,31 +28,33 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Run image
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
+
       - name: View poetry --help
         run: poetry --help
 
-  # check-coverage:
-    # name: Check coverage
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Check out Git repository
-        # uses: actions/checkout@v2
+  check-coverage:
+    name: Check coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
 
-      # - name: Set up Python
-        # uses: actions/setup-python@v1
-        # with:
-          # python-version: 3.9
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
-      # - name: Install Python dependencies
-        # run: pip install pytest coverage coverage-badge
+      - name: Install Python dependencies
+        run: pip install pytest coverage coverage-badge
 
-      # - name: Run coverage
-        # run: |
-          # coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
-          # coverage report -m
-          # coverage html
-          # coverage-badge
+      - name: Run coverage
+        run: |
+          coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
+          coverage report -m
+          coverage html
+          coverage-badge
