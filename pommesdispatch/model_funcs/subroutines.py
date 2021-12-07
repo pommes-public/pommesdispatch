@@ -675,6 +675,7 @@ def create_transformers_conventional(input_data,
                         :dispatch_model.end_time,
                         t['country'] + '_natgas'].to_numpy() + 0.01)
 
+        print(i, outflow_args_el['min'])
         node_dict[i] = build_condensing_transformer(
             i, t, node_dict, outflow_args_el)
 

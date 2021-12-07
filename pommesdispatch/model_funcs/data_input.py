@@ -56,12 +56,16 @@ def parse_input_data(dispatch_model):
         'costs_carbon': 'costs_carbon',
         'costs_operation': 'costs_operation',
         'costs_operation_renewables': 'costs_operation_renewables',
-        'costs_operation_storages': 'costs_operation_storages'}
+        'costs_operation_storages': 'costs_operation_storages',
+        'min_loads_dh': 'min_loads_dh',
+        'min_loads_ipp': 'min_loads_ipp'
+    }
 
     other_files = {
         'emission_limits': 'emission_limits',
-        'min_loads_dh': 'min_loads_dh',
-        'min_loads_ipp': 'min_loads_ipp'}
+    #    'min_loads_dh': 'min_loads_dh',
+    #    'min_loads_ipp': 'min_loads_ipp'
+    }
 
     # Optionally use aggregated transformer data instead
     if dispatch_model.aggregate_input:
