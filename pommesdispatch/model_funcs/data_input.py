@@ -70,8 +70,6 @@ def parse_input_data(dispatch_model):
 
     other_files = {
         'emission_limits': 'emission_limits',
-    #    'min_loads_dh': 'min_loads_dh',
-    #    'min_loads_ipp': 'min_loads_ipp'
     }
 
     # Optionally use aggregated transformer data instead
