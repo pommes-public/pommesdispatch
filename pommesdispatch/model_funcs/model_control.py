@@ -26,6 +26,7 @@ from oemof.tools import logger
 from pommesdispatch.model_funcs import helpers
 from pommesdispatch.model_funcs.data_input import (nodes_from_csv,
                                                    nodes_from_csv_rh)
+import warnings
 
 
 def show_meta_logging_info(model_meta):
@@ -147,6 +148,7 @@ class DispatchModel(object):
         self.activate_demand_response = None
         self.demand_response_approach = None
         self.demand_response_scenario = None
+        self.update_market_values = None
         self.save_production_results = None
         self.save_price_results = None
         self.write_lp_file = None
@@ -376,6 +378,58 @@ class DispatchModel(object):
                                     columns=["Power price"])
 
         return power_prices
+
+    def calculate_market_values_from_model(self, power_prices):
+        r"""
+        Calculates market values from exogenous feedin timeseries and power prices
+        obtained with POMMES.
+
+        Parameters
+        ----------
+        power_prices : :pandas:`pandas.DataFrame<DataFrame>`
+            DataFrame containing the power prices obtained from the dispatch model.
+
+        Returns
+        -------
+        market_values : :pandas:`pandas.DataFrame<DataFrame>`
+            Contains monthly market values for renewables.
+        market_values_hourly : :pandas:`pandas.DataFrame<DataFrame>`
+            Contains monthly market values for renewables rolled
+            out over each hour of a given month.
+        """
+        techs = ['DE_bus_solarPV', 'DE_bus_windonshore', 'DE_bus_windoffshore']
+        feedin_df = pd.read_csv(
+            self.path_folder_input + 'sources_renewables_ts' + "_" + self.year + '.csv',
+            index_col=0,
+            parse_dates=True
+        )[techs]
+
+        # Create new DataFrame before manipulating the original data
+        market_values_hourly = pd.DataFrame(index=feedin_df.index, columns=feedin_df.columns)
+        market_values = pd.DataFrame(index=range(1, 13), columns=feedin_df.columns)
+
+        feedin_df.loc[:, 'power_price'] = 0
+        feedin_df.loc[power_prices.index, 'power_price'] = power_prices["Power price"].values
+
+        if power_prices["Power price"].values.shape[0] < 8760:
+            msg = "Timehorizon of the model is less than a year. Market values will be incorrect."
+            warnings.warn(msg)
+
+        feedin_df['month'] = feedin_df.index.month
+
+        for month in range(1, 13):
+            for tech in techs:
+                market_values.loc[month, tech] = \
+                    sum(feedin_df.loc[feedin_df['month'] == month, tech].values *
+                        feedin_df.loc[feedin_df['month'] == month, 'power_price'].values) / \
+                    feedin_df.loc[feedin_df['month'] == month, tech].sum()
+
+                market_values_hourly.loc[feedin_df['month'] == month, tech] = \
+                    market_values.loc[month, tech]
+
+            market_values.loc[month, 'EPEX'] = feedin_df.loc[feedin_df['month'] == month, 'power_price'].mean()
+
+        return market_values, market_values_hourly
 
     def build_rolling_horizon_model(self, counter, iteration_results):
         r"""Set up and return a rolling horizon LP dispatch model
