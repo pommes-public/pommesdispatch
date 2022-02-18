@@ -232,5 +232,13 @@ def add_args():
         action="store_true",
         help="Automatically generate default config"
     )
+    parser.add_argument(
+        '--iterations',
+        metavar='n',
+        type=int,
+        required=False,
+        default=1,
+        help="Define number of iterations for market value update"
+    )
     args = parser.parse_args()
     return args

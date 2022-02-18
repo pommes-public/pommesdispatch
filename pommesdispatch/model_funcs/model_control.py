@@ -463,11 +463,7 @@ class DispatchModel(object):
             monthly market values for renewables rolled
             out over each hour of a given month
         """
-        log_info = (
-            "Saving updated market values from model run.\n"
-            "Note: This will overwrite existing values.\n"
-            "To use the updated values, please rerun simulation."
-        )
+        log_info = ("Saving updated market values from model run.")
         logging.info(log_info)
         techs = ["DE_bus_solarPV", "DE_bus_windonshore", "DE_bus_windoffshore"]
         feedin_df = pd.read_csv(
