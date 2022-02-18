@@ -19,25 +19,27 @@ import logging
 import math
 
 import pandas as pd
-from oemof.solph import (constraints, views,
-                         models, network, processing)
+from oemof.solph import constraints, views, models, network, processing
 from oemof.tools import logger
 
 from pommesdispatch.model_funcs import helpers
-from pommesdispatch.model_funcs.data_input import (nodes_from_csv,
-                                                   nodes_from_csv_rh)
+from pommesdispatch.model_funcs.data_input import (
+    nodes_from_csv, nodes_from_csv_rh
+)
 import warnings
 
 
 def show_meta_logging_info(model_meta):
     """Show some logging information on model meta data"""
     logging.info("***** MODEL RUN TERMINATED SUCCESSFULLY :-) *****")
-    logging.info("Overall objective value: "
-                 + f"{model_meta['overall_objective']:,.0f}")
-    logging.info("Overall solution time: "
-                 + f"{model_meta['overall_solution_time']:.2f}")
-    logging.info("Overall time: "
-                 + f"{model_meta['overall_time']:.2f}")
+    logging.info(
+        "Overall objective value: " + f"{model_meta['overall_objective']:,.0f}"
+    )
+    logging.info(
+        "Overall solution time: "
+        + f"{model_meta['overall_solution_time']:.2f}"
+    )
+    logging.info("Overall time: " + f"{model_meta['overall_time']:.2f}")
 
 
 class DispatchModel(object):
@@ -99,6 +101,10 @@ class DispatchModel(object):
         Options: '25', '50', '75', whereby '25' is the lower,
         i.e. rather pessimistic estimate
 
+    save_updated_market_values : str
+        boolean control variable indicating whether to save updated
+        RES market values calculated from a previous model run
+
     save_production_results : boolean
         boolean control variable indicating whether to save the dispatch
         results of the model run to a .csv file
@@ -148,7 +154,7 @@ class DispatchModel(object):
         self.activate_demand_response = None
         self.demand_response_approach = None
         self.demand_response_scenario = None
-        self.update_market_values = None
+        self.save_updated_market_values = None
         self.save_production_results = None
         self.save_price_results = None
         self.write_lp_file = None
@@ -176,12 +182,12 @@ class DispatchModel(object):
             for k, v in param_dict.items():
                 if not nolog:
                     if hasattr(self, k):
-                        print(
-                            f"Updating attribute `{k}` with value '{v}'.")
+                        print(f"Updating attribute `{k}` with value '{v}'.")
                     else:
                         print(
                             f"Adding attribute `{k}` with value '{v}' "
-                            + "to the model.")
+                            + "to the model."
+                        )
                 setattr(self, k, v)
 
         if hasattr(self, "start_time"):
@@ -197,12 +203,14 @@ class DispatchModel(object):
                     missing_parameters.append(entry)
                     logging.warning(
                         f"Necessary model parameter `{entry}` "
-                        + "has not yet been specified!")
+                        + "has not yet been specified!"
+                    )
 
         return missing_parameters
 
-    def add_rolling_horizon_configuration(self, rolling_horizon_parameters,
-                                          nolog=False):
+    def add_rolling_horizon_configuration(
+        self, rolling_horizon_parameters, nolog=False
+    ):
         r"""Add a rolling horizon configuration to the dispatch model
 
         .. _note:
@@ -212,49 +220,88 @@ class DispatchModel(object):
             allow for adding another time slice, the last couple of time
             steps of the time series are not used.
         """
-        self.update_model_configuration(rolling_horizon_parameters,
-                                        nolog=nolog)
+        self.update_model_configuration(
+            rolling_horizon_parameters,
+            nolog=nolog
+        )
 
-        setattr(self, "time_series_start",
-                pd.Timestamp(self.start_time, self.freq))
-        setattr(self, "time_series_end",
-                pd.Timestamp(self.end_time, self.freq))
-        setattr(self, "time_slice_length_wo_overlap_in_time_steps",
-                ({'60min': 1, '15min': 4}[self.freq]
-                 * getattr(self, "time_slice_length_wo_overlap_in_hours")))
-        setattr(self, "overlap_in_time_steps",
-                ({'60min': 1, '15min': 4}[self.freq]
-                 * getattr(self, "overlap_in_hours")))
-        setattr(self, "time_slice_length_with_overlap",
-                (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
-                 + getattr(self, "overlap_in_time_steps")))
-        setattr(self, "overall_time_steps",
-                helpers.time_steps_between_timestamps(
-                    getattr(self, "time_series_start"),
-                    getattr(self, "time_series_end"),
-                    self.freq))
-        setattr(self, "amount_of_time_slices",
-                math.ceil(
-                    getattr(self, "overall_time_steps")
-                    / getattr(self,
-                              "time_slice_length_wo_overlap_in_time_steps")))
+        setattr(
+            self,
+            "time_series_start",
+            pd.Timestamp(self.start_time, self.freq)
+        )
+        setattr(
+            self,
+            "time_series_end",
+            pd.Timestamp(self.end_time, self.freq)
+        )
+        setattr(
+            self,
+            "time_slice_length_wo_overlap_in_time_steps",
+            (
+                {"60min": 1, "15min": 4}[self.freq]
+                * getattr(self, "time_slice_length_wo_overlap_in_hours")
+            ),
+        )
+        setattr(
+            self,
+            "overlap_in_time_steps",
+            (
+                {"60min": 1, "15min": 4}[self.freq]
+                * getattr(self, "overlap_in_hours")
+             ),
+        )
+        setattr(
+            self,
+            "time_slice_length_with_overlap",
+            (
+                getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+                + getattr(self, "overlap_in_time_steps")
+            ),
+        )
+        setattr(
+            self,
+            "overall_time_steps",
+            helpers.time_steps_between_timestamps(
+                getattr(self, "time_series_start"),
+                getattr(self, "time_series_end"),
+                self.freq,
+            ),
+        )
+        setattr(
+            self,
+            "amount_of_time_slices",
+            math.ceil(
+                getattr(self, "overall_time_steps")
+                / getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+            ),
+        )
 
     def initialize_logging(self):
         """Initialize logging by deriving a filename from the configuration"""
-        optimization_timeframe = helpers.days_between(self.start_time,
-                                                      self.end_time)
+        optimization_timeframe = helpers.days_between(
+            self.start_time,
+            self.end_time
+        )
 
         if not self.rolling_horizon:
-            rh = 'simple_'
+            rh = "simple_"
         else:
-            rh = 'RH_'
+            rh = "RH_"
         if self.aggregate_input:
-            agg = 'clustered'
+            agg = "clustered"
         else:
-            agg = 'complete'
+            agg = "complete"
 
-        filename = ("dispatch_LP_start-" + self.start_time[:10] + "_"
-                    + str(optimization_timeframe) + "-days_" + rh + agg)
+        filename = (
+            "dispatch_LP_start-"
+            + self.start_time[:10]
+            + "_"
+            + str(optimization_timeframe)
+            + "-days_"
+            + rh
+            + agg
+        )
 
         setattr(self, "filename", filename)
         logger.define_logging(logfile=filename + ".log")
@@ -266,15 +313,18 @@ class DispatchModel(object):
         if self.aggregate_input:
             agg_string = "Using the AGGREGATED POWER PLANT DATA SET"
         else:
-            agg_string = ("Using the COMPLETE POWER PLANT DATA SET.\n"
-                          "Minimum power output constraint of (individual)\n"
-                          "transformers will be neglected.")
+            agg_string = (
+                "Using the COMPLETE POWER PLANT DATA SET.\n"
+                "Minimum power output constraint of (individual)\n"
+                "transformers will be neglected."
+            )
 
         if self.activate_demand_response:
             dr_string = (
                 f"Using approach '{self.demand_response_approach}' "
                 f"for DEMAND RESPONSE modeling\n"
-                f"Considering a {self.demand_response_scenario}% scenario")
+                f"Considering a {self.demand_response_scenario}% scenario"
+            )
 
         else:
             dr_string = "Running a model WITHOUT DEMAND RESPONSE"
@@ -290,28 +340,26 @@ class DispatchModel(object):
         Construct a model for an overall optimization run
         not including any measures for complexity reduction.
         """
-        logging.info('Starting optimization')
-        logging.info('Running a DISPATCH OPTIMIZATION')
+        logging.info("Starting optimization")
+        logging.info("Running a DISPATCH OPTIMIZATION")
 
         datetime_index = pd.date_range(
-            self.start_time, self.end_time, freq=self.freq)
+            self.start_time,
+            self.end_time,
+            freq=self.freq
+        )
         es = network.EnergySystem(timeindex=datetime_index)
 
         nodes_dict, emissions_limit = nodes_from_csv(self)
 
-        logging.info('Creating a LP model for DISPATCH OPTIMIZATION.')
+        logging.info("Creating a LP model for DISPATCH OPTIMIZATION.")
 
         es.add(*nodes_dict.values())
         setattr(self, "om", models.Model(es))
 
-        self.add_further_constrs(
-            emissions_limit)
+        self.add_further_constrs(emissions_limit)
 
-    def add_further_constrs(
-            self,
-            emissions_limit,
-            countries=None,
-            fuels=None):
+    def add_further_constrs(self, emissions_limit, countries=None, fuels=None):
         r"""Integrate further constraints into the optimization model
 
         For now, an additional overall emissions limit can be imposed.
@@ -337,14 +385,22 @@ class DispatchModel(object):
             countries = ["DE"]
 
         if fuels is None:
-            fuels = ["biomass", "hardcoal", "lignite",
-                     "natgas", "uranium", "oil",
-                     "otherfossil", "waste", "mixedfuels"]
+            fuels = [
+                "biomass",
+                "hardcoal",
+                "lignite",
+                "natgas",
+                "uranium",
+                "oil",
+                "otherfossil",
+                "waste",
+                "mixedfuels",
+            ]
 
         # Emissions limit is imposed for flows from commodity source to bus
-        emission_flow_labels = [country + '_bus_' + fuel
-                                for country in countries
-                                for fuel in fuels]
+        emission_flow_labels = [
+            country + "_bus_" + fuel for country in countries for fuel in fuels
+        ]
 
         emission_flows = {}
 
@@ -353,10 +409,12 @@ class DispatchModel(object):
                 emission_flows[(i, o)] = self.om.flows[(i, o)]
 
         if self.activate_emissions_limit:
-            constraints.emission_limit(self.om, flows=emission_flows,
-                                       limit=emissions_limit)
+            constraints.emission_limit(
+                self.om, flows=emission_flows, limit=emissions_limit
+            )
             logging.info(
-                f"Adding an EMISSIONS LIMIT of {emissions_limit} t CO2")
+                f"Adding an EMISSIONS LIMIT of {emissions_limit} t CO2"
+            )
 
     def get_power_prices_from_duals(self):
         r"""Obtain the power price results for the dispatch model
@@ -370,64 +428,99 @@ class DispatchModel(object):
         """
         constr = self.om.Bus.balance
 
-        power_prices_list = [self.om.dual[constr[index]]
-                             for index in constr if
-                             index[0].label == "DE_bus_el"]
-        power_prices = pd.DataFrame(data=power_prices_list,
-                                    index=self.om.es.timeindex,
-                                    columns=["Power price"])
+        power_prices_list = [
+            self.om.dual[constr[index]]
+            for index in constr
+            if index[0].label == "DE_bus_el"
+        ]
+        power_prices = pd.DataFrame(
+            data=power_prices_list,
+            index=self.om.es.timeindex,
+            columns=["Power price"]
+        )
 
         return power_prices
 
-    def calculate_market_values_from_model(self, power_prices):
-        r"""
-        Calculates market values from exogenous feedin timeseries and power prices
-        obtained with POMMES.
+    def calculate_market_values_from_model(
+            self,
+            power_prices,
+    ):
+        r"""Calculate market values from exogenous feed-in and power prices
+
+        Market values are obtained from a prior run of pommesdispatch
 
         Parameters
         ----------
         power_prices : :pandas:`pandas.DataFrame<DataFrame>`
-            DataFrame containing the power prices obtained from the dispatch model.
+            DataFrame containing the power prices obtained from
+            the dispatch model
 
         Returns
         -------
         market_values : :pandas:`pandas.DataFrame<DataFrame>`
-            Contains monthly market values for renewables.
+            monthly market values for renewables
         market_values_hourly : :pandas:`pandas.DataFrame<DataFrame>`
-            Contains monthly market values for renewables rolled
-            out over each hour of a given month.
+            monthly market values for renewables rolled
+            out over each hour of a given month
         """
-        techs = ['DE_bus_solarPV', 'DE_bus_windonshore', 'DE_bus_windoffshore']
+        log_info = (
+            "Saving updated market values from model run.\n"
+            "Note: This will overwrite existing values.\n"
+            "To use the updated values, please rerun simulation."
+        )
+        logging.info(log_info)
+        techs = ["DE_bus_solarPV", "DE_bus_windonshore", "DE_bus_windoffshore"]
         feedin_df = pd.read_csv(
-            self.path_folder_input + 'sources_renewables_ts' + "_" + self.year + '.csv',
+            (
+                self.path_folder_input
+                + "sources_renewables_ts_" + self.year + ".csv"
+            ),
             index_col=0,
-            parse_dates=True
+            parse_dates=True,
         )[techs]
 
         # Create new DataFrame before manipulating the original data
-        market_values_hourly = pd.DataFrame(index=feedin_df.index, columns=feedin_df.columns)
-        market_values = pd.DataFrame(index=range(1, 13), columns=feedin_df.columns)
+        market_values_hourly = pd.DataFrame(
+            index=feedin_df.index, columns=feedin_df.columns
+        )
+        market_values = pd.DataFrame(
+            index=range(1, 13),
+            columns=feedin_df.columns
+        )
 
-        feedin_df.loc[:, 'power_price'] = 0
-        feedin_df.loc[power_prices.index, 'power_price'] = power_prices["Power price"].values
+        feedin_df.loc[:, "power_price"] = 0
+        feedin_df.loc[power_prices.index, "power_price"] = power_prices[
+            "Power price"
+        ].values
 
         if power_prices["Power price"].values.shape[0] < 8760:
-            msg = "Timehorizon of the model is less than a year. Market values will be incorrect."
+            msg = (
+                "Timehorizon of the model is less than a year."
+                " Market values will be incorrect."
+            )
             warnings.warn(msg)
 
-        feedin_df['month'] = feedin_df.index.month
+        feedin_df["month"] = feedin_df.index.month
 
         for month in range(1, 13):
             for tech in techs:
-                market_values.loc[month, tech] = \
-                    sum(feedin_df.loc[feedin_df['month'] == month, tech].values *
-                        feedin_df.loc[feedin_df['month'] == month, 'power_price'].values) / \
-                    feedin_df.loc[feedin_df['month'] == month, tech].sum()
+                market_values.loc[month, tech] = (
+                    sum(
+                        feedin_df.loc[feedin_df["month"] == month, tech].values
+                        * feedin_df.loc[
+                            feedin_df["month"] == month, "power_price"
+                        ].values
+                    )
+                    / feedin_df.loc[feedin_df["month"] == month, tech].sum()
+                )
 
-                market_values_hourly.loc[feedin_df['month'] == month, tech] = \
-                    market_values.loc[month, tech]
+                market_values_hourly.loc[
+                    feedin_df["month"] == month, tech
+                ] = market_values.loc[month, tech]
 
-            market_values.loc[month, 'EPEX'] = feedin_df.loc[feedin_df['month'] == month, 'power_price'].mean()
+            market_values.loc[month, "EPEX"] = feedin_df.loc[
+                feedin_df["month"] == month, "power_price"
+            ].mean()
 
         return market_values, market_values_hourly
 
@@ -447,28 +540,37 @@ class DispatchModel(object):
             A dictionary holding the results of the previous rolling horizon
             iteration
         """
-        setattr(self, "time_series_end",
-                (getattr(self, "time_series_start")
-                 + pd.to_timedelta(
-                            getattr(
-                                self,
-                                "time_slice_length_wo_overlap_in_hours"),
-                            "h")))
+        setattr(
+            self,
+            "time_series_end",
+            (
+                getattr(self, "time_series_start")
+                + pd.to_timedelta(
+                    getattr(self, "time_slice_length_wo_overlap_in_hours"), "h"
+                )
+            ),
+        )
 
         logging.info(f"Starting optimization for optimization run {counter}")
-        logging.info(f"Start of iteration {counter}: "
-                     + f"{getattr(self, 'time_series_start')}")
-        logging.info(f"End of iteration {counter}: "
-                     + f"{getattr(self, 'time_series_end')}")
+        logging.info(
+            f"Start of iteration {counter}: "
+            + f"{getattr(self, 'time_series_start')}"
+        )
+        logging.info(
+            f"End of iteration {counter}: "
+            + f"{getattr(self, 'time_series_end')}"
+        )
 
         datetime_index = pd.date_range(
             start=getattr(self, "time_series_start"),
             periods=getattr(self, "time_slice_length_with_overlap"),
-            freq=self.freq)
+            freq=self.freq,
+        )
         es = network.EnergySystem(timeindex=datetime_index)
 
         node_dict, emissions_limit, storage_labels = nodes_from_csv_rh(
-            self, iteration_results)
+            self, iteration_results
+        )
         # Only set storage labels attribute for the 0th iteration
         if not hasattr(self, "storage_labels"):
             setattr(self, "storage_labels", storage_labels)
@@ -478,14 +580,16 @@ class DispatchModel(object):
 
         es.add(*node_dict.values())
         logging.info(
-            f"Successfully set up energy system for iteration {counter}")
+            f"Successfully set up energy system for iteration {counter}"
+        )
 
         self.om = models.Model(es)
 
         self.add_further_constrs(emissions_limit)
 
-    def solve_rolling_horizon_model(self, counter, iteration_results,
-                                    model_meta, no_solver_log=False):
+    def solve_rolling_horizon_model(
+        self, counter, iter_results, model_meta, no_solver_log=False
+    ):
         """Solve a rolling horizon optimization model
 
         Parameters
@@ -493,7 +597,7 @@ class DispatchModel(object):
         counter : int
             A counter for the rolling horizon optimization iterations
 
-        iteration_results : dict
+        iter_results : dict
             A dictionary holding the results of the previous rolling horizon
             iteration
 
@@ -507,46 +611,58 @@ class DispatchModel(object):
         self.om.receive_duals()
         logging.info(
             "Obtaining dual values and reduced costs from the model \n"
-            "in order to calculate power prices.")
+            "in order to calculate power prices."
+        )
 
         if self.write_lp_file:
-            self.om.write((self.path_folder_output
-                           + "pommesdispatch_model_iteration_" + str(counter)
-                           + ".lp"),
-                          io_options={"symbolic_solver_labels": True})
+            self.om.write(
+                (
+                    self.path_folder_output
+                    + "pommesdispatch_model_iteration_"
+                    + str(counter)
+                    + ".lp"
+                ),
+                io_options={"symbolic_solver_labels": True},
+            )
 
         if no_solver_log:
-            solve_kwargs = {'tee': False}
+            solve_kwargs = {"tee": False}
         else:
-            solve_kwargs = {'tee': True}
+            solve_kwargs = {"tee": True}
 
         self.om.solve(solver=self.solver, solve_kwargs=solve_kwargs)
         print("********************************************************")
         logging.info(f"Model run {counter} done!")
 
-        iteration_results["model_results"] = processing.results(self.om)
-        electricity_bus = views.node(iteration_results["model_results"],
-                                     "DE_bus_el")
+        iter_results["model_results"] = processing.results(self.om)
+        electricity_bus = views.node(
+            iter_results["model_results"],
+            "DE_bus_el"
+        )
         sliced_dispatch_results = pd.DataFrame(
             data=electricity_bus["sequences"].iloc[
-                 0:getattr(self,
-                           "time_slice_length_wo_overlap_in_time_steps")])
-        iteration_results["dispatch_results"] = (
-            iteration_results["dispatch_results"].append(
-                sliced_dispatch_results))
+                0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+            ]
+        )
+        iter_results["dispatch_results"] = iter_results[
+            "dispatch_results"
+        ].append(sliced_dispatch_results)
 
         meta_results = processing.meta_results(self.om)
         # Objective is weighted in order to take overlap into account
-        model_meta["overall_objective"] += (
-            (int(meta_results["objective"]
-                 * (getattr(self, "time_slice_length_wo_overlap_in_time_steps")
-                    / getattr(self, "time_slice_length_with_overlap"))))
+        model_meta["overall_objective"] += int(
+            meta_results["objective"]
+            * (
+                getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+                / getattr(self, "time_slice_length_with_overlap")
+            )
         )
         model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
         pps = self.get_power_prices_from_duals().iloc[
-              0:getattr(self, "time_slice_length_wo_overlap_in_time_steps")]
-        iteration_results["power_prices"] = (
-            iteration_results["power_prices"].append(pps)
+            0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+        ]
+        iter_results["power_prices"] = iter_results["power_prices"].append(
+            pps
         )
 
     def retrieve_initial_states_rolling_horizon(self, iteration_results):
@@ -560,17 +676,16 @@ class DispatchModel(object):
         """
         iteration_results["storages_initial"] = pd.DataFrame(
             columns=["initial_storage_level_last_iteration"],
-            index=getattr(self, "storage_labels"))
+            index=getattr(self, "storage_labels"),
+        )
 
         for i, s in iteration_results["storages_initial"].iterrows():
             storage = views.node(iteration_results["model_results"], i)
 
             iteration_results["storages_initial"].at[
-                i, "initial_storage_level_last_iteration"] = (
-                storage["sequences"][((i, "None"),
-                                      "storage_content")].iloc[
-                    getattr(
-                        self,
-                        "time_slice_length_wo_overlap_in_time_steps") - 1])
+                i, "initial_storage_level_last_iteration"
+            ] = storage["sequences"][((i, "None"), "storage_content")].iloc[
+                getattr(self, "time_slice_length_wo_overlap_in_time_steps") - 1
+            ]
 
         logging.info("Obtained initial (storage) levels for next iteration")
