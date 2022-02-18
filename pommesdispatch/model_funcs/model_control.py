@@ -637,7 +637,7 @@ class DispatchModel(object):
         )
         sliced_dispatch_results = pd.DataFrame(
             data=electricity_bus["sequences"].iloc[
-                0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+                0: getattr(self, "time_slice_length_wo_overlap_in_time_steps")
             ]
         )
         iter_results["dispatch_results"] = iter_results[
@@ -655,7 +655,7 @@ class DispatchModel(object):
         )
         model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
         pps = self.get_power_prices_from_duals().iloc[
-            0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+            0: getattr(self, "time_slice_length_wo_overlap_in_time_steps")
         ]
         iter_results["power_prices"] = iter_results["power_prices"].append(
             pps
