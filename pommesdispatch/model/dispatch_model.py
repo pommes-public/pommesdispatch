@@ -182,6 +182,24 @@ def run_dispatch_model(config_file="./config.yml"):
             axis=1
         )
 
+    if dm.save_updated_market_values:
+        market_values, market_values_hourly = (
+            dm.calculate_market_values_from_model(power_prices)
+        )
+        market_values.to_csv(
+            dm.path_folder_output + getattr(dm, "filename")
+            + '_monthly_market_values.csv',
+            sep=',',
+            decimal='.'
+        )
+
+        market_values_hourly.to_csv(
+            dm.path_folder_input + "costs_market_values" +
+            "_" + str(dm.year) + ".csv",
+            sep=',',
+            decimal='.'
+        )
+
     if dm.save_production_results:
         dispatch_results.to_csv(
             dm.path_folder_output + getattr(dm, "filename")
@@ -213,6 +231,14 @@ def add_args():
         required=False,
         action="store_true",
         help="Automatically generate default config"
+    )
+    parser.add_argument(
+        '--iterations',
+        metavar='n',
+        type=int,
+        required=False,
+        default=1,
+        help="Define number of iterations for market value update"
     )
     args = parser.parse_args()
     return args

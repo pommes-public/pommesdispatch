@@ -46,7 +46,19 @@ def run_pommes_dispatch():
     if args.init:
         create_default_config()
         return
-    run_dispatch_model(args.file)
+    # Use multiple iterations to update market values
+    if args.iterations > 1:
+        print(
+            f"Running pommesdispatch ITERATIVELY in "
+            f"{args.iterations} iterations"
+        )
+        for iteration in range(args.iterations):
+            print(f"STARTING ITERATION {iteration}")
+            run_dispatch_model(args.file)
+            print(f"ITERATION {iteration} completed")
+            print("-" * 60)
+    else:
+        run_dispatch_model()
 
 
 if __name__ == "__main__":

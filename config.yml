@@ -14,6 +14,7 @@ control_parameters:
     activate_demand_response: False
     demand_response_approach: "DLR"
     demand_response_scenario: "50"
+    save_updated_market_values: True
     save_production_results: True
     save_price_results: True
     write_lp_file: False
