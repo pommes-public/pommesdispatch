@@ -43,7 +43,7 @@ def show_meta_logging_info(model_meta):
 
 
 class DispatchModel(object):
-    """A class that holds a dispatch model.
+    r"""A class that holds a dispatch model.
 
     A dispatch model is a container for all the model parameters as well
     as for methods for controlling the model workflow.
@@ -70,9 +70,82 @@ class DispatchModel(object):
         'cbc', 'gplk', 'gurobi', 'cplex'.
 
     fuel_cost_pathway :  str
-        A predefined pathway for commodity cost develoment until 2050
-        Options: 'lower', 'middle', 'upper'
+        A predefined pathway for commodity cost development until 2050
 
+        .. csv-table:: Pathways and explanations
+            :header: "pathway", "explanation", "description"
+            :widths: 10 45 45
+
+            "NZE", "| Net Zero Emissions Scenario
+            | from IEA's world energy outlook 2021", "comparatively
+            low commodity prices"
+            "SDS", "| Sustainable Development Scenario
+            | from IEA's world energy outlook 2021", "| comparatively low commodity prices;
+            | slightly higher than NZE"
+            "APS", "| Announced Pledges Scenario
+            | from IEA's world energy outlook 2021", "| medium price development,
+            | decline in prices between 
+            | 2030 and 2050"
+            "STEPS", "| Stated Policies Scenario
+            | from IEA's world energy outlook 2021", "| highest price development,
+            | esp. for oil and natgas"
+            "regression", "| Linear regression based on historic
+            | commodity prices from 1991-2020", "| compared to IEA's scenarios,
+            | close to upper range of projections"
+    
+    emissions_cost_pathway : str
+        A predefined pathway for emissions cost development until 2030 or 2050
+
+        .. csv-table:: Pathways and explanations
+            :header: "pathway", "explanation", "description"
+            :widths: 10 45 45
+
+            "Fit_for_55_split_high", "| Emissions split according to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| high estimate, 
+            | values until 2030"
+            "Fit_for_55_split_medium", "| Emissions split according to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | values until 2030"
+            "Fit_for_55_split_low", "| Emissions split according to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| low estimate, 
+            | values until 2030"
+            "ESR_reduced_high", "| Higher emission reduction 
+            | in ETS compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| high estimate, 
+            | values until 2030"
+            "ESR_reduced_medium", "| Higher emission reduction 
+            | in ETS compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | values until 2030"
+            "ESR_reduced_low", "| Higher emission reduction 
+            | in ETS compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| low estimate, 
+            | values until 2030"
+            "reductions_in_ETS_only_high", "| Reductions only in ETS 
+            | compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| high estimate, 
+            | values until 2030"
+            "reductions_in_ETS_only_medium", "| Reductions only in ETS 
+            | compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | values until 2030"
+            "reductions_in_ETS_only_low", "| Reductions only in ETS 
+            | compared to
+            | Fit for 55 split between 
+            | ETS and ESR (non-ETS)", "| low estimate, 
+            | values until 2030"
+            "long-term", "| Long-term emissions cost pathway 
+            | according to medium estimate", "| medium estimate, 
+            | values until 2050"
+    
     activate_emissions_limit : boolean
         boolean control variable indicating whether to introduce an overall
         emissions limit
@@ -140,7 +213,7 @@ class DispatchModel(object):
 
     overlap_in_hours : int (optional, for rolling horizon)
         The length of the overlap for a rolling horizon model run in hours
-    """
+    """  # noqa: E501
 
     def __init__(self):
         """Initialize an empty DispatchModel object"""
@@ -149,6 +222,7 @@ class DispatchModel(object):
         self.countries = None
         self.solver = None
         self.fuel_cost_pathway = None
+        self.emissions_cost_pathway = None
         self.activate_emissions_limit = None
         self.emissions_pathway = None
         self.activate_demand_response = None
@@ -451,15 +525,15 @@ class DispatchModel(object):
 
         Parameters
         ----------
-        power_prices : :pandas:`pandas.DataFrame<DataFrame>`
+        power_prices : :obj:`pd.DataFrame`
             DataFrame containing the power prices obtained from
             the dispatch model
 
         Returns
         -------
-        market_values : :pandas:`pandas.DataFrame<DataFrame>`
+        market_values : :obj:`pd.DataFrame`
             monthly market values for renewables
-        market_values_hourly : :pandas:`pandas.DataFrame<DataFrame>`
+        market_values_hourly : :obj:`pd.DataFrame`
             monthly market values for renewables rolled
             out over each hour of a given month
         """
