@@ -279,6 +279,14 @@ class DispatchModel(object):
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!"
                     )
+            if entry == "fuel_cost_pathway":
+                logging.info(
+                    f"Using fuel cost pathway: {getattr(self, entry)}"
+                )
+            elif entry == "emissions_cost_pathway":
+                logging.info(
+                    f"Using emissions cost pathway: {getattr(self, entry)}"
+                )
 
         return missing_parameters
 
