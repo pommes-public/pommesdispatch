@@ -83,8 +83,9 @@ class TestSubroutines:
         assert len(node_dict) == 10
         assert type(node_dict["DE_source_hardcoal"]) == oemof.solph.Source
         assert node_dict["DE_source_hardcoal"].outputs[
-                   node_dict["DE_bus_hardcoal"]].variable_costs[0]== (
-                   14.20586765)
+                   node_dict["DE_bus_hardcoal"]].variable_costs[0] == (
+                   14.20586765
+        )
 
     def test_create_shortage_sources(self):
         """test function create_shortage_sources"""
