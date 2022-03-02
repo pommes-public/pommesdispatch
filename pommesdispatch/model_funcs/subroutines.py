@@ -674,17 +674,27 @@ def create_transformers_conventional(input_data,
                             dispatch_model.end_time,
                             'ipp'].to_numpy())
 
-        if t['country'] in ['AT', 'FR'] and t['country'] == 'natgas':
+        if t['country'] in ['AT', 'FR'] and t['fuel'] == 'natgas':
             outflow_args_el['min'] = (
                 input_data['transformers_minload_ts'].loc[
                     dispatch_model.start_time:
                     dispatch_model.end_time,
                     t['country'] + '_natgas'].to_numpy())
             outflow_args_el['max'] = (
+                np.minimum(
+                    [1] * len(
+                        input_data['transformers_minload_ts'].loc[
+                            dispatch_model.start_time:
+                            dispatch_model.end_time
+                        ]
+                    ),
                     input_data['transformers_minload_ts'].loc[
                         dispatch_model.start_time:
                         dispatch_model.end_time,
-                        t['country'] + '_natgas'].to_numpy() + 0.01)
+                        t['country'] + '_natgas'
+                    ].to_numpy() + 0.05
+                )
+            )
 
         node_dict[i] = build_condensing_transformer(
             i, t, node_dict, outflow_args_el)
