@@ -9,7 +9,8 @@ def create_dispatch_model():
     dm = model_control.DispatchModel()
     dm.update_model_configuration(
         {"path_folder_input": "tests/csv_files/",
-         "fuel_cost_pathway": "middle",
+         "fuel_cost_pathway": "NZE",
+         "emissions_cost_pathway": "long-term",
          "start_time": "2017-01-01 00:00:00",
          "end_time": "2017-01-02 00:00:00",
          "freq": "60min",
@@ -54,7 +55,7 @@ class TestDataInput:
         """test function parse_input_data"""
         dm = create_dispatch_model()
         input_data = data_input.parse_input_data(dm)
-        assert len(input_data.keys()) == 25
+        assert len(input_data.keys()) == 27
         input_data_keys = [
             'linking_transformers', 'linking_transformers_ts',
             'sinks_excess', 'sinks_demand_el',
@@ -63,8 +64,10 @@ class TestDataInput:
             'buses', 'sources_commodity', 'sources_renewables',
             'sources_renewables_ts', 'storages_el',
             'transformers', 'transformers_minload_ts',
+            'transformers_availability_ts',
             'transformers_renewables', 'costs_fuel',
-            'costs_ramping', 'costs_carbon', 'costs_operation',
+            'costs_fuel_ts', 'costs_emissions',
+            'costs_emissions_ts', 'costs_operation',
             'costs_operation_renewables',
             'costs_operation_storages', 'emission_limits',
             'min_loads_dh', 'min_loads_ipp'
