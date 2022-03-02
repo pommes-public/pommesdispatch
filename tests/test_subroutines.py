@@ -10,7 +10,8 @@ def create_inputs_model_and_nodes():
     dm = model_control.DispatchModel()
     dm.update_model_configuration(
         {"path_folder_input": "tests/csv_files/",
-         "fuel_cost_pathway": "middle",
+         "fuel_cost_pathway": "NZE",
+         "emissions_cost_pathway": "long-term",
          "start_time": "2017-01-01 00:00:00",
          "end_time": "2017-01-02 00:00:00",
          "freq": "60min",
@@ -82,8 +83,8 @@ class TestSubroutines:
         assert len(node_dict) == 10
         assert type(node_dict["DE_source_hardcoal"]) == oemof.solph.Source
         assert node_dict["DE_source_hardcoal"].outputs[
-                   node_dict["DE_bus_hardcoal"]].variable_costs.default == (
-                   17.853)
+                   node_dict["DE_bus_hardcoal"]].variable_costs[0]== (
+                   14.20586765)
 
     def test_create_shortage_sources(self):
         """test function create_shortage_sources"""

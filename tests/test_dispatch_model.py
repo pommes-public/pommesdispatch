@@ -15,13 +15,15 @@ def create_test_config():
         aggregate_input: False
         countries: ['AT', 'DE']
         solver: "gurobi"
-        fuel_cost_pathway: "middle"
+        fuel_cost_pathway: "NZE"
+        emissions_cost_pathway: "long-term"
         activate_emissions_limit: False
         emissions_pathway: "100_percent_linear"
         activate_demand_response: False
         demand_response_approach: "DLR"
         demand_response_scenario: "50"
         save_production_results: True
+        save_update_market_values: False
         save_price_results: True
         write_lp_file: False
 

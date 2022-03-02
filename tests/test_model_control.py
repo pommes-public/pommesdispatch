@@ -14,13 +14,15 @@ def return_model_and_parameters():
                       'NL', 'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
                       'SE1', 'SE2', 'SE3', 'SE4'],
         "solver": "gurobi",
-        "fuel_cost_pathway": "middle",
+        "fuel_cost_pathway": "NZE",
+        "emissions_cost_pathway": "long-term",
         "activate_emissions_limit": False,
         "emissions_pathway": "100_percent_linear",
         "activate_demand_response": False,
         "demand_response_approach": "DLR",
         "demand_response_scenario": "50",
         "save_production_results": True,
+        "save_updated_market_values": False,
         "save_price_results": True,
         "write_lp_file": False}
 
