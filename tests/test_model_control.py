@@ -188,6 +188,22 @@ class TestModelControl:
         assert power_prices.shape == (5, 1)
         assert power_prices.max().max() == 160.0
 
+    def test_calculate_market_values_from_model(self):
+        """test method calculate_market_values_from_model of DispatchModel"""
+        dm, all_parameters = return_model_and_parameters()
+        all_parameters["save_updated_market_values"] = True
+        dm.build_simple_model()
+        dm.om.receive_duals()
+        dm.om.solve(solver=dm.solver, solve_kwargs={"tee": False})
+        power_prices = dm.get_power_prices_from_duals()
+        market_values, market_values_hourly = (
+            dm.calculate_market_values_from_model(power_prices)
+        )
+        assert(not market_values.loc[1].isna().all())
+        assert(market_values_hourly.at[
+            "2017-01-01 02:00:00", "DE_bus_windonshore"] == 160.0
+        )
+
     def test_build_rolling_horizon_model(self):
         """test method build_rolling_horizon_model of class DispatchModel"""
         dm, iteration_results, model_meta = set_up_rolling_horizon_run()
