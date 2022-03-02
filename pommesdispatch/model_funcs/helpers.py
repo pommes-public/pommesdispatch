@@ -53,16 +53,12 @@ def time_steps_between_timestamps(ts1, ts2, freq):
     hour_diff: int
         The difference between the two dates in hours
     """
-    time_steps_seconds = {
-        "60min": (24, 3600),
-        "15min": (96, 900)
-    }
+    time_steps_seconds = {"60min": (24, 3600), "15min": (96, 900)}
 
     diff = ts2 - ts1
 
-    time_step_diff = (
-            diff.days * time_steps_seconds[freq][0]
-            + math.floor(diff.seconds / time_steps_seconds[freq][1])
+    time_step_diff = diff.days * time_steps_seconds[freq][0] + math.floor(
+        diff.seconds / time_steps_seconds[freq][1]
     )
 
     return time_step_diff
@@ -90,8 +86,8 @@ def convert_annual_limit(annual_limit, start_time, end_time):
     new_limit: :obj:`float`
         A sub-annual / multi-annual limit for the optimization timeframe
     """
-    dt_start = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
-    dt_end = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+    dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+    dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
     start_year = dt_start.year
     end_year = dt_end.year
 
@@ -106,8 +102,8 @@ def convert_annual_limit(annual_limit, start_time, end_time):
             new_limit = annual_limit[start_year] * year_fraction
 
     else:
-        start_year_begin = str(start_year) + '-01-01 00:00:00'
-        end_year_end = str(end_year) + '-12-31 23:59:59'
+        start_year_begin = str(start_year) + "-01-01 00:00:00"
+        end_year_end = str(end_year) + "-12-31 23:59:59"
         day_diff_start = days_between(start_year_begin, start_time)
         day_diff_end = days_between(end_time, end_year_end)
 
@@ -120,7 +116,9 @@ def convert_annual_limit(annual_limit, start_time, end_time):
             new_limit += annual_limit
 
         # Add limits for fractions of the start year and end year
-        new_limit += (annual_limit * start_year_fraction
-                      + annual_limit * end_year_fraction)
+        new_limit += (
+            annual_limit * start_year_fraction
+            + annual_limit * end_year_fraction
+        )
 
     return new_limit

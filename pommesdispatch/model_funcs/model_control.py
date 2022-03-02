@@ -24,7 +24,8 @@ from oemof.tools import logger
 
 from pommesdispatch.model_funcs import helpers
 from pommesdispatch.model_funcs.data_input import (
-    nodes_from_csv, nodes_from_csv_rh
+    nodes_from_csv,
+    nodes_from_csv_rh,
 )
 import warnings
 
@@ -84,7 +85,7 @@ class DispatchModel(object):
             | slightly higher than NZE"
             "APS", "| Announced Pledges Scenario
             | from IEA's world energy outlook 2021", "| medium price development,
-            | decline in prices between 
+            | decline in prices between
             | 2030 and 2050"
             "STEPS", "| Stated Policies Scenario
             | from IEA's world energy outlook 2021", "| highest price development,
@@ -92,7 +93,7 @@ class DispatchModel(object):
             "regression", "| Linear regression based on historic
             | commodity prices from 1991-2020", "| compared to IEA's scenarios,
             | close to upper range of projections"
-    
+
     emissions_cost_pathway : str
         A predefined pathway for emissions cost development until 2030 or 2050
 
@@ -101,51 +102,51 @@ class DispatchModel(object):
             :widths: 10 45 45
 
             "Fit_for_55_split_high", "| Emissions split according to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| high estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
             | values until 2030"
             "Fit_for_55_split_medium", "| Emissions split according to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
             | values until 2030"
             "Fit_for_55_split_low", "| Emissions split according to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| low estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
             | values until 2030"
-            "ESR_reduced_high", "| Higher emission reduction 
+            "ESR_reduced_high", "| Higher emission reduction
             | in ETS compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| high estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
             | values until 2030"
-            "ESR_reduced_medium", "| Higher emission reduction 
+            "ESR_reduced_medium", "| Higher emission reduction
             | in ETS compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
             | values until 2030"
-            "ESR_reduced_low", "| Higher emission reduction 
+            "ESR_reduced_low", "| Higher emission reduction
             | in ETS compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| low estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
             | values until 2030"
-            "reductions_in_ETS_only_high", "| Reductions only in ETS 
+            "reductions_in_ETS_only_high", "| Reductions only in ETS
             | compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| high estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
             | values until 2030"
-            "reductions_in_ETS_only_medium", "| Reductions only in ETS 
+            "reductions_in_ETS_only_medium", "| Reductions only in ETS
             | compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| medium estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
             | values until 2030"
-            "reductions_in_ETS_only_low", "| Reductions only in ETS 
+            "reductions_in_ETS_only_low", "| Reductions only in ETS
             | compared to
-            | Fit for 55 split between 
-            | ETS and ESR (non-ETS)", "| low estimate, 
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
             | values until 2030"
-            "long-term", "| Long-term emissions cost pathway 
-            | according to medium estimate", "| medium estimate, 
+            "long-term", "| Long-term emissions cost pathway
+            | according to medium estimate", "| medium estimate,
             | values until 2050"
-    
+
     activate_emissions_limit : boolean
         boolean control variable indicating whether to introduce an overall
         emissions limit
@@ -303,19 +304,14 @@ class DispatchModel(object):
             steps of the time series are not used.
         """
         self.update_model_configuration(
-            rolling_horizon_parameters,
-            nolog=nolog
+            rolling_horizon_parameters, nolog=nolog
         )
 
         setattr(
-            self,
-            "time_series_start",
-            pd.Timestamp(self.start_time, self.freq)
+            self, "time_series_start", pd.Timestamp(self.start_time, self.freq)
         )
         setattr(
-            self,
-            "time_series_end",
-            pd.Timestamp(self.end_time, self.freq)
+            self, "time_series_end", pd.Timestamp(self.end_time, self.freq)
         )
         setattr(
             self,
@@ -331,7 +327,7 @@ class DispatchModel(object):
             (
                 {"60min": 1, "15min": 4}[self.freq]
                 * getattr(self, "overlap_in_hours")
-             ),
+            ),
         )
         setattr(
             self,
@@ -362,8 +358,7 @@ class DispatchModel(object):
     def initialize_logging(self):
         """Initialize logging by deriving a filename from the configuration"""
         optimization_timeframe = helpers.days_between(
-            self.start_time,
-            self.end_time
+            self.start_time, self.end_time
         )
 
         if not self.rolling_horizon:
@@ -426,9 +421,7 @@ class DispatchModel(object):
         logging.info("Running a DISPATCH OPTIMIZATION")
 
         datetime_index = pd.date_range(
-            self.start_time,
-            self.end_time,
-            freq=self.freq
+            self.start_time, self.end_time, freq=self.freq
         )
         es = network.EnergySystem(timeindex=datetime_index)
 
@@ -518,14 +511,14 @@ class DispatchModel(object):
         power_prices = pd.DataFrame(
             data=power_prices_list,
             index=self.om.es.timeindex,
-            columns=["Power price"]
+            columns=["Power price"],
         )
 
         return power_prices
 
     def calculate_market_values_from_model(
-            self,
-            power_prices,
+        self,
+        power_prices,
     ):
         r"""Calculate market values from exogenous feed-in and power prices
 
@@ -545,13 +538,15 @@ class DispatchModel(object):
             monthly market values for renewables rolled
             out over each hour of a given month
         """
-        log_info = ("Saving updated market values from model run.")
+        log_info = "Saving updated market values from model run."
         logging.info(log_info)
         techs = ["DE_bus_solarPV", "DE_bus_windonshore", "DE_bus_windoffshore"]
         feedin_df = pd.read_csv(
             (
                 self.path_folder_input
-                + "sources_renewables_ts_" + self.year + ".csv"
+                + "sources_renewables_ts_"
+                + self.year
+                + ".csv"
             ),
             index_col=0,
             parse_dates=True,
@@ -562,8 +557,7 @@ class DispatchModel(object):
             index=feedin_df.index, columns=feedin_df.columns
         )
         market_values = pd.DataFrame(
-            index=range(1, 13),
-            columns=feedin_df.columns
+            index=range(1, 13), columns=feedin_df.columns
         )
 
         feedin_df.loc[:, "power_price"] = 0
@@ -714,8 +708,7 @@ class DispatchModel(object):
 
         iter_results["model_results"] = processing.results(self.om)
         electricity_bus = views.node(
-            iter_results["model_results"],
-            "DE_bus_el"
+            iter_results["model_results"], "DE_bus_el"
         )
         sliced_dispatch_results = pd.DataFrame(
             data=electricity_bus["sequences"].iloc[
@@ -739,9 +732,7 @@ class DispatchModel(object):
         pps = self.get_power_prices_from_duals().iloc[
             0: getattr(self, "time_slice_length_wo_overlap_in_time_steps")
         ]
-        iter_results["power_prices"] = iter_results["power_prices"].append(
-            pps
-        )
+        iter_results["power_prices"] = iter_results["power_prices"].append(pps)
 
     def retrieve_initial_states_rolling_horizon(self, iteration_results):
         r"""Retrieve the initial states for the upcoming rolling horizon run

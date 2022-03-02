@@ -289,7 +289,8 @@ def nodes_from_csv_rh(dispatch_model, iteration_results):
     """
     frequency_used = {
         "60min": (
-            getattr(dispatch_model, "time_slice_length_with_overlap"), "h"
+            getattr(dispatch_model, "time_slice_length_with_overlap"),
+            "h",
         ),
         "15min": (
             getattr(dispatch_model, "time_slice_length_with_overlap") * 15,
@@ -300,9 +301,7 @@ def nodes_from_csv_rh(dispatch_model, iteration_results):
     # Update start time and end time of the model for retrieving the right data
     dispatch_model.start_time = getattr(
         dispatch_model, "time_series_start"
-    ).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    ).strftime("%Y-%m-%d %H:%M:%S")
     dispatch_model.end_time = (
         getattr(dispatch_model, "time_series_start")
         + pd.to_timedelta(frequency_used[0], frequency_used[1])

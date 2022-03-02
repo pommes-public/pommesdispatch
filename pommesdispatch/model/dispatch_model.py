@@ -86,13 +86,12 @@ def run_dispatch_model(config_file="./config.yml"):
         config["control_parameters"],
         config["time_parameters"],
         config["input_output_parameters"],
-        nolog=True
+        nolog=True,
     )
 
     if dm.rolling_horizon:
         dm.add_rolling_horizon_configuration(
-            config["rolling_horizon_parameters"],
-            nolog=True
+            config["rolling_horizon_parameters"], nolog=True
         )
 
     dm.initialize_logging()
@@ -105,7 +104,7 @@ def run_dispatch_model(config_file="./config.yml"):
     model_meta = {
         "overall_objective": 0,
         "overall_time": 0,
-        "overall_solution_time": 0
+        "overall_solution_time": 0,
     }
     ts = time.gmtime()
     dispatch_results = pd.DataFrame()
@@ -124,7 +123,7 @@ def run_dispatch_model(config_file="./config.yml"):
         if dm.write_lp_file:
             dm.om.write(
                 dm.path_folder_output + "pommesdispatch_model.lp",
-                io_options={"symbolic_solver_labels": True}
+                io_options={"symbolic_solver_labels": True},
             )
         dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
         meta_results = processing.meta_results(dm.om)
@@ -146,7 +145,7 @@ def run_dispatch_model(config_file="./config.yml"):
             "storages_initial": pd.DataFrame(),
             "model_results": {},
             "dispatch_results": dispatch_results,
-            "power_prices": power_prices
+            "power_prices": power_prices,
         }
 
         for counter in range(getattr(dm, "amount_of_time_slices")):
@@ -179,41 +178,48 @@ def run_dispatch_model(config_file="./config.yml"):
                 views.node(model_results, bus_el)["sequences"]
                 for bus_el in buses_el_views
             ],
-            axis=1
+            axis=1,
         )
 
     if dm.save_updated_market_values:
-        market_values, market_values_hourly = (
-            dm.calculate_market_values_from_model(power_prices)
-        )
+        (
+            market_values,
+            market_values_hourly,
+        ) = dm.calculate_market_values_from_model(power_prices)
         market_values.to_csv(
-            dm.path_folder_output + getattr(dm, "filename")
-            + '_monthly_market_values.csv',
-            sep=',',
-            decimal='.'
+            dm.path_folder_output
+            + getattr(dm, "filename")
+            + "_monthly_market_values.csv",
+            sep=",",
+            decimal=".",
         )
 
         market_values_hourly.to_csv(
-            dm.path_folder_input + "costs_market_values" +
-            "_" + str(dm.year) + ".csv",
-            sep=',',
-            decimal='.'
+            dm.path_folder_input
+            + "costs_market_values"
+            + "_"
+            + str(dm.year)
+            + ".csv",
+            sep=",",
+            decimal=".",
         )
 
     if dm.save_production_results:
         dispatch_results.to_csv(
-            dm.path_folder_output + getattr(dm, "filename")
-            + '_production.csv',
-            sep=',',
-            decimal='.'
+            dm.path_folder_output
+            + getattr(dm, "filename")
+            + "_production.csv",
+            sep=",",
+            decimal=".",
         )
 
     if dm.save_price_results:
         power_prices.to_csv(
-            dm.path_folder_output + getattr(dm, "filename")
-            + '_power-prices.csv',
-            sep=',',
-            decimal='.'
+            dm.path_folder_output
+            + getattr(dm, "filename")
+            + "_power-prices.csv",
+            sep=",",
+            decimal=".",
         )
 
 
@@ -221,24 +227,25 @@ def add_args():
     """Add command line argument for config file"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         required=False,
         default="./config.yml",
-        help="Specify input config file"
+        help="Specify input config file",
     )
     parser.add_argument(
         "--init",
         required=False,
         action="store_true",
-        help="Automatically generate default config"
+        help="Automatically generate default config",
     )
     parser.add_argument(
-        '--iterations',
-        metavar='n',
+        "--iterations",
+        metavar="n",
         type=int,
         required=False,
         default=1,
-        help="Define number of iterations for market value update"
+        help="Define number of iterations for market value update",
     )
     args = parser.parse_args()
     return args
