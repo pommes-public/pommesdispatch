@@ -31,7 +31,6 @@ def load_input_data(filename=None,
                     countries=None):
     r"""Load input data from csv files.
 
-    Optionally reindex time series in order to simulate 2030 (or another year).
     Display some information on NaN values in time series data.
 
     Parameters
@@ -179,8 +178,12 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
                 variable_costs=(
                         input_data["costs_fuel"].loc[
                             i, dispatch_model.year]
-                        + input_data["costs_carbon"].loc[
+                        + input_data["costs_emissions"].loc[
                             i, dispatch_model.year]
+                        * np.array(
+                            input_data['costs_emissions_ts']["price"][
+                                dispatch_model.start_time:
+                                dispatch_model.end_time])
                         * cs["emission_factors"]),
                 emission_factor=cs["emission_factors"])})
 
@@ -193,7 +196,6 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-# TODO: Show a warning if shortage or excess is active
 def create_shortage_sources(input_data, node_dict):
     r"""Create shortage sources and add them to the dict of nodes.
 
@@ -295,7 +297,6 @@ def create_demand(input_data, dispatch_model, node_dict,
                              dispatch_model.end_time]),
                 nominal_value=d['maximum'])}}
 
-        # TODO: Include into data preparation and write adjusted demand
         # Adjusted demand here means the difference between overall demand
         # and the baseline load profile for demand response units
         if dispatch_model.activate_demand_response:
@@ -425,7 +426,7 @@ def create_excess_sinks(input_data, node_dict):
     r"""Create excess sinks and add them to the dict of nodes.
 
     The German excess sink is additionally connected to the renewable buses
-    including punishment costs, which is needed to model negative prices.
+    including penalty costs, which is needed to model negative prices.
     It is therefore excluded in the DataFrame that is read in.
 
     Parameters
@@ -446,7 +447,11 @@ def create_excess_sinks(input_data, node_dict):
     for i, e in input_data["sinks_excess"].iterrows():
         node_dict[i] = solph.Sink(
             label=i,
-            inputs={node_dict[e['from']]: solph.Flow(variable_costs=1000)})
+            inputs={
+                node_dict[e['from']]: solph.Flow(
+                    variable_costs=e['excess_costs'])
+            }
+        )
 
     # The German sink is special due to a different input
     try:
@@ -616,16 +621,22 @@ def create_transformers_conventional(input_data,
                 input_data['costs_operation']
                 .loc[t['from'], dispatch_model.year]),
             'min': t['min_load_factor'],
-            'max': t['max_load_factor'],
+            'max': (
+                t['max_load_factor']
+                # * np.array(
+                #     input_data['transformers_availability_ts']["values"]
+                #     .loc[dispatch_model.start_time:dispatch_model.end_time]
+                # )
+            ),
 
             'positive_gradient': {
                 'ub': t['grad_pos'],
-                'costs': input_data['costs_ramping'].loc[t['from'],
-                                                         dispatch_model.year]},
+                'costs': 0
+            },
             'negative_gradient': {
                 'ub': t['grad_neg'],
-                'costs': input_data['costs_ramping'].loc[t['from'],
-                                                         dispatch_model.year]}
+                'costs': 0
+            }
         }
 
         if t['country'] == 'DE':
@@ -722,12 +733,12 @@ def create_transformers_res(input_data,
                                    dispatch_model.end_time]),
                 'positive_gradient': {
                     'ub': t['grad_pos'],
-                    'costs': input_data['costs_ramping'].loc[
-                        t['from'], dispatch_model.year]},
+                    'costs': 0
+                },
                 'negative_gradient': {
                     'ub': t['grad_neg'],
-                    'costs': input_data['costs_ramping'].loc[
-                        t['from'], dispatch_model.year]}
+                    'costs': 0
+                }
             }
 
             node_dict[i] = solph.Transformer(
