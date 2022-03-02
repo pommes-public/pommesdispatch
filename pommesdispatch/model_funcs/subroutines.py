@@ -88,7 +88,7 @@ def create_buses(input_data, node_dict):
     return node_dict
 
 
-def create_linking_transformers(input_data, dispatch_model, node_dict):
+def create_linking_transformers(input_data, dm, node_dict):
     r"""Create linking transformers and add them to the dict of nodes.
 
     Linking transformers serve for modeling interconnector capacities
@@ -99,7 +99,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -119,7 +119,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
                     label=i,
                     inputs={
                         node_dict[l["from"]]: solph.Flow(
-                            nominal_value=l[dispatch_model.year]
+                            nominal_value=l[dm.year]
                         )
                     },
                     outputs={node_dict[l["to"]]: solph.Flow()},
@@ -135,10 +135,9 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
                     label=i,
                     inputs={
                         node_dict[l["from"]]: solph.Flow(
-                            nominal_value=l[dispatch_model.year],
+                            nominal_value=l[dm.year],
                             max=input_data["linking_transformers_ts"][i][
-                                dispatch_model.start_time
-                                :dispatch_model.end_time
+                                dm.start_time:dm.end_time
                             ].to_numpy(),
                         )
                     },
@@ -156,7 +155,7 @@ def create_linking_transformers(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-def create_commodity_sources(input_data, dispatch_model, node_dict):
+def create_commodity_sources(input_data, dm, node_dict):
     r"""Create commodity sources and add them to the dict of nodes.
 
     Parameters
@@ -165,7 +164,7 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -184,14 +183,11 @@ def create_commodity_sources(input_data, dispatch_model, node_dict):
             outputs={
                 node_dict[cs["to"]]: solph.Flow(
                     variable_costs=(
-                        input_data["costs_fuel"].loc[i, dispatch_model.year]
-                        + input_data["costs_emissions"].loc[
-                            i, dispatch_model.year
-                        ]
+                        input_data["costs_fuel"].loc[i, dm.year]
+                        + input_data["costs_emissions"].loc[i, dm.year]
                         * np.array(
                             input_data["costs_emissions_ts"]["price"][
-                                dispatch_model.start_time
-                                : dispatch_model.end_time
+                                dm.start_time:dm.end_time
                             ]
                         )
                         * cs["emission_factors"]
@@ -241,7 +237,7 @@ def create_shortage_sources(input_data, node_dict):
     return node_dict
 
 
-def create_renewables(input_data, dispatch_model, node_dict):
+def create_renewables(input_data, dm, node_dict):
     r"""Create renewable sources and add them to the dict of nodes.
 
     Parameters
@@ -250,7 +246,7 @@ def create_renewables(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -270,8 +266,7 @@ def create_renewables(input_data, dispatch_model, node_dict):
                     node_dict[re["to"]]: solph.Flow(
                         fix=np.array(
                             input_data["sources_renewables_ts"][i][
-                                dispatch_model.start_time
-                                :dispatch_model.end_time
+                                dm.start_time:dm.end_time
                             ]
                         ),
                         nominal_value=re["capacity"],
@@ -284,9 +279,7 @@ def create_renewables(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-def create_demand(
-    input_data, dispatch_model, node_dict, dr_overall_load_ts_df=None
-):
+def create_demand(input_data, dm, node_dict, dr_overall_load_ts_df=None):
     r"""Create demand sinks and add them to the dict of nodes.
 
     Parameters
@@ -295,7 +288,7 @@ def create_demand(
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -320,7 +313,7 @@ def create_demand(
                 node_dict[d["from"]]: solph.Flow(
                     fix=np.array(
                         input_data["sinks_demand_el_ts"][i][
-                            dispatch_model.start_time : dispatch_model.end_time
+                            dm.start_time:dm.end_time
                         ]
                     ),
                     nominal_value=d["maximum"],
@@ -330,20 +323,18 @@ def create_demand(
 
         # Adjusted demand here means the difference between overall demand
         # and the baseline load profile for demand response units
-        if dispatch_model.activate_demand_response:
+        if dm.activate_demand_response:
             if i == "DE_sink_el_load":
                 kwargs_dict["inputs"] = {
                     node_dict[d["from"]]: solph.Flow(
                         fix=np.array(
                             input_data["sinks_demand_el_ts"][i][
-                                dispatch_model.start_time
-                                :dispatch_model.end_time
+                                dm.start_time:dm.end_time
                             ]
                             .mul(d["maximum"])
                             .sub(
                                 dr_overall_load_ts_df[
-                                    dispatch_model.start_time
-                                    :dispatch_model.end_time
+                                    dm.start_time:dm.end_time
                                 ]
                             )
                         ),
@@ -356,7 +347,7 @@ def create_demand(
     return node_dict
 
 
-def create_demand_response_units(input_data, dispatch_model, node_dict):
+def create_demand_response_units(input_data, dm, node_dict):
     r"""Create demand response units and add them to the dict of nodes.
 
     The demand response modeling approach can be chosen from different
@@ -368,7 +359,7 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -391,19 +382,19 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
         kwargs_all = {
             "demand": np.array(
                 input_data["sinks_dr_el_ts"][i].loc[
-                    dispatch_model.start_time : dispatch_model.end_time
+                    dm.start_time:dm.end_time
                 ]
             ),
             "max_demand": d["max_cap"],
             "capacity_up": np.array(
                 input_data["sinks_dr_el_ava_neg_ts"][i].loc[
-                    dispatch_model.start_time : dispatch_model.end_time
+                    dm.start_time:dm.end_time
                 ]
             ),
             "max_capacity_up": d["potential_neg_overall"],
             "capacity_down": np.array(
                 input_data["sinks_dr_el_ava_pos_ts"][i].loc[
-                    dispatch_model.start_time : dispatch_model.end_time
+                    dm.start_time:dm.end_time
                 ]
             ),
             "max_capacity_down": d["potential_pos_overall"],
@@ -461,7 +452,7 @@ def create_demand_response_units(input_data, dispatch_model, node_dict):
             ),
         }
 
-        node_dict[i] = approach_dict[dispatch_model.demand_response_approach]
+        node_dict[i] = approach_dict[dm.demand_response_approach]
 
     # Calculate overall electrical baseline load from demand response units
     dr_overall_load_ts_df = (
@@ -648,7 +639,7 @@ def build_condensing_transformer(i, t, node_dict, outflow_args_el):
     return node_dict[i]
 
 
-def create_transformers_conventional(input_data, dispatch_model, node_dict):
+def create_transformers_conventional(input_data, dm, node_dict):
     r"""Create transformers elements and add them to the dict of nodes
 
     Parameters
@@ -657,7 +648,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -674,9 +665,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
         outflow_args_el = {
             "nominal_value": t["capacity"],
             "variable_costs": (
-                input_data["costs_operation"].loc[
-                    t["from"], dispatch_model.year
-                ]
+                input_data["costs_operation"].loc[t["from"], dm.year]
             ),
             "min": t["min_load_factor"],
             "max": (t["max_load_factor"]),
@@ -691,7 +680,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     outflow_args_el["min"] = (
                         input_data["min_loads_dh"]
                         .loc[
-                            dispatch_model.start_time:dispatch_model.end_time,
+                            dm.start_time:dm.end_time,
                             t["identifier"],
                         ]
                         .to_numpy()
@@ -700,7 +689,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dispatch_model.start_time:dispatch_model.end_time,
+                            dm.start_time:dm.end_time,
                             "chp_" + t["fuel"],
                         ]
                         .to_numpy()
@@ -709,7 +698,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dispatch_model.start_time:dispatch_model.end_time,
+                            dm.start_time:dm.end_time,
                             "chp",
                         ]
                         .to_numpy()
@@ -720,7 +709,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     outflow_args_el["min"] = (
                         input_data["min_loads_ipp"]
                         .loc[
-                            dispatch_model.start_time:dispatch_model.end_time,
+                            dm.start_time:dm.end_time,
                             t["identifier"],
                         ]
                         .to_numpy()
@@ -729,7 +718,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dispatch_model.start_time:dispatch_model.end_time,
+                            dm.start_time:dm.end_time,
                             "ipp",
                         ]
                         .to_numpy()
@@ -740,7 +729,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
             outflow_args_el["min"] = (
                 input_data["transformers_minload_ts"]
                 .loc[
-                    dispatch_model.start_time:dispatch_model.end_time,
+                    dm.start_time:dm.end_time,
                     t["country"] + "_natgas",
                 ]
                 .to_numpy()
@@ -749,12 +738,12 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                 [1]
                 * len(
                     input_data["transformers_minload_ts"].loc[
-                        dispatch_model.start_time:dispatch_model.end_time
+                        dm.start_time:dm.end_time
                     ]
                 ),
                 input_data["transformers_minload_ts"]
                 .loc[
-                    dispatch_model.start_time:dispatch_model.end_time,
+                    dm.start_time:dm.end_time,
                     t["country"] + "_natgas",
                 ]
                 .to_numpy()
@@ -767,7 +756,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                 [1]
                 * len(
                     input_data["transformers_availability_ts"].loc[
-                        dispatch_model.start_time:dispatch_model.end_time
+                        dm.start_time:dm.end_time
                     ]
                 ),
                 np.maximum(
@@ -776,9 +765,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
                     * np.array(
                         input_data["transformers_availability_ts"][
                             "values"
-                        ].loc[
-                            dispatch_model.start_time:dispatch_model.end_time
-                        ]
+                        ].loc[dm.start_time:dm.end_time]
                     ),
                 ),
             )
@@ -790,7 +777,7 @@ def create_transformers_conventional(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-def create_transformers_res(input_data, dispatch_model, node_dict):
+def create_transformers_res(input_data, dm, node_dict):
     r"""Create renewable energy transformers and add them to the dict of nodes.
 
     Parameters
@@ -799,7 +786,7 @@ def create_transformers_res(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -820,14 +807,14 @@ def create_transformers_res(input_data, dispatch_model, node_dict):
                     input_data["costs_operation_renewables"].at[i, "costs"]
                     + np.array(
                         input_data["costs_market_values"][t["from"]][
-                            dispatch_model.start_time : dispatch_model.end_time
+                            dm.start_time:dm.end_time
                         ]
                     )
                 ),
                 "min": t["min_load_factor"],
                 "max": np.array(
                     input_data["sources_renewables_ts"][t["from"]][
-                        dispatch_model.start_time : dispatch_model.end_time
+                        dm.start_time:dm.end_time
                     ]
                 ),
                 "positive_gradient": {"ub": t["grad_pos"], "costs": 0},
@@ -851,8 +838,7 @@ def create_transformers_res(input_data, dispatch_model, node_dict):
                         nominal_value=t["capacity"],
                         fix=np.array(
                             input_data["sources_renewables_ts"][t["from"]][
-                                dispatch_model.start_time
-                                :dispatch_model.end_time
+                                dm.start_time:dm.end_time
                             ]
                         ),
                     )
@@ -863,7 +849,7 @@ def create_transformers_res(input_data, dispatch_model, node_dict):
     return node_dict
 
 
-def create_storages(input_data, dispatch_model, node_dict):
+def create_storages(input_data, dm, node_dict):
     r"""Create storages and add them to the dict of nodes.
 
     Parameters
@@ -872,7 +858,7 @@ def create_storages(input_data, dispatch_model, node_dict):
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -894,7 +880,7 @@ def create_storages(input_data, dispatch_model, node_dict):
                         nominal_value=s["capacity_pump"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                     )
@@ -904,7 +890,7 @@ def create_storages(input_data, dispatch_model, node_dict):
                         nominal_value=s["capacity_turbine"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                     )
@@ -928,7 +914,7 @@ def create_storages(input_data, dispatch_model, node_dict):
                         nominal_value=s["capacity_turbine"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                         min=s["min_load_factor"],
@@ -949,7 +935,7 @@ def create_storages(input_data, dispatch_model, node_dict):
 
 
 def create_storages_rolling_horizon(
-    input_data, dispatch_model, node_dict, iteration_results
+    input_data, dm, node_dict, iteration_results
 ):
     r"""Create storages, add them to the dict of nodes, return storage labels.
 
@@ -959,7 +945,7 @@ def create_storages_rolling_horizon(
         The input data given as a dict of DataFrames
         with component names as keys
 
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     node_dict : :obj:`dict` of :class:`nodes <oemof.network.Node>`
@@ -1001,7 +987,7 @@ def create_storages_rolling_horizon(
                         nominal_value=s["capacity_pump"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                     )
@@ -1011,7 +997,7 @@ def create_storages_rolling_horizon(
                         nominal_value=s["capacity_turbine"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                     )
@@ -1035,7 +1021,7 @@ def create_storages_rolling_horizon(
                         nominal_value=s["capacity_turbine"],
                         variable_costs=(
                             input_data["costs_operation_storages"].loc[
-                                i, dispatch_model.year
+                                i, dm.year
                             ]
                         ),
                         min=s["min_load_factor"],
