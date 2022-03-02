@@ -623,10 +623,6 @@ def create_transformers_conventional(input_data,
             'min': t['min_load_factor'],
             'max': (
                 t['max_load_factor']
-                # * np.array(
-                #     input_data['transformers_availability_ts']["values"]
-                #     .loc[dispatch_model.start_time:dispatch_model.end_time]
-                # )
             ),
 
             'positive_gradient': {
@@ -639,6 +635,7 @@ def create_transformers_conventional(input_data,
             }
         }
 
+        # Assign minimum loads for German CHP and IPP plants
         if t['country'] == 'DE':
             if t['type'] == 'chp':
                 if t['identifier'] in input_data['min_loads_dh'].columns:
@@ -674,6 +671,7 @@ def create_transformers_conventional(input_data,
                             dispatch_model.end_time,
                             'ipp'].to_numpy())
 
+        # Limit flexibility for Austrian and French natgas plants
         if t['country'] in ['AT', 'FR'] and t['fuel'] == 'natgas':
             outflow_args_el['min'] = (
                 input_data['transformers_minload_ts'].loc[
@@ -693,6 +691,30 @@ def create_transformers_conventional(input_data,
                         dispatch_model.end_time,
                         t['country'] + '_natgas'
                     ].to_numpy() + 0.05
+                )
+            )
+
+        # Introduce availability and handle minimum loads
+        else:
+            outflow_args_el['max'] = (
+                np.minimum(
+                    [1] * len(
+                        input_data['transformers_availability_ts'].loc[
+                            dispatch_model.start_time:dispatch_model.end_time
+                        ]
+                    ),
+                    np.maximum(
+                        outflow_args_el['min'] + 0.05,
+                        outflow_args_el['max']
+                        * np.array(
+                            input_data[
+                                'transformers_availability_ts'
+                            ]["values"].loc[
+                                dispatch_model.start_time
+                                :dispatch_model.end_time
+                            ]
+                        )
+                    )
                 )
             )
 
