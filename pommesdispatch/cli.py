@@ -58,7 +58,7 @@ def run_pommes_dispatch():
             print(f"ITERATION {iteration} completed")
             print("-" * 60)
     else:
-        run_dispatch_model()
+        run_dispatch_model(args.file)
 
 
 if __name__ == "__main__":
