@@ -72,15 +72,19 @@ def parse_input_data(dispatch_model):
         "sources_renewables_ts": "sources_renewables_ts",
         "transformers_minload_ts": "transformers_minload_ts",
         "transformers_availability_ts": "transformers_availability_ts",
-        "costs_fuel": "costs_fuel_" + dispatch_model.fuel_cost_pathway,
+        "costs_fuel": (
+            "costs_fuel_" + dispatch_model.fuel_cost_pathway + "_nominal"
+        ),
         "costs_fuel_ts": "costs_fuel_ts",
         "costs_emissions": (
-            "costs_emissions_" + dispatch_model.emissions_cost_pathway
+            "costs_emissions_"
+            + dispatch_model.emissions_cost_pathway
+            + "_nominal"
         ),
         "costs_emissions_ts": "costs_emissions_ts",
-        "costs_operation": "costs_operation",
+        "costs_operation": "costs_operation_nominal",
         "costs_operation_renewables": "costs_operation_renewables",
-        "costs_operation_storages": "costs_operation_storages",
+        "costs_operation_storages": "costs_operation_storages_nominal",
         "min_loads_dh": "min_loads_dh",
         "min_loads_ipp": "min_loads_ipp",
     }
