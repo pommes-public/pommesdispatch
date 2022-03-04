@@ -8,7 +8,7 @@ Installation requirements
 -------------------------
 Python version >= 3.8
 
-@author: Johannes Kochems
+@author: Johannes Kochems, Johannes Giehl
 """
 import math
 from datetime import datetime
@@ -71,21 +71,21 @@ def convert_annual_limit(annual_limit, start_time, end_time):
 
     Parameters
     ----------
-    annual_limit: :obj:`float` or :obj:`pd.Series`of :class:`float`
+    annual_limit: float or pd.Series of dtype float
         An annual limit (e.g. for emissions, investment budgets)
         if start_time and end_time are within the same year,
         or a pd.Series of annual limits indexed by years if start_time and
         end_time are not within one year
 
-    start_time: :obj:`str`
+    start_time: str
         The first date string; start_time of the optimization run
 
-    end_time: :obj:`str`
+    end_time: str
         The second date string; end_time of the optimization run
 
     Returns
     -------
-    new_limit: :obj:`float`
+    new_limit: float
         A sub-annual / multi-annual limit for the optimization timeframe
     """
     dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
@@ -133,13 +133,13 @@ def convert_annual_costs_nominal_to_real(
 
     Parameters
     ----------
-    nominal_costs: :obj:`pd.DataFrame`
+    nominal_costs: pd.DataFrame
         Nominal costs data in annual resolution (years = columns)
 
-    inflation_rate: :obj:`float`
+    inflation_rate: float
         Inflation rate
 
-    year: :obj:`int`
+    year: int
         Year for which the nominal costs shall be expressed
 
     Returns
@@ -158,7 +158,7 @@ def convert_annual_costs_nominal_to_real(
                 msg = (
                     "DataFrame format not as expected\n"
                     "Except for column 'label', "
-                    "all other columns must be integer"
+                    "all other columns must have column names of type int!"
                 )
                 raise TypeError(msg)
 
@@ -175,15 +175,15 @@ def convert_nominal_to_real_time_series(
     nominal_time_series: :obj:`pd.DataFrame`
         Nominal time series data in hourly resolution
 
-    inflation_rate: :obj:`float`
+    inflation_rate: float
         Inflation rate
 
-    year: :obj:`int`
+    year: int
         Year for which the nominal costs shall be expressed
 
     Returns
     -------
-    real_time_series: :obj:`pd.DataFrame`
+    real_time_series: pd.DataFrame
         Real time series data in hourly resolution
     """
     if not type(nominal_time_series.index.year == pd.DatetimeIndex):
