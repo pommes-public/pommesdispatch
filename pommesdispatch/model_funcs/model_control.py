@@ -199,6 +199,10 @@ class DispatchModel(object):
         A date string of format "YYYY-MM-DD hh:mm:ss" defining the end time
         of the simulation
 
+    freq : str
+        Frequency of the simulation, i.e. freqeuncy of the pandas.date_range
+        object
+
     path_folder_input : str
         The path to the folder where the input data is stored
 
