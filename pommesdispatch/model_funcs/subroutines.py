@@ -747,7 +747,14 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     t["country"] + "_natgas",
                 ]
                 .to_numpy()
-                + 0.05,
+                * np.array(
+                    input_data["transformers_availability_ts"]["values"].loc[
+                        dm.start_time:dm.end_time
+                    ]
+                )
+                + input_data["min_max_load_margins"]
+                .loc[int(dm.year)]
+                .to_numpy(),
             )
 
         # Introduce availability and handle minimum loads
@@ -760,7 +767,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     ]
                 ),
                 np.maximum(
-                    outflow_args_el["min"] + 0.05,
+                    outflow_args_el["min"] + 0.01,
                     outflow_args_el["max"]
                     * np.array(
                         input_data["transformers_availability_ts"][
