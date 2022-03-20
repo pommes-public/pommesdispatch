@@ -395,9 +395,7 @@ class DispatchModel(object):
             agg_string = "Using the AGGREGATED POWER PLANT DATA SET"
         else:
             agg_string = (
-                "Using the COMPLETE POWER PLANT DATA SET.\n"
-                "Minimum power output constraint of (individual)\n"
-                "transformers will be neglected."
+                "Using the COMPLETE POWER PLANT DATA SET."
             )
 
         if self.activate_demand_response:
