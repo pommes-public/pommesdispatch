@@ -13,7 +13,7 @@ def return_model_and_parameters():
         "countries": ['AT', 'BE', 'CH', 'CZ', 'DE', 'DK1', 'DK2', 'FR',
                       'NL', 'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
                       'SE1', 'SE2', 'SE3', 'SE4'],
-        "solver": "gurobi",
+        "solver": "cbc",
         "fuel_cost_pathway": "NZE",
         "emissions_cost_pathway": "long-term",
         "activate_emissions_limit": False,
