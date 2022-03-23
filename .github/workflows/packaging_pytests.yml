@@ -64,7 +64,7 @@ jobs:
         run: |
           pip3 install dist/*.whl
           pip3 install pytest coverage coverage-badge
-          conda install -c conda-forge coincbc
+          sudo apt install coinor-cbc
           coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
           coverage report -m
           coverage html
