@@ -63,9 +63,10 @@ jobs:
       - name: Run coverage
         run: |
           pip3 install dist/*.whl
-          pip3 install pytest coverage coverage-badge
+          pip3 install pytest coverage coverage-badge coveralls
           sudo apt install coinor-cbc
           coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
           coverage report -m
           coverage html
           coverage-badge
+          coveralls
