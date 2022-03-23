@@ -35,6 +35,6 @@ jobs:
           black: true
           flake8: false
           # Mark the following line true if you want linters to attempt to autocorrect your code
-          auto_fix: true
+          auto_fix: false
           git_name: "jokochems"
           git_email: "jokochems@web.de"
