@@ -1,0 +1,71 @@
+name: Packaging and tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  packaging:
+    name: build
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+        poetry-version: [1.1.13]
+        os: [ubuntu-18.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: View poetry --help
+        run: poetry --help
+
+  check-coverage:
+    name: Check coverage
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Build package
+        run: |
+          pip3 install wheel
+          python3 setup.py sdist
+          python3 setup.py bdist_wheel
+        
+      - name: Run coverage
+        run: |
+          pip3 install dist/*.whl
+          pip3 install pytest coverage coverage-badge
+          sudo apt install coinor-cbc
+          coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
+          coverage report -m
+          coverage html
+          coverage-badge

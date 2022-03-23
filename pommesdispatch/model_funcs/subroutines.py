@@ -137,7 +137,7 @@ def create_linking_transformers(input_data, dm, node_dict):
                         node_dict[l["from"]]: solph.Flow(
                             nominal_value=l[dm.year],
                             max=input_data["linking_transformers_ts"][i][
-                                dm.start_time:dm.end_time
+                                dm.start_time : dm.end_time
                             ].to_numpy(),
                         )
                     },
@@ -187,7 +187,7 @@ def create_commodity_sources(input_data, dm, node_dict):
                         + input_data["costs_emissions"].loc[i, dm.year]
                         * np.array(
                             input_data["costs_emissions_ts"]["price"][
-                                dm.start_time:dm.end_time
+                                dm.start_time : dm.end_time
                             ]
                         )
                         * cs["emission_factors"]
@@ -266,7 +266,7 @@ def create_renewables(input_data, dm, node_dict):
                     node_dict[re["to"]]: solph.Flow(
                         fix=np.array(
                             input_data["sources_renewables_ts"][i][
-                                dm.start_time:dm.end_time
+                                dm.start_time : dm.end_time
                             ]
                         ),
                         nominal_value=re["capacity"],
@@ -313,7 +313,7 @@ def create_demand(input_data, dm, node_dict, dr_overall_load_ts_df=None):
                 node_dict[d["from"]]: solph.Flow(
                     fix=np.array(
                         input_data["sinks_demand_el_ts"][i][
-                            dm.start_time:dm.end_time
+                            dm.start_time : dm.end_time
                         ]
                     ),
                     nominal_value=d["maximum"],
@@ -329,12 +329,12 @@ def create_demand(input_data, dm, node_dict, dr_overall_load_ts_df=None):
                     node_dict[d["from"]]: solph.Flow(
                         fix=np.array(
                             input_data["sinks_demand_el_ts"][i][
-                                dm.start_time:dm.end_time
+                                dm.start_time : dm.end_time
                             ]
                             .mul(d["maximum"])
                             .sub(
                                 dr_overall_load_ts_df[
-                                    dm.start_time:dm.end_time
+                                    dm.start_time : dm.end_time
                                 ]
                             )
                         ),
@@ -382,19 +382,19 @@ def create_demand_response_units(input_data, dm, node_dict):
         kwargs_all = {
             "demand": np.array(
                 input_data["sinks_dr_el_ts"][i].loc[
-                    dm.start_time:dm.end_time
+                    dm.start_time : dm.end_time
                 ]
             ),
             "max_demand": d["max_cap"],
             "capacity_up": np.array(
                 input_data["sinks_dr_el_ava_neg_ts"][i].loc[
-                    dm.start_time:dm.end_time
+                    dm.start_time : dm.end_time
                 ]
             ),
             "max_capacity_up": d["potential_neg_overall"],
             "capacity_down": np.array(
                 input_data["sinks_dr_el_ava_pos_ts"][i].loc[
-                    dm.start_time:dm.end_time
+                    dm.start_time : dm.end_time
                 ]
             ),
             "max_capacity_down": d["potential_pos_overall"],
@@ -680,7 +680,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     outflow_args_el["min"] = (
                         input_data["min_loads_dh"]
                         .loc[
-                            dm.start_time:dm.end_time,
+                            dm.start_time : dm.end_time,
                             t["identifier"],
                         ]
                         .to_numpy()
@@ -689,7 +689,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dm.start_time:dm.end_time,
+                            dm.start_time : dm.end_time,
                             "chp_" + t["fuel"],
                         ]
                         .to_numpy()
@@ -698,7 +698,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dm.start_time:dm.end_time,
+                            dm.start_time : dm.end_time,
                             "chp",
                         ]
                         .to_numpy()
@@ -709,7 +709,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     outflow_args_el["min"] = (
                         input_data["min_loads_ipp"]
                         .loc[
-                            dm.start_time:dm.end_time,
+                            dm.start_time : dm.end_time,
                             t["identifier"],
                         ]
                         .to_numpy()
@@ -718,7 +718,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     outflow_args_el["min"] = (
                         input_data["transformers_minload_ts"]
                         .loc[
-                            dm.start_time:dm.end_time,
+                            dm.start_time : dm.end_time,
                             "ipp",
                         ]
                         .to_numpy()
@@ -729,7 +729,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
             outflow_args_el["min"] = (
                 input_data["transformers_minload_ts"]
                 .loc[
-                    dm.start_time:dm.end_time,
+                    dm.start_time : dm.end_time,
                     t["country"] + "_natgas",
                 ]
                 .to_numpy()
@@ -738,18 +738,18 @@ def create_transformers_conventional(input_data, dm, node_dict):
                 [1]
                 * len(
                     input_data["transformers_minload_ts"].loc[
-                        dm.start_time:dm.end_time
+                        dm.start_time : dm.end_time
                     ]
                 ),
                 input_data["transformers_minload_ts"]
                 .loc[
-                    dm.start_time:dm.end_time,
+                    dm.start_time : dm.end_time,
                     t["country"] + "_natgas",
                 ]
                 .to_numpy()
                 * np.array(
                     input_data["transformers_availability_ts"]["values"].loc[
-                        dm.start_time:dm.end_time
+                        dm.start_time : dm.end_time
                     ]
                 )
                 + input_data["min_max_load_margins"]
@@ -763,7 +763,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                 [1]
                 * len(
                     input_data["transformers_availability_ts"].loc[
-                        dm.start_time:dm.end_time
+                        dm.start_time : dm.end_time
                     ]
                 ),
                 np.maximum(
@@ -772,7 +772,7 @@ def create_transformers_conventional(input_data, dm, node_dict):
                     * np.array(
                         input_data["transformers_availability_ts"][
                             "values"
-                        ].loc[dm.start_time:dm.end_time]
+                        ].loc[dm.start_time : dm.end_time]
                     ),
                 ),
             )
@@ -814,14 +814,14 @@ def create_transformers_res(input_data, dm, node_dict):
                     input_data["costs_operation_renewables"].at[i, "costs"]
                     + np.array(
                         input_data["costs_market_values"][t["from"]][
-                            dm.start_time:dm.end_time
+                            dm.start_time : dm.end_time
                         ]
                     )
                 ),
                 "min": t["min_load_factor"],
                 "max": np.array(
                     input_data["sources_renewables_ts"][t["from"]][
-                        dm.start_time:dm.end_time
+                        dm.start_time : dm.end_time
                     ]
                 ),
                 "positive_gradient": {"ub": t["grad_pos"], "costs": 0},
@@ -845,7 +845,7 @@ def create_transformers_res(input_data, dm, node_dict):
                         nominal_value=t["capacity"],
                         fix=np.array(
                             input_data["sources_renewables_ts"][t["from"]][
-                                dm.start_time:dm.end_time
+                                dm.start_time : dm.end_time
                             ]
                         ),
                     )
