@@ -56,17 +56,22 @@ jobs:
       
       - name: Build package
         run: |
-          pip3 install wheel
-          python3 setup.py sdist
-          python3 setup.py bdist_wheel
+          pip install wheel
+          python setup.py sdist
+          python setup.py bdist_wheel
         
       - name: Run coverage
         run: |
-          pip3 install dist/*.whl
-          pip3 install pytest coverage coverage-badge coveralls
+          pip install dist/*.whl
+          pip install pytest coverage coverage-badge coveralls
           sudo apt install coinor-cbc
-          coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
-          coverage report -m
+          coverage run --source=pommesdispatch -m pytest
+          coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 79 || 80 }}
           coverage html
           coverage-badge
-          coveralls
+
+      - name: Report to coveralls
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_SERVICE_NAME: github
