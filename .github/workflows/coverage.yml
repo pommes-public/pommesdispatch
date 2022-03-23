@@ -56,12 +56,13 @@ jobs:
       
       - name: Build package
         run: |
+          pip3 install wheel
           python3 setup.py sdist
           python3 setup.py bdist_wheel
         
       - name: Run coverage
         run: |
-          pip3 install wheel dist/*.whl
+          pip3 install dist/*.whl
           pip3 install pytest coverage coverage-badge
           coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
           coverage report -m
