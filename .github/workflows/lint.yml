@@ -1,4 +1,4 @@
-name: Flake8
+name: Linting
 
 on:
   push:
@@ -11,30 +11,52 @@ on:
       - dev
 
 jobs:
-  run-linters:
-    name: Run linters
+  clean:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
+      - uses: actions/checkout@v2
+
+      - name: Black formatting
+        uses: lgeiger/black-action@v1.0.1
+        with:
+          args: "./"
+
+      - name: Run isort
+        uses: jamescurtin/isort-action@master
+        with:
+          configuration: --profile black
+
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+
+      - name: Push changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.email "jokochems@web.de"
+          git config --global user.name "jokochems"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout $GITHUB_HEAD_REF
+          git commit -am "Black reformating"
+          git push
+  lint:
+    runs-on: ubuntu-latest
+    needs: clean
+    steps:
+
+      - name: Checkout source code
         uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
 
-      - name: Install Python dependencies
-        run: pip install black flake8
-
-      - name: Run linters
-        uses: samuelmeuli/lint-action@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          # Enable linters
-          black: false
-          flake8: true
-          # Mark the following line true if you want linters to attempt to autocorrect your code
-          auto_fix: false
-          git_name: "Greene Lab Linter"
-          git_email: "csgreene@upenn.edu"
+      - name: Super-Linter
+        uses: github/super-linter@v4
+        env:
+          ERRORS: false
+          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_PYTHON: true
+          DEFAULT_BRANCH: master
+          IGNORE_GITIGNORED_FILES: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
