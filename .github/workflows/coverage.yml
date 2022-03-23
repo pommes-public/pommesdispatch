@@ -61,7 +61,7 @@ jobs:
         
       - name: Run coverage
         run: |
-          pip3 install dist/*.whl
+          pip3 install wheel dist/*.whl
           pip3 install pytest coverage coverage-badge
           coverage run --source=pommesdispatch -m pytest --junitxml=report.xml
           coverage report -m
