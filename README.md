@@ -2,6 +2,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pommesdispatch)
 ![Documentation Status](https://readthedocs.org/projects/pommesdispatch/badge/?version=latest)
 ![PyPI - License](https://img.shields.io/pypi/l/pommesdispatch)
+[![Coverage Status](https://coveralls.io/repos/github/pommes-public/pommesdispatch/badge.svg?branch=set-up-ci)](https://coveralls.io/github/pommes-public/pommesdispatch?branch=set-up-ci)
 
 # pommesdispatch
 
