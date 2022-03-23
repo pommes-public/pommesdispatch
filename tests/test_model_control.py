@@ -138,10 +138,7 @@ class TestModelControl:
         dm.initialize_logging()
         agg_string, dr_string = dm.show_configuration_log()
 
-        assert agg_string == (
-            "Using the COMPLETE POWER PLANT DATA SET.\n"
-            "Minimum power output constraint of (individual)\n"
-            "transformers will be neglected.")
+        assert agg_string == "Using the COMPLETE POWER PLANT DATA SET."
         assert dr_string == "Running a model WITHOUT DEMAND RESPONSE"
 
         dm.update_model_configuration(
