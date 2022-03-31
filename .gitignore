@@ -9,6 +9,7 @@
 *__pycache__*
 *.ipynb_checkpoints/*
 *.idea
+*.vscode
 *start_jupyter*
 *.aux
 *.bcf
