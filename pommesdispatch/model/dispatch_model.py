@@ -33,7 +33,6 @@ or its data inputs.
 Input Data
 ----------
 Input data can be compiled using the ``pommesdata`` package.
-A precompiled version is distributed with the dispatch model.
 
 Installation requirements
 -------------------------
