@@ -89,10 +89,7 @@ def parse_input_data(dispatch_model):
         "min_loads_ipp": "min_loads_ipp",
     }
 
-    other_files = {
-        "emission_limits": "emission_limits",
-        "min_max_load_margins": "min_max_load_margins",
-    }
+    other_files = {"emission_limits": "emission_limits"}
 
     # Optionally use aggregated transformer data instead
     if dispatch_model.aggregate_input:
