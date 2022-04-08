@@ -70,7 +70,7 @@ class TestDataInput:
         """test function parse_input_data"""
         dm = create_dispatch_model()
         input_data = data_input.parse_input_data(dm)
-        assert len(input_data.keys()) == 28
+        assert len(input_data.keys()) == 27
         input_data_keys = [
             "linking_transformers",
             "linking_transformers_ts",
