@@ -59,6 +59,7 @@ def parse_input_data(dispatch_model):
         "sources_shortage": "sources_shortage",
         "sources_renewables_fluc": "sources_fluc_res",
         "sources_commodity": "sources_commodity",
+        "sources_commodity_el_add": "sources_commodity_el_add",
         "sources_renewables": "sources_renewables",
         "storages_el": "storages_el",
         "transformers": "transformers",

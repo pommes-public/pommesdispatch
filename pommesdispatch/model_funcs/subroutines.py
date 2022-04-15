@@ -234,6 +234,18 @@ def create_shortage_sources(input_data, node_dict):
             },
         )
 
+    # Market-based shortage situations
+    for i, s in input_data["sources_commodity_el_add"].iterrows():
+        node_dict[i] = solph.Source(
+            label=i,
+            outputs={
+                node_dict[s["to"]]: solph.Flow(
+                    nominal_value=s["nominal_value"],
+                    variable_costs=s["shortage_costs"],
+                )
+            },
+        )
+
     return node_dict
 
 
