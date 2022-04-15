@@ -40,6 +40,8 @@ def return_node_labels_and_dtypes():
         "DE_source_windoffshore",
         "DE_source_windonshore",
         "DE_source_el_shortage",
+        "DE_source_el_shortage_add_0",
+        "DE_source_el_shortage_add_1",
         "DE_source_biomassEEG",
         "DE_sink_el_load",
         "DE_sink_el_excess",
@@ -70,25 +72,25 @@ class TestDataInput:
         """test function parse_input_data"""
         dm = create_dispatch_model()
         input_data = data_input.parse_input_data(dm)
-        assert len(input_data.keys()) == 27
+        assert len(input_data.keys()) == 31
         input_data_keys = [
             "linking_transformers",
-            "linking_transformers_ts",
             "sinks_excess",
             "sinks_demand_el",
-            "sinks_demand_el_ts",
             "sources_shortage",
+            "sources_shortage_el_add",
             "sources_renewables_fluc",
-            "costs_market_values",
-            "buses",
             "sources_commodity",
             "sources_renewables",
-            "sources_renewables_ts",
             "storages_el",
             "transformers",
+            "transformers_renewables",
+            "linking_transformers_ts",
+            "sinks_demand_el_ts",
+            "costs_market_values",
+            "sources_renewables_ts",
             "transformers_minload_ts",
             "transformers_availability_ts",
-            "transformers_renewables",
             "costs_fuel",
             "costs_fuel_ts",
             "costs_emissions",
@@ -96,9 +98,11 @@ class TestDataInput:
             "costs_operation",
             "costs_operation_renewables",
             "costs_operation_storages",
-            "emission_limits",
             "min_loads_dh",
             "min_loads_ipp",
+            "dh_gradients_ts",
+            "ipp_gradients_ts",
+            "remaining_gradients_ts",
         ]
 
         for el in input_data_keys:

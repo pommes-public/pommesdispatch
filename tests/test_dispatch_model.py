@@ -92,6 +92,8 @@ class TestDispatchModel:
             "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
             "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_0', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_1', 'DE_bus_el'), 'flow')",
             "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
@@ -103,7 +105,7 @@ class TestDispatchModel:
         ]
 
         assert power_prices.shape == (5, 1)
-        assert dispatch_results.shape == (5, 19)
+        assert dispatch_results.shape == (5, 21)
         for col in cols:
             assert col in list(dispatch_results.columns)
 
@@ -140,6 +142,8 @@ class TestDispatchModel:
             "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
             "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_0', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_1', 'DE_bus_el'), 'flow')",
             "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
@@ -151,6 +155,6 @@ class TestDispatchModel:
         ]
 
         assert power_prices.shape == (4, 1)
-        assert dispatch_results_de.shape == (4, 17)
+        assert dispatch_results_de.shape == (4, 19)
         for col in cols:
             assert col in list(dispatch_results_de.columns)

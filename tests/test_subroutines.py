@@ -121,7 +121,7 @@ class TestSubroutines:
         node_dict = subroutines.create_buses(input_data, node_dict)
         node_dict = subroutines.create_shortage_sources(input_data, node_dict)
 
-        assert len(node_dict) == 7
+        assert len(node_dict) == 9
         assert type(node_dict["DE_source_el_shortage"]) == oemof.solph.Source
         assert (
             node_dict["DE_source_el_shortage"]
@@ -225,11 +225,13 @@ class TestSubroutines:
             == 0.438
         )
         assert (
-            node_dict["DE_transformer_hardcoal_BNA0019"]
-            .outputs[node_dict["DE_bus_el"]]
-            .positive_gradient["ub"]
-            .default
-            == 1.0
+            np.round(
+                node_dict["DE_transformer_hardcoal_BNA0019"]
+                .outputs[node_dict["DE_bus_el"]]
+                .positive_gradient["ub"][0],
+                3,
+            )
+            == 0.223
         )
 
         # Check minimum loads for CHP unit

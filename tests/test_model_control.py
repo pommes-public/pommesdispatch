@@ -282,7 +282,7 @@ class TestModelControl:
             )
             assert iteration_results["dispatch_results"].shape == (
                 2 * (counter + 1),
-                17,
+                19,
             )
             assert model_meta["overall_objective"] > 0
 
