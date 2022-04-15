@@ -57,9 +57,9 @@ def parse_input_data(dispatch_model):
         "sinks_excess": "sinks_excess",
         "sinks_demand_el": "sinks_demand_el",
         "sources_shortage": "sources_shortage",
+        "sources_shortage_el_add": "sources_shortage_el_add",
         "sources_renewables_fluc": "sources_fluc_res",
         "sources_commodity": "sources_commodity",
-        "sources_commodity_el_add": "sources_commodity_el_add",
         "sources_renewables": "sources_renewables",
         "storages_el": "storages_el",
         "transformers": "transformers",
@@ -88,6 +88,9 @@ def parse_input_data(dispatch_model):
         "costs_operation_storages": "costs_operation_storages_nominal",
         "min_loads_dh": "min_loads_dh",
         "min_loads_ipp": "min_loads_ipp",
+        "dh_gradients_ts": "dh_gradients_ts",
+        "ipp_gradients_ts": "ipp_gradients_ts",
+        "remaining_gradients_ts": "remaining_gradients_ts",
     }
 
     other_files = {"emission_limits": "emission_limits"}

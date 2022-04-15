@@ -235,7 +235,7 @@ def create_shortage_sources(input_data, node_dict):
         )
 
     # Market-based shortage situations
-    for i, s in input_data["sources_commodity_el_add"].iterrows():
+    for i, s in input_data["sources_shortage_el_add"].iterrows():
         node_dict[i] = solph.Source(
             label=i,
             outputs={
@@ -685,66 +685,78 @@ def create_transformers_conventional(input_data, dm, node_dict):
             "negative_gradient": {"ub": t["grad_neg"], "costs": 0},
         }
 
-        # Assign minimum loads for German CHP and IPP plants
+        # Assign minimum loads and gradients for German CHP and IPP plants
         if t["country"] == "DE":
             if t["type"] == "chp":
                 if t["identifier"] in input_data["min_loads_dh"].columns:
-                    outflow_args_el["min"] = (
-                        input_data["min_loads_dh"]
-                        .loc[
-                            dm.start_time : dm.end_time,
-                            t["identifier"],
-                        ]
-                        .to_numpy()
+                    set_min_load_and_gradient_profile(
+                        t,
+                        outflow_args_el,
+                        input_data,
+                        dm,
+                        min_load_ts="min_loads_dh",
+                        min_load_column=t["identifier"],
+                        gradient_ts="dh_gradients_ts",
+                        gradient_column=t["identifier"],
                     )
                 elif t["fuel"] in ["natgas", "hardcoal", "lignite"]:
-                    outflow_args_el["min"] = (
-                        input_data["transformers_minload_ts"]
-                        .loc[
-                            dm.start_time : dm.end_time,
-                            "chp_" + t["fuel"],
-                        ]
-                        .to_numpy()
+                    set_min_load_and_gradient_profile(
+                        t,
+                        outflow_args_el,
+                        input_data,
+                        dm,
+                        min_load_ts="transformers_minload_ts",
+                        min_load_column="chp_" + t["fuel"],
+                        gradient_ts="remaining_gradients_ts",
+                        gradient_column="chp_" + t["fuel"],
                     )
                 else:
-                    outflow_args_el["min"] = (
-                        input_data["transformers_minload_ts"]
-                        .loc[
-                            dm.start_time : dm.end_time,
-                            "chp",
-                        ]
-                        .to_numpy()
+                    set_min_load_and_gradient_profile(
+                        t,
+                        outflow_args_el,
+                        input_data,
+                        dm,
+                        min_load_ts="transformers_minload_ts",
+                        min_load_column="chp",
+                        gradient_ts="remaining_gradients_ts",
+                        gradient_column="chp_" + t["fuel"],
                     )
 
             if t["type"] == "ipp":
                 if t["identifier"] in input_data["min_loads_ipp"].columns:
-                    outflow_args_el["min"] = (
-                        input_data["min_loads_ipp"]
-                        .loc[
-                            dm.start_time : dm.end_time,
-                            t["identifier"],
-                        ]
-                        .to_numpy()
+                    set_min_load_and_gradient_profile(
+                        t,
+                        outflow_args_el,
+                        input_data,
+                        dm,
+                        min_load_ts="min_loads_ipp",
+                        min_load_column=t["identifier"],
+                        gradient_ts="ipp_gradients_ts",
+                        gradient_column=t["identifier"],
                     )
                 else:
-                    outflow_args_el["min"] = (
-                        input_data["transformers_minload_ts"]
-                        .loc[
-                            dm.start_time : dm.end_time,
-                            "ipp",
-                        ]
-                        .to_numpy()
+                    set_min_load_and_gradient_profile(
+                        t,
+                        outflow_args_el,
+                        input_data,
+                        dm,
+                        min_load_ts="transformers_minload_ts",
+                        min_load_column="ipp",
+                        gradient_ts="remaining_gradients_ts",
+                        gradient_column="ipp_" + t["fuel"],
                     )
 
         # Limit flexibility for Austrian and French natgas plants
         if t["country"] in ["AT", "FR"] and t["fuel"] == "natgas":
-            outflow_args_el["min"] = (
-                input_data["transformers_minload_ts"]
-                .loc[
-                    dm.start_time : dm.end_time,
-                    t["country"] + "_natgas",
-                ]
-                .to_numpy()
+            set_min_load_and_gradient_profile(
+                t,
+                outflow_args_el,
+                input_data,
+                dm,
+                min_load_ts="transformers_minload_ts",
+                min_load_column=t["country"] + "_natgas",
+                gradient_ts="remaining_gradients_ts",
+                gradient_column=t["country"] + "_natgas",
             )
             outflow_args_el["max"] = np.minimum(
                 [1]
@@ -782,11 +794,72 @@ def create_transformers_conventional(input_data, dm, node_dict):
                 ),
             )
 
+        outflow_args_el["negative_gradient"] = outflow_args_el[
+            "positive_gradient"
+        ]
+
         node_dict[i] = build_condensing_transformer(
             i, t, node_dict, outflow_args_el
         )
 
     return node_dict
+
+
+def set_min_load_and_gradient_profile(
+    t,
+    outflow_args_el,
+    input_data,
+    dm,
+    min_load_ts,
+    min_load_column,
+    gradient_ts,
+    gradient_column,
+):
+    """Set the min load and gradient profile of a transformer
+
+    Parameters
+    ----------
+    t : pd.Series
+        parameter data for the transformer to create
+
+    outflow_args_el : dict
+        dictionary of transformer outflow arguments
+
+    input_data: :obj:`dict` of :class:`pd.DataFrame`
+        The input data given as a dict of DataFrames
+        with component names as keys
+
+    dm : :class:`DispatchModel`
+        The dispatch model that is considered
+
+    min_loads_ts : str
+        Dictionary key for the minimum load time series DataFrame
+
+    min_load_column : str
+        Name of the column to use for assigning the minimum load profile
+
+    gradient_ts : str
+        Dictionary key for the gradients time series DataFrame
+
+    gradient_column : str
+        Name of the column to use for assigning the gradient profile
+    """
+    outflow_args_el["min"] = (
+        input_data[min_load_ts]
+        .loc[
+            dm.start_time : dm.end_time,
+            min_load_column,
+        ]
+        .to_numpy()
+    )
+    outflow_args_el["positive_gradient"]["ub"] = (
+        input_data[gradient_ts]
+        .loc[
+            dm.start_time : dm.end_time,
+            gradient_column,
+        ]
+        .to_numpy()
+    )
 
 
 def create_transformers_res(input_data, dm, node_dict):
