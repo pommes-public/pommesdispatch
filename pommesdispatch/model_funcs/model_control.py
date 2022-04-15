@@ -24,7 +24,8 @@ from oemof.tools import logger
 
 from pommesdispatch.model_funcs import helpers
 from pommesdispatch.model_funcs.data_input import (
-    nodes_from_csv, nodes_from_csv_rh
+    nodes_from_csv,
+    nodes_from_csv_rh,
 )
 import warnings
 
@@ -43,7 +44,7 @@ def show_meta_logging_info(model_meta):
 
 
 class DispatchModel(object):
-    """A class that holds a dispatch model.
+    r"""A class that holds a dispatch model.
 
     A dispatch model is a container for all the model parameters as well
     as for methods for controlling the model workflow.
@@ -70,8 +71,81 @@ class DispatchModel(object):
         'cbc', 'gplk', 'gurobi', 'cplex'.
 
     fuel_cost_pathway :  str
-        A predefined pathway for commodity cost develoment until 2050
-        Options: 'lower', 'middle', 'upper'
+        A predefined pathway for commodity cost development until 2050
+
+        .. csv-table:: Pathways and explanations
+            :header: "pathway", "explanation", "description"
+            :widths: 10 45 45
+
+            "NZE", "| Net Zero Emissions Scenario
+            | from IEA's world energy outlook 2021", "comparatively
+            low commodity prices"
+            "SDS", "| Sustainable Development Scenario
+            | from IEA's world energy outlook 2021", "| comparatively low commodity prices;
+            | slightly higher than NZE"
+            "APS", "| Announced Pledges Scenario
+            | from IEA's world energy outlook 2021", "| medium price development,
+            | decline in prices between
+            | 2030 and 2050"
+            "STEPS", "| Stated Policies Scenario
+            | from IEA's world energy outlook 2021", "| highest price development,
+            | esp. for oil and natgas"
+            "regression", "| Linear regression based on historic
+            | commodity prices from 1991-2020", "| compared to IEA's scenarios,
+            | close to upper range of projections"
+
+    emissions_cost_pathway : str
+        A predefined pathway for emissions cost development until 2030 or 2050
+
+        .. csv-table:: Pathways and explanations
+            :header: "pathway", "explanation", "description"
+            :widths: 10 45 45
+
+            "Fit_for_55_split_high", "| Emissions split according to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
+            | values until 2030"
+            "Fit_for_55_split_medium", "| Emissions split according to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
+            | values until 2030"
+            "Fit_for_55_split_low", "| Emissions split according to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
+            | values until 2030"
+            "ESR_reduced_high", "| Higher emission reduction
+            | in ETS compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
+            | values until 2030"
+            "ESR_reduced_medium", "| Higher emission reduction
+            | in ETS compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
+            | values until 2030"
+            "ESR_reduced_low", "| Higher emission reduction
+            | in ETS compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
+            | values until 2030"
+            "reductions_in_ETS_only_high", "| Reductions only in ETS
+            | compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| high estimate,
+            | values until 2030"
+            "reductions_in_ETS_only_medium", "| Reductions only in ETS
+            | compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| medium estimate,
+            | values until 2030"
+            "reductions_in_ETS_only_low", "| Reductions only in ETS
+            | compared to
+            | Fit for 55 split between
+            | ETS and ESR (non-ETS)", "| low estimate,
+            | values until 2030"
+            "long-term", "| Long-term emissions cost pathway
+            | according to medium estimate", "| medium estimate,
+            | values until 2050"
 
     activate_emissions_limit : boolean
         boolean control variable indicating whether to introduce an overall
@@ -125,6 +199,10 @@ class DispatchModel(object):
         A date string of format "YYYY-MM-DD hh:mm:ss" defining the end time
         of the simulation
 
+    freq : str
+        Frequency of the simulation, i.e. freqeuncy of the pandas.date_range
+        object
+
     path_folder_input : str
         The path to the folder where the input data is stored
 
@@ -140,7 +218,7 @@ class DispatchModel(object):
 
     overlap_in_hours : int (optional, for rolling horizon)
         The length of the overlap for a rolling horizon model run in hours
-    """
+    """  # noqa: E501
 
     def __init__(self):
         """Initialize an empty DispatchModel object"""
@@ -149,6 +227,7 @@ class DispatchModel(object):
         self.countries = None
         self.solver = None
         self.fuel_cost_pathway = None
+        self.emissions_cost_pathway = None
         self.activate_emissions_limit = None
         self.emissions_pathway = None
         self.activate_demand_response = None
@@ -205,6 +284,14 @@ class DispatchModel(object):
                         f"Necessary model parameter `{entry}` "
                         + "has not yet been specified!"
                     )
+            if entry == "fuel_cost_pathway":
+                logging.info(
+                    f"Using fuel cost pathway: {getattr(self, entry)}"
+                )
+            elif entry == "emissions_cost_pathway":
+                logging.info(
+                    f"Using emissions cost pathway: {getattr(self, entry)}"
+                )
 
         return missing_parameters
 
@@ -221,19 +308,14 @@ class DispatchModel(object):
             steps of the time series are not used.
         """
         self.update_model_configuration(
-            rolling_horizon_parameters,
-            nolog=nolog
+            rolling_horizon_parameters, nolog=nolog
         )
 
         setattr(
-            self,
-            "time_series_start",
-            pd.Timestamp(self.start_time, self.freq)
+            self, "time_series_start", pd.Timestamp(self.start_time, self.freq)
         )
         setattr(
-            self,
-            "time_series_end",
-            pd.Timestamp(self.end_time, self.freq)
+            self, "time_series_end", pd.Timestamp(self.end_time, self.freq)
         )
         setattr(
             self,
@@ -249,7 +331,7 @@ class DispatchModel(object):
             (
                 {"60min": 1, "15min": 4}[self.freq]
                 * getattr(self, "overlap_in_hours")
-             ),
+            ),
         )
         setattr(
             self,
@@ -280,8 +362,7 @@ class DispatchModel(object):
     def initialize_logging(self):
         """Initialize logging by deriving a filename from the configuration"""
         optimization_timeframe = helpers.days_between(
-            self.start_time,
-            self.end_time
+            self.start_time, self.end_time
         )
 
         if not self.rolling_horizon:
@@ -313,11 +394,7 @@ class DispatchModel(object):
         if self.aggregate_input:
             agg_string = "Using the AGGREGATED POWER PLANT DATA SET"
         else:
-            agg_string = (
-                "Using the COMPLETE POWER PLANT DATA SET.\n"
-                "Minimum power output constraint of (individual)\n"
-                "transformers will be neglected."
-            )
+            agg_string = "Using the COMPLETE POWER PLANT DATA SET."
 
         if self.activate_demand_response:
             dr_string = (
@@ -344,9 +421,7 @@ class DispatchModel(object):
         logging.info("Running a DISPATCH OPTIMIZATION")
 
         datetime_index = pd.date_range(
-            self.start_time,
-            self.end_time,
-            freq=self.freq
+            self.start_time, self.end_time, freq=self.freq
         )
         es = network.EnergySystem(timeindex=datetime_index)
 
@@ -436,14 +511,14 @@ class DispatchModel(object):
         power_prices = pd.DataFrame(
             data=power_prices_list,
             index=self.om.es.timeindex,
-            columns=["Power price"]
+            columns=["Power price"],
         )
 
         return power_prices
 
     def calculate_market_values_from_model(
-            self,
-            power_prices,
+        self,
+        power_prices,
     ):
         r"""Calculate market values from exogenous feed-in and power prices
 
@@ -451,25 +526,27 @@ class DispatchModel(object):
 
         Parameters
         ----------
-        power_prices : :pandas:`pandas.DataFrame<DataFrame>`
+        power_prices : :obj:`pd.DataFrame`
             DataFrame containing the power prices obtained from
             the dispatch model
 
         Returns
         -------
-        market_values : :pandas:`pandas.DataFrame<DataFrame>`
+        market_values : :obj:`pd.DataFrame`
             monthly market values for renewables
-        market_values_hourly : :pandas:`pandas.DataFrame<DataFrame>`
+        market_values_hourly : :obj:`pd.DataFrame`
             monthly market values for renewables rolled
             out over each hour of a given month
         """
-        log_info = ("Saving updated market values from model run.")
+        log_info = "Saving updated market values from model run."
         logging.info(log_info)
         techs = ["DE_bus_solarPV", "DE_bus_windonshore", "DE_bus_windoffshore"]
         feedin_df = pd.read_csv(
             (
                 self.path_folder_input
-                + "sources_renewables_ts_" + self.year + ".csv"
+                + "sources_renewables_ts_"
+                + self.year
+                + ".csv"
             ),
             index_col=0,
             parse_dates=True,
@@ -480,8 +557,7 @@ class DispatchModel(object):
             index=feedin_df.index, columns=feedin_df.columns
         )
         market_values = pd.DataFrame(
-            index=range(1, 13),
-            columns=feedin_df.columns
+            index=range(1, 13), columns=feedin_df.columns
         )
 
         feedin_df.loc[:, "power_price"] = 0
@@ -632,12 +708,11 @@ class DispatchModel(object):
 
         iter_results["model_results"] = processing.results(self.om)
         electricity_bus = views.node(
-            iter_results["model_results"],
-            "DE_bus_el"
+            iter_results["model_results"], "DE_bus_el"
         )
         sliced_dispatch_results = pd.DataFrame(
             data=electricity_bus["sequences"].iloc[
-                0: getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+                0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
             ]
         )
         iter_results["dispatch_results"] = iter_results[
@@ -655,11 +730,9 @@ class DispatchModel(object):
         )
         model_meta["overall_solution_time"] += meta_results["solver"]["Time"]
         pps = self.get_power_prices_from_duals().iloc[
-            0: getattr(self, "time_slice_length_wo_overlap_in_time_steps")
+            0 : getattr(self, "time_slice_length_wo_overlap_in_time_steps")
         ]
-        iter_results["power_prices"] = iter_results["power_prices"].append(
-            pps
-        )
+        iter_results["power_prices"] = iter_results["power_prices"].append(pps)
 
     def retrieve_initial_states_rolling_horizon(self, iteration_results):
         r"""Retrieve the initial states for the upcoming rolling horizon run

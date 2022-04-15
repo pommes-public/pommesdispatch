@@ -26,8 +26,9 @@ class TestHelpers:
         annual_limit = 365.0
         start_time = "2017-01-01 00:00:00"
         end_time = "2017-01-03 23:00:00"
-        limit = helpers.convert_annual_limit(annual_limit, start_time,
-                                             end_time)
+        limit = helpers.convert_annual_limit(
+            annual_limit, start_time, end_time
+        )
         assert limit == 2.0
 
     def test_convert_annual_limit_multi_years(self):
@@ -35,6 +36,7 @@ class TestHelpers:
         annual_limit = 365.0
         start_time = "2017-01-01 00:00:00"
         end_time = "2018-01-03 23:00:00"
-        limit = helpers.convert_annual_limit(annual_limit, start_time,
-                                             end_time)
+        limit = helpers.convert_annual_limit(
+            annual_limit, start_time, end_time
+        )
         assert limit == 368.0
