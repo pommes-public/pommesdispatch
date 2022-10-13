@@ -28,8 +28,8 @@ time_parameters:
 
 # 3) Set input and output data paths
 input_output_parameters:
-    path_folder_input: "../inputs/"
-    path_folder_output: "../results/"
+    path_folder_input: "./inputs/"
+    path_folder_output: "./results/"
 
 # 4) Set rolling horizon parameters (optional)
 rolling_horizon_parameters:
