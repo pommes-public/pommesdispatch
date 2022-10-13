@@ -14,14 +14,16 @@ def create_test_config():
         rolling_horizon: False
         aggregate_input: False
         countries: ['AT', 'DE']
-        solver: "gurobi"
-        fuel_cost_pathway: "middle"
+        solver: "cbc"
+        fuel_cost_pathway: "NZE"
+        emissions_cost_pathway: "long-term"
         activate_emissions_limit: False
         emissions_pathway: "100_percent_linear"
         activate_demand_response: False
         demand_response_approach: "DLR"
         demand_response_scenario: "50"
         save_production_results: True
+        save_update_market_values: False
         save_price_results: True
         write_lp_file: False
 
@@ -51,7 +53,7 @@ def change_to_rolling_horizon_config():
 
     test_config["control_parameters"]["rolling_horizon"] = True
 
-    with open('tests/config_rolling_horizon.yml', 'w') as opf:
+    with open("tests/config_rolling_horizon.yml", "w") as opf:
         yaml.dump(test_config, opf, default_flow_style=False)
 
 
@@ -61,16 +63,22 @@ class TestDispatchModel:
     def test_run_dispatch_model(self):
         """test function run_dispatch_model for a simple model run"""
         create_test_config()
-        dispatch_model.run_dispatch_model()
+        dispatch_model.run_dispatch_model(config_file="tests/config.yml")
 
-        power_prices = pd.read_csv((
+        power_prices = pd.read_csv(
+            (
                 "tests/csv_files/dispatch_LP_start"
-                + "-2017-01-01_0-days_simple_complete_power-prices.csv"),
-            index_col=0)
-        dispatch_results = pd.read_csv((
+                + "-2017-01-01_0-days_simple_complete_power-prices.csv"
+            ),
+            index_col=0,
+        )
+        dispatch_results = pd.read_csv(
+            (
                 "tests/csv_files/dispatch_LP_start"
-                + "-2017-01-01_0-days_simple_complete_production.csv"),
-            index_col=0)
+                + "-2017-01-01_0-days_simple_complete_production.csv"
+            ),
+            index_col=0,
+        )
 
         cols = [
             "(('AT_bus_el', 'None'), 'duals')",
@@ -84,6 +92,8 @@ class TestDispatchModel:
             "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
             "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_0', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_1', 'DE_bus_el'), 'flow')",
             "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
@@ -91,10 +101,11 @@ class TestDispatchModel:
             "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
             "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')",
+        ]
 
         assert power_prices.shape == (5, 1)
-        assert dispatch_results.shape == (5, 19)
+        assert dispatch_results.shape == (5, 21)
         for col in cols:
             assert col in list(dispatch_results.columns)
 
@@ -106,14 +117,20 @@ class TestDispatchModel:
             config_file="tests/config_rolling_horizon.yml"
         )
 
-        power_prices = pd.read_csv((
+        power_prices = pd.read_csv(
+            (
                 "tests/csv_files/dispatch_LP_start"
-                + "-2017-01-01_0-days_RH_complete_power-prices.csv"),
-            index_col=0)
-        dispatch_results_de = pd.read_csv((
+                + "-2017-01-01_0-days_RH_complete_power-prices.csv"
+            ),
+            index_col=0,
+        )
+        dispatch_results_de = pd.read_csv(
+            (
                 "tests/csv_files/dispatch_LP_start"
-                + "-2017-01-01_0-days_RH_complete_production.csv"),
-            index_col=0)
+                + "-2017-01-01_0-days_RH_complete_production.csv"
+            ),
+            index_col=0,
+        )
 
         cols = [
             "(('DE_bus_el', 'DE_link_AT'), 'flow')",
@@ -125,6 +142,8 @@ class TestDispatchModel:
             "(('DE_solarPV_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_source_biomassEEG', 'DE_bus_el'), 'flow')",
             "(('DE_source_el_shortage', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_0', 'DE_bus_el'), 'flow')",
+            "(('DE_source_el_shortage_add_1', 'DE_bus_el'), 'flow')",
             "(('DE_storage_el_PHS', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0019', 'DE_bus_el'), 'flow')",
             "(('DE_transformer_hardcoal_BNA0147', 'DE_bus_el'), 'flow')",
@@ -132,9 +151,10 @@ class TestDispatchModel:
             "(('DE_windoffshore_cluster_1', 'DE_bus_el'), 'flow')",
             "(('DE_windoffshore_cluster_2', 'DE_bus_el'), 'flow')",
             "(('DE_windonshore_cluster_1', 'DE_bus_el'), 'flow')",
-            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')"]
+            "(('DE_windonshore_cluster_2', 'DE_bus_el'), 'flow')",
+        ]
 
         assert power_prices.shape == (4, 1)
-        assert dispatch_results_de.shape == (4, 17)
+        assert dispatch_results_de.shape == (4, 19)
         for col in cols:
             assert col in list(dispatch_results_de.columns)

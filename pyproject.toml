@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pommesdispatch"
-version = "0.1.0"
+version = "0.1.1"
 description = "A bottom-up fundamental power market model for the German electricity sector"
 authors = ["Johannes Kochems <jokochems@web.de>", "Yannick Werner <>", "Johannes Giehl <>", "Benjamin Grosse <>"]
 maintainers = ["Johannes Kochems <jokochems@web.de>"]
@@ -36,3 +36,22 @@ dev = ["pytest", "sphinx", "sphinx_rtd_theme", "sphinx_copybutton"]
 [tool.poetry.urls]
 "Changelog" = "https://pommesdispatch.readthedocs.io/en/latest/changelog.html"
 "Issue Tracker" = "https://github.com/pommes-public/pommesdispatch/issues"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | ci
+)/
+'''
