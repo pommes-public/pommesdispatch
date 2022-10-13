@@ -136,9 +136,13 @@ def create_linking_transformers(input_data, dm, node_dict):
                     inputs={
                         node_dict[l["from"]]: solph.Flow(
                             nominal_value=l[dm.year],
-                            max=input_data["linking_transformers_ts"][i][
-                                dm.start_time : dm.end_time
-                            ].to_numpy(),
+                            max=input_data["linking_transformers_ts"]
+                            .loc[
+                                f"{dm.start_time}+00:00":f"{dm.end_time}"
+                                f"+00:00",
+                                i,
+                            ]
+                            .to_numpy(),
                         )
                     },
                     outputs={node_dict[l["to"]]: solph.Flow()},
