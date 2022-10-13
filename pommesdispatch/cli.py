@@ -12,6 +12,7 @@ control_parameters:
                 'NO1', 'NO2', 'NO3', 'NO4', 'NO5', 'PL',
                 'SE1', 'SE2', 'SE3', 'SE4']
     solver: "gurobi"
+    solver_commandline_options: False
     fuel_cost_pathway: "NZE"
     emissions_cost_pathway: "long-term"
     activate_emissions_limit: False
@@ -38,7 +39,15 @@ input_output_parameters:
 # 4) Set rolling horizon parameters (optional)
 rolling_horizon_parameters:
     time_slice_length_wo_overlap_in_hours: 24
-    overlap_in_hours: 12"""
+    overlap_in_hours: 12
+
+# 5) Set solver command line options (optional)
+solver_cmdline_options:
+    lpmethod: 4
+    preprocessing dual: -1
+    solutiontype: 2
+    threads: 12
+    barrier convergetol: 1.0e-6"""
     with open("./config.yml", "w") as opf:
         opf.write(content)
 

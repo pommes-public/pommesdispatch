@@ -70,6 +70,9 @@ class DispatchModel(object):
         Must be one of the solvers oemof.solph resp. pyomo support, e.g.
         'cbc', 'gplk', 'gurobi', 'cplex'.
 
+    solver_commandline_options: bool
+        If True, use solver command line option; If False, use solver defaults
+
     fuel_cost_pathway :  str
         A predefined pathway for commodity cost development until 2050
 
@@ -226,6 +229,7 @@ class DispatchModel(object):
         self.aggregate_input = None
         self.countries = None
         self.solver = None
+        self.solver_commandline_options = None
         self.fuel_cost_pathway = None
         self.emissions_cost_pathway = None
         self.activate_emissions_limit = None
