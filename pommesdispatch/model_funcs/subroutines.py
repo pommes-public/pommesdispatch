@@ -814,6 +814,7 @@ def set_min_load_and_gradient_profile(
     min_load_column,
     gradient_ts,
     gradient_column,
+    availability_ts="transformers_availability_ts",
 ):
     """Set the min load and gradient profile of a transformer
 
@@ -832,7 +833,7 @@ def set_min_load_and_gradient_profile(
     dm : :class:`DispatchModel`
         The dispatch model that is considered
 
-    min_loads_ts : str
+    min_load_ts : str
         Dictionary key for the minimum load time series DataFrame
 
     min_load_column : str
@@ -843,14 +844,23 @@ def set_min_load_and_gradient_profile(
 
     gradient_column : str
         Name of the column to use for assigning the gradient profile
+
+    availability_ts : str
+        Name of the column to use for limiting minimum output with current
+        availability
     """
     outflow_args_el["min"] = (
-        input_data[min_load_ts]
-        .loc[
-            dm.start_time : dm.end_time,
-            min_load_column,
-        ]
-        .to_numpy()
+        np.minimum(
+            input_data[min_load_ts]
+            .loc[
+                dm.start_time : dm.end_time,
+                min_load_column,
+            ]
+            .to_numpy(),
+            input_data[availability_ts].loc[
+                dm.start_time : dm.end_time, "values"
+            ].to_numpy() - 0.01
+        )
     )
     outflow_args_el["positive_gradient"]["ub"] = (
         input_data[gradient_ts]
