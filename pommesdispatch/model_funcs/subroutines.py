@@ -849,18 +849,17 @@ def set_min_load_and_gradient_profile(
         Name of the column to use for limiting minimum output with current
         availability
     """
-    outflow_args_el["min"] = (
-        np.minimum(
-            input_data[min_load_ts]
-            .loc[
-                dm.start_time : dm.end_time,
-                min_load_column,
-            ]
-            .to_numpy(),
-            input_data[availability_ts].loc[
-                dm.start_time : dm.end_time, "values"
-            ].to_numpy() - 0.01
-        )
+    outflow_args_el["min"] = np.minimum(
+        input_data[min_load_ts]
+        .loc[
+            dm.start_time : dm.end_time,
+            min_load_column,
+        ]
+        .to_numpy(),
+        input_data[availability_ts]
+        .loc[dm.start_time : dm.end_time, "values"]
+        .to_numpy()
+        - 0.01,
     )
     outflow_args_el["positive_gradient"]["ub"] = (
         input_data[gradient_ts]
