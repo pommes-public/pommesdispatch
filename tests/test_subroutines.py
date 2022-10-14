@@ -261,10 +261,13 @@ class TestSubroutines:
             == 5
         )
         assert (
-            node_dict["DE_transformer_hardcoal_BNA0216a"]
-            .outputs[node_dict["DE_bus_el"]]
-            .min.max()
-            == 1.0
+            np.round(
+                node_dict["DE_transformer_hardcoal_BNA0216a"]
+                .outputs[node_dict["DE_bus_el"]]
+                .min.max(),
+                3,
+            )
+            == 0.985
         )
 
     def test_create_transformers_res(self):
