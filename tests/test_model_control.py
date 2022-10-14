@@ -32,6 +32,7 @@ def return_model_and_parameters():
             "SE4",
         ],
         "solver": "cbc",
+        "solver_commandline_options": False,
         "fuel_cost_pathway": "NZE",
         "fuel_price_shock": "high",
         "emissions_cost_pathway": "long-term",

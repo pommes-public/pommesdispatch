@@ -38,6 +38,7 @@ class TestCli:
                     "SE4",
                 ],
                 "solver": "gurobi",
+                "solver_commandline_options": False,
                 "fuel_cost_pathway": "NZE",
                 "emissions_cost_pathway": "long-term",
                 "activate_emissions_limit": False,
@@ -62,6 +63,13 @@ class TestCli:
             "rolling_horizon_parameters": {
                 "time_slice_length_wo_overlap_in_hours": 24,
                 "overlap_in_hours": 12,
+            },
+            "solver_cmdline_options": {
+                "lpmethod": 4,
+                "preprocessing dual": -1,
+                "solutiontype": 2,
+                "threads": 12,
+                "barrier convergetol": 1e-6,
             },
         }
 

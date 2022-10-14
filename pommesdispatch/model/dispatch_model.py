@@ -124,7 +124,20 @@ def run_dispatch_model(config_file="./config.yml"):
                 dm.path_folder_output + "pommesdispatch_model.lp",
                 io_options={"symbolic_solver_labels": True},
             )
-        dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
+        if dm.solver_commandline_options:
+            logging.info(
+                "Using solver command line options.\n"
+                "Ensure that these are the correct ones for your solver of "
+                "choice since otherwise, this might lead to "
+                "the solver to run into an Error."
+            )
+            dm.om.solve(
+                solver=dm.solver,
+                solve_kwargs={"tee": True},
+                cmdline_options=config["solver_cmdline_options"],
+            )
+        else:
+            dm.om.solve(solver=dm.solver, solve_kwargs={"tee": True})
         meta_results = processing.meta_results(dm.om)
 
         power_prices = dm.get_power_prices_from_duals()
