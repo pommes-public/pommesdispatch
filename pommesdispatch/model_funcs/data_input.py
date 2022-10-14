@@ -34,12 +34,12 @@ from pommesdispatch.model_funcs.subroutines import (
 )
 
 
-def parse_input_data(dispatch_model):
+def parse_input_data(dm):
     r"""Read in csv files as DataFrames and store them in a dict
 
     Parameters
     ----------
-    dispatch_model : :class:`DispatchModel`
+    dm : :class:`DispatchModel`
         The dispatch model that is considered
 
     Returns
@@ -74,13 +74,12 @@ def parse_input_data(dispatch_model):
         "transformers_minload_ts": "transformers_minload_ts",
         "transformers_availability_ts": "transformers_availability_ts",
         "costs_fuel": (
-            "costs_fuel_" + dispatch_model.fuel_cost_pathway + "_nominal"
+            f"costs_fuel_{dm.fuel_cost_pathway}"
+            + f"_{dm.fuel_price_shock}_nominal"
         ),
         "costs_fuel_ts": "costs_fuel_ts",
         "costs_emissions": (
-            "costs_emissions_"
-            + dispatch_model.emissions_cost_pathway
-            + "_nominal"
+            f"costs_emissions_{dm.emissions_cost_pathway}_nominal"
         ),
         "costs_emissions_ts": "costs_emissions_ts",
         "costs_operation": "costs_operation_nominal",
@@ -96,42 +95,38 @@ def parse_input_data(dispatch_model):
     other_files = {"emission_limits": "emission_limits"}
 
     # Optionally use aggregated transformer data instead
-    if dispatch_model.aggregate_input:
+    if dm.aggregate_input:
         components["transformers"] = "transformers_clustered"
 
     # Add demand response units
-    if dispatch_model.activate_demand_response:
+    if dm.activate_demand_response:
         components["sinks_dr_el"] = (
-            "sinks_demand_response_el_"
-            + dispatch_model.demand_response_scenario
+            "sinks_demand_response_el_" + dm.demand_response_scenario
         )
         components["sinks_dr_el_ts"] = (
-            "sinks_demand_response_el_ts_"
-            + dispatch_model.demand_response_scenario
+            "sinks_demand_response_el_ts_" + dm.demand_response_scenario
         )
         components["sinks_dr_el_ava_pos_ts"] = (
             "sinks_demand_response_el_ava_pos_ts_"
-            + dispatch_model.demand_response_scenario
+            + dm.demand_response_scenario
         )
         components["sinks_dr_el_ava_neg_ts"] = (
             "sinks_demand_response_el_ava_neg_ts_"
-            + dispatch_model.demand_response_scenario
+            + dm.demand_response_scenario
         )
 
     # Combine all files
     input_files = {**buses, **components, **time_series}
 
     # Use data for the respective simulation year
-    input_files = {
-        k: v + "_" + dispatch_model.year for k, v in input_files.items()
-    }
+    input_files = {k: v + "_" + dm.year for k, v in input_files.items()}
     input_files = {**input_files, **other_files}
 
     input_data = {
         key: load_input_data(
             filename=name,
-            path_folder_input=dispatch_model.path_folder_input,
-            countries=dispatch_model.countries,
+            path_folder_input=dm.path_folder_input,
+            countries=dm.countries,
         )
         for key, name in input_files.items()
     }
