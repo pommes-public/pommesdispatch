@@ -1,8 +1,6 @@
 name: pommesdispatch
 channels:
-  - anaconda
   - conda-forge
-  - defaults
 dependencies:
   - python=3.8
   - pip
@@ -10,4 +8,5 @@ dependencies:
   - pandas
   - pip:
     - oemof.solph==0.4.4
+    - pyyaml
 
