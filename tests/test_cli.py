@@ -40,6 +40,7 @@ class TestCli:
                 "solver": "gurobi",
                 "solver_commandline_options": False,
                 "fuel_cost_pathway": "NZE",
+                "fuel_price_shock": "high",
                 "emissions_cost_pathway": "long-term",
                 "activate_emissions_limit": False,
                 "emissions_pathway": "100_percent_linear",
