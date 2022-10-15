@@ -85,7 +85,9 @@ class TestSubroutines:
         )
 
         assert len(node_dict) == 7
-        assert type(node_dict["DE_link_AT"]) == oemof.solph.Transformer
+        assert (
+            type(node_dict["DE_link_AT"]) == oemof.solph.components.Transformer
+        )
         assert (
             node_dict["DE_link_AT"]
             .conversion_factors[
@@ -111,7 +113,10 @@ class TestSubroutines:
         )
 
         assert len(node_dict) == 10
-        assert type(node_dict["DE_source_hardcoal"]) == oemof.solph.Source
+        assert (
+            type(node_dict["DE_source_hardcoal"])
+            == oemof.solph.components.Source
+        )
         assert node_dict["DE_source_hardcoal"].outputs[
             node_dict["DE_bus_hardcoal"]
         ].variable_costs[0] == (14.20586765)
@@ -123,7 +128,10 @@ class TestSubroutines:
         node_dict = subroutines.create_shortage_sources(input_data, node_dict)
 
         assert len(node_dict) == 9
-        assert type(node_dict["DE_source_el_shortage"]) == oemof.solph.Source
+        assert (
+            type(node_dict["DE_source_el_shortage"])
+            == oemof.solph.components.Source
+        )
         assert (
             node_dict["DE_source_el_shortage"]
             .outputs[node_dict["DE_bus_el"]]
@@ -138,7 +146,10 @@ class TestSubroutines:
         node_dict = subroutines.create_renewables(input_data, dm, node_dict)
 
         assert len(node_dict) == 7
-        assert type(node_dict["DE_source_biomassEEG"]) == oemof.solph.Source
+        assert (
+            type(node_dict["DE_source_biomassEEG"])
+            == oemof.solph.components.Source
+        )
         assert (
             node_dict["DE_source_biomassEEG"]
             .outputs[node_dict["DE_bus_el"]]
@@ -167,7 +178,9 @@ class TestSubroutines:
         node_dict = subroutines.create_demand(input_data, dm, node_dict)
 
         assert len(node_dict) == 7
-        assert type(node_dict["DE_sink_el_load"]) == oemof.solph.Sink
+        assert (
+            type(node_dict["DE_sink_el_load"]) == oemof.solph.components.Sink
+        )
         assert (
             node_dict["DE_sink_el_load"]
             .inputs[node_dict["DE_bus_el"]]
@@ -188,7 +201,9 @@ class TestSubroutines:
         node_dict = subroutines.create_excess_sinks(input_data, node_dict)
 
         assert len(node_dict) == 7
-        assert type(node_dict["DE_sink_el_excess"]) == oemof.solph.Sink
+        assert (
+            type(node_dict["DE_sink_el_excess"]) == oemof.solph.components.Sink
+        )
         keys = ["DE_bus_solarPV", "DE_bus_windonshore", "DE_bus_windoffshore"]
         for key in keys:
             assert (

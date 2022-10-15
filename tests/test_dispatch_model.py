@@ -15,6 +15,7 @@ def create_test_config():
         aggregate_input: False
         countries: ['AT', 'DE']
         solver: "cbc"
+        solver_commandline_options: False
         fuel_cost_pathway: "NZE"
         fuel_price_shock: "high"
         emissions_cost_pathway: "long-term"
@@ -24,7 +25,7 @@ def create_test_config():
         demand_response_approach: "DLR"
         demand_response_scenario: "50"
         save_production_results: True
-        save_update_market_values: False
+        save_updated_market_values: False
         save_price_results: True
         write_lp_file: False
 
@@ -106,7 +107,7 @@ class TestDispatchModel:
         ]
 
         assert power_prices.shape == (5, 1)
-        assert dispatch_results.shape == (5, 21)
+        assert dispatch_results.shape == (6, 21)
         for col in cols:
             assert col in list(dispatch_results.columns)
 

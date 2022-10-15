@@ -514,13 +514,14 @@ class DispatchModel(object):
             for index in constr
             if index[0].label == "DE_bus_el"
         ]
-        # Add empty element; last time step is only for storage level
+        # HACK: Add empty element; last time step is only for storage level
+        # Remove element again to prevent nan values in the output
         power_prices_list.append(np.nan)
         power_prices = pd.DataFrame(
             data=power_prices_list,
             index=self.om.es.timeindex,
             columns=["Power price"],
-        )
+        )[:-1]
 
         return power_prices
 
