@@ -1,4 +1,4 @@
-name: pommesdispatch
+name: pommesdispatch_solph_update
 channels:
   - conda-forge
 dependencies:
@@ -7,6 +7,6 @@ dependencies:
   - numpy
   - pandas
   - pip:
-    - oemof.solph==0.4.4
+    - oemof.solph==0.5.0a1
     - pyyaml
 

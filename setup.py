@@ -83,7 +83,7 @@ setup(
         ),
         "Issue Tracker": "https://github.com/pommes-public/pommesdispatch/issues",
     },
-    install_requires=["numpy", "pandas", "oemof.solph == 0.4.4", "pyyaml"],
+    install_requires=["numpy", "pandas", "oemof.solph == 0.5.0a1", "pyyaml"],
     python_requires=">=3.8",
     extras_require={
         "dev": ["pytest", "sphinx", "sphinx_rtd_theme", "sphinx_copybutton"]

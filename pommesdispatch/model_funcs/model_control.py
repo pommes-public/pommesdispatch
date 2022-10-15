@@ -18,8 +18,9 @@ Timona Ghosh, Paul Verwiebe, Leticia Encinas Rosa, Joachim Müller-Kirchenbauer
 import logging
 import math
 
+import numpy as np
 import pandas as pd
-from oemof.solph import constraints, views, models, network, processing
+from oemof.solph import constraints, views, Model, EnergySystem, processing
 from oemof.tools import logger
 
 from pommesdispatch.model_funcs import helpers
@@ -212,7 +213,7 @@ class DispatchModel(object):
     path_folder_output : str
         The path to the folder where the output data is to be stored
 
-    om : :class:`oemof.solph.models.Model`
+    om : :class:`oemof.solph._models.Model`
         The mathematical optimization model itself
 
     time_slice_length_wo_overlap_in_hours : int (optional, for rolling horizon)
@@ -428,14 +429,14 @@ class DispatchModel(object):
         datetime_index = pd.date_range(
             self.start_time, self.end_time, freq=self.freq
         )
-        es = network.EnergySystem(timeindex=datetime_index)
+        es = EnergySystem(timeindex=datetime_index, infer_last_interval=True)
 
         nodes_dict, emissions_limit = nodes_from_csv(self)
 
         logging.info("Creating a LP model for DISPATCH OPTIMIZATION.")
 
         es.add(*nodes_dict.values())
-        setattr(self, "om", models.Model(es))
+        setattr(self, "om", Model(es))
 
         self.add_further_constrs(emissions_limit)
 
@@ -506,13 +507,15 @@ class DispatchModel(object):
         -------
         power_prices: :obj:`pd.DataFrame`
         """
-        constr = self.om.Bus.balance
+        constr = self.om.BusBlock.balance
 
         power_prices_list = [
             self.om.dual[constr[index]]
             for index in constr
             if index[0].label == "DE_bus_el"
         ]
+        # Add empty element; last time step is only for storage level
+        power_prices_list.append(np.nan)
         power_prices = pd.DataFrame(
             data=power_prices_list,
             index=self.om.es.timeindex,
@@ -643,7 +646,7 @@ class DispatchModel(object):
             periods=getattr(self, "time_slice_length_with_overlap"),
             freq=self.freq,
         )
-        es = network.EnergySystem(timeindex=datetime_index)
+        es = EnergySystem(timeindex=datetime_index, infer_last_interval=True)
 
         node_dict, emissions_limit, storage_labels = nodes_from_csv_rh(
             self, iteration_results
@@ -660,7 +663,7 @@ class DispatchModel(object):
             f"Successfully set up energy system for iteration {counter}"
         )
 
-        self.om = models.Model(es)
+        self.om = Model(es)
 
         self.add_further_constrs(emissions_limit)
 
