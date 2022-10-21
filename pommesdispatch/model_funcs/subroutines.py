@@ -115,7 +115,7 @@ def create_linking_transformers(input_data, dm, node_dict):
     for i, l in input_data["linking_transformers"].iterrows():
         try:
             if l["type"] == "DC":
-                node_dict[i] = solph.Transformer(
+                node_dict[i] = solph.components.Transformer(
                     label=i,
                     inputs={
                         node_dict[l["from"]]: solph.Flow(
@@ -131,7 +131,7 @@ def create_linking_transformers(input_data, dm, node_dict):
                 )
 
             if l["type"] == "AC":
-                node_dict[i] = solph.Transformer(
+                node_dict[i] = solph.components.Transformer(
                     label=i,
                     inputs={
                         node_dict[l["from"]]: solph.Flow(
@@ -182,7 +182,7 @@ def create_commodity_sources(input_data, dm, node_dict):
     """
     # Regular commodity sources
     for i, cs in input_data["sources_commodity"].iterrows():
-        node_dict[i] = solph.Source(
+        node_dict[i] = solph.components.Source(
             label=i,
             outputs={
                 node_dict[cs["to"]]: solph.Flow(
@@ -203,7 +203,7 @@ def create_commodity_sources(input_data, dm, node_dict):
 
     # Fluctuating renewables in Germany
     for i, cs in input_data["sources_renewables_fluc"].iterrows():
-        node_dict[i] = solph.Source(
+        node_dict[i] = solph.components.Source(
             label=i, outputs={node_dict[cs["to"]]: solph.Flow()}
         )
 
@@ -229,7 +229,7 @@ def create_shortage_sources(input_data, node_dict):
         the shortage source elements
     """
     for i, s in input_data["sources_shortage"].iterrows():
-        node_dict[i] = solph.Source(
+        node_dict[i] = solph.components.Source(
             label=i,
             outputs={
                 node_dict[s["to"]]: solph.Flow(
@@ -240,7 +240,7 @@ def create_shortage_sources(input_data, node_dict):
 
     # Market-based shortage situations
     for i, s in input_data["sources_shortage_el_add"].iterrows():
-        node_dict[i] = solph.Source(
+        node_dict[i] = solph.components.Source(
             label=i,
             outputs={
                 node_dict[s["to"]]: solph.Flow(
@@ -276,7 +276,7 @@ def create_renewables(input_data, dm, node_dict):
     """
     for i, re in input_data["sources_renewables"].iterrows():
         try:
-            node_dict[i] = solph.Source(
+            node_dict[i] = solph.components.Source(
                 label=i,
                 outputs={
                     node_dict[re["to"]]: solph.Flow(
@@ -358,7 +358,7 @@ def create_demand(input_data, dm, node_dict, dr_overall_load_ts_df=None):
                     )
                 }
 
-        node_dict[i] = solph.Sink(**kwargs_dict)
+        node_dict[i] = solph.components.Sink(**kwargs_dict)
 
     return node_dict
 
@@ -448,19 +448,19 @@ def create_demand_response_units(input_data, dm, node_dict):
         }
 
         approach_dict = {
-            "DLR": solph.custom.SinkDSM(
+            "DLR": solph.components.experimental.SinkDSM(
                 label=i,
                 inputs={node_dict[d["from"]]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
                 **kwargs_dict["DLR"],
             ),
-            "DIW": solph.custom.SinkDSM(
+            "DIW": solph.components.experimental.SinkDSM(
                 label=i,
                 inputs={node_dict[d["from"]]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
                 **kwargs_dict["DIW"],
             ),
-            "oemof": solph.custom.SinkDSM(
+            "oemof": solph.components.experimental.SinkDSM(
                 label=i,
                 inputs={node_dict[d["from"]]: solph.Flow(variable_costs=0)},
                 **kwargs_all,
@@ -503,7 +503,7 @@ def create_excess_sinks(input_data, node_dict):
         the excess sink elements
     """
     for i, e in input_data["sinks_excess"].iterrows():
-        node_dict[i] = solph.Sink(
+        node_dict[i] = solph.components.Sink(
             label=i,
             inputs={
                 node_dict[e["from"]]: solph.Flow(
@@ -514,7 +514,7 @@ def create_excess_sinks(input_data, node_dict):
 
     # The German sink is special due to a different input
     try:
-        node_dict["DE_sink_el_excess"] = solph.Sink(
+        node_dict["DE_sink_el_excess"] = solph.components.Sink(
             label="DE_sink_el_excess",
             inputs={
                 node_dict["DE_bus_windoffshore"]: solph.Flow(variable_costs=0),
@@ -555,7 +555,7 @@ def build_chp_transformer(i, t, node_dict, outflow_args_el, outflow_args_th):
         The transformer element to be added to the dict of nodes
         as i-th element
     """
-    node_dict[i] = solph.Transformer(
+    node_dict[i] = solph.components.Transformer(
         label=i,
         inputs={node_dict[t["from"]]: solph.Flow()},
         outputs={
@@ -602,7 +602,7 @@ def build_var_chp_units(i, t, node_dict, outflow_args_el, outflow_args_th):
         The extraction turbine element to be added to the dict of nodes
         as i-th element
     """
-    node_dict[i] = solph.ExtractionTurbineCHP(
+    node_dict[i] = solph.components.ExtractionTurbineCHP(
         label=i,
         inputs={node_dict[t["from"]]: solph.Flow()},
         outputs={
@@ -645,7 +645,7 @@ def build_condensing_transformer(i, t, node_dict, outflow_args_el):
         The transformer element to be added to the dict of nodes
         as i-th element
     """
-    node_dict[i] = solph.Transformer(
+    node_dict[i] = solph.components.Transformer(
         label=i,
         inputs={node_dict[t["from"]]: solph.Flow()},
         outputs={node_dict[t["to_el"]]: solph.Flow(**outflow_args_el)},
@@ -685,8 +685,8 @@ def create_transformers_conventional(input_data, dm, node_dict):
             ),
             "min": t["min_load_factor"],
             "max": (t["max_load_factor"]),
-            "positive_gradient": {"ub": t["grad_pos"], "costs": 0},
-            "negative_gradient": {"ub": t["grad_neg"], "costs": 0},
+            "positive_gradient": {"ub": t["grad_pos"]},
+            "negative_gradient": {"ub": t["grad_neg"]},
         }
 
         # Assign minimum loads and gradients for German CHP and IPP plants
@@ -915,11 +915,11 @@ def create_transformers_res(input_data, dm, node_dict):
                         dm.start_time : dm.end_time
                     ]
                 ),
-                "positive_gradient": {"ub": t["grad_pos"], "costs": 0},
-                "negative_gradient": {"ub": t["grad_neg"], "costs": 0},
+                "positive_gradient": {"ub": t["grad_pos"]},
+                "negative_gradient": {"ub": t["grad_neg"]},
             }
 
-            node_dict[i] = solph.Transformer(
+            node_dict[i] = solph.components.Transformer(
                 label=i,
                 inputs={node_dict[t["from"]]: solph.Flow()},
                 outputs={node_dict[t["to_el"]]: solph.Flow(**outflow_args_el)},
@@ -928,7 +928,7 @@ def create_transformers_res(input_data, dm, node_dict):
 
         # exogeneous fRES
         else:
-            node_dict[i] = solph.Transformer(
+            node_dict[i] = solph.components.Transformer(
                 label=i,
                 inputs={node_dict[t["from"]]: solph.Flow()},
                 outputs={

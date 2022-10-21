@@ -292,7 +292,7 @@ class TestModelControl:
     def test_retrieve_initial_states_rolling_horizon(self):
         """test method retrieve_initial_states_rolling_horizon"""
         dm, iteration_results, model_meta = set_up_rolling_horizon_run()
-        storage_levels = [12308, 12063]
+        storage_levels = [12432, 12308]
 
         for counter in range(getattr(dm, "amount_of_time_slices")):
             dm.build_rolling_horizon_model(counter, iteration_results)

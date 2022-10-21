@@ -57,10 +57,10 @@ def return_node_labels_and_dtypes():
         "DE_windoffshore_cluster_2",
     ]
     nodes_dict_dtypes = [
-        oemof.solph.Source,
-        oemof.solph.Sink,
+        oemof.solph.components.Source,
+        oemof.solph.components.Sink,
         oemof.solph.Bus,
-        oemof.solph.Transformer,
+        oemof.solph.components.Transformer,
     ]
 
     return nodes_dict_keys, nodes_dict_dtypes
@@ -136,7 +136,7 @@ class TestDataInput:
         nodes_dict, emissions_limit = data_input.nodes_from_csv(dm)
         nodes_dict_keys, nodes_dict_dtypes = return_node_labels_and_dtypes()
         nodes_dict_keys.append("DE_storage_el_PHS")
-        nodes_dict_dtypes.append(oemof.solph.GenericStorage)
+        nodes_dict_dtypes.append(oemof.solph.components.GenericStorage)
 
         assert emissions_limit is None
         for key, value in nodes_dict.items():
@@ -167,7 +167,7 @@ class TestDataInput:
         ) = data_input.nodes_from_csv_rh(dm, iteration_results)
         nodes_dict_keys, nodes_dict_dtypes = return_node_labels_and_dtypes()
         nodes_dict_keys.append("DE_storage_el_PHS")
-        nodes_dict_dtypes.append(oemof.solph.GenericStorage)
+        nodes_dict_dtypes.append(oemof.solph.components.GenericStorage)
 
         assert storage_labels == ["DE_storage_el_PHS"]
         assert emissions_limit is None
