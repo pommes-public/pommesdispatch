@@ -59,6 +59,7 @@ from oemof.solph import views
 from yaml.loader import SafeLoader
 
 from pommesdispatch.model_funcs import model_control
+from pommesdispatch.model_funcs.results_processing import process_demand_response_results
 
 
 def run_dispatch_model(config_file="./config.yml"):
@@ -192,6 +193,15 @@ def run_dispatch_model(config_file="./config.yml"):
             ],
             axis=1,
         )
+        if dm.activate_demand_response:
+            dispatch_to_concat = [dispatch_results]
+            for cluster in dm.demand_response_clusters:
+                processed_demand_response_results = (
+                    process_demand_response_results(
+                        views.node(model_results, cluster)["sequences"]
+                    )
+                )
+                dispatch_to_concat.append(processed_demand_response_results)
 
     if dm.save_updated_market_values:
         (

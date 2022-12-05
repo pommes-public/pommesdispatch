@@ -222,6 +222,9 @@ class DispatchModel(object):
 
     overlap_in_hours : int (optional, for rolling horizon)
         The length of the overlap for a rolling horizon model run in hours
+    
+    demand_response_clusters : list (optional, only for demand response)
+        A list specifying the names of the demand response clusters introduced
     """  # noqa: E501
 
     def __init__(self):
@@ -364,6 +367,16 @@ class DispatchModel(object):
                 / getattr(self, "time_slice_length_wo_overlap_in_time_steps")
             ),
         )
+
+    def add_demand_response_clusters(self, demand_response_clusters):
+        """Append the information on demand response clusters to the model
+
+        Parameters
+        ----------
+        demand_response_clusters : list
+            Demand response clusters to be considered
+        """
+        setattr(self, "demand_response_clusters", demand_response_clusters)
 
     def initialize_logging(self):
         """Initialize logging by deriving a filename from the configuration"""
