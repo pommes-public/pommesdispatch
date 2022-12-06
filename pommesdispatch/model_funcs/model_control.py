@@ -222,7 +222,7 @@ class DispatchModel(object):
 
     overlap_in_hours : int (optional, for rolling horizon)
         The length of the overlap for a rolling horizon model run in hours
-    
+
     demand_response_clusters : list (optional, only for demand response)
         A list specifying the names of the demand response clusters introduced
     """  # noqa: E501

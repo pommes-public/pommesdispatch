@@ -388,9 +388,7 @@ def create_demand_response_units(input_data, dm, node_dict):
                 dr_cluster_potential_data.loc[
                     simulation_year, "potential_pos_overall"
                 ],
-                dr_cluster_potential_data.loc[
-                    simulation_year, "max_cap"
-                ],
+                dr_cluster_potential_data.loc[simulation_year, "max_cap"],
             ),
             "capacity_up": np.array(
                 input_data["sinks_dr_el_ava_neg_ts"][dr_cluster].loc[

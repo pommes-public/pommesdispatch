@@ -202,9 +202,7 @@ def add_components(input_data, dispatch_model):
             input_data, dispatch_model, node_dict
         )
 
-        node_dict = create_demand(
-            input_data, dispatch_model, node_dict
-        )
+        node_dict = create_demand(input_data, dispatch_model, node_dict)
     else:
         node_dict = create_demand(input_data, dispatch_model, node_dict)
 
