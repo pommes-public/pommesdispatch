@@ -68,7 +68,7 @@ def parse_input_data(dm):
 
     time_series = {
         "linking_transformers_ts": "linking_transformers_ts",
-        "sinks_demand_el_ts": "sinks_demand_el_ts",
+        "sinks_demand_el_ts": "sinks_demand_el_ts_hourly",
         "costs_market_values": "costs_market_values",
         "sources_renewables_ts": "sources_renewables_ts",
         "transformers_minload_ts": "transformers_minload_ts",
@@ -100,19 +100,46 @@ def parse_input_data(dm):
 
     # Add demand response units
     if dm.activate_demand_response:
-        components["sinks_dr_el"] = (
-            "sinks_demand_response_el_" + dm.demand_response_scenario
+        # Overall demand = overall demand excluding demand response baseline
+        time_series["sinks_demand_el_ts"] = (
+            f"sinks_demand_el_excl_demand_response_ts_"
+            f"{dm.demand_response_scenario}_hourly"
         )
-        components["sinks_dr_el_ts"] = (
-            "sinks_demand_response_el_ts_" + dm.demand_response_scenario
+        other_files["sinks_demand_el"] = (
+            f"sinks_demand_el_excl_demand_response_"
+            f"{dm.demand_response_scenario}"
         )
-        components["sinks_dr_el_ava_pos_ts"] = (
-            "sinks_demand_response_el_ava_pos_ts_"
-            + dm.demand_response_scenario
+
+        # Obtain demand response clusters from file to avoid hard-coding
+        other_files[
+            "demand_response_clusters_eligibility"
+        ] = "demand_response_clusters_eligibility"
+        dr_clusters = load_input_data(
+            filename="demand_response_clusters_eligibility", dm=dm
         )
-        components["sinks_dr_el_ava_neg_ts"] = (
-            "sinks_demand_response_el_ava_neg_ts_"
-            + dm.demand_response_scenario
+        # Add demand response clusters information to the model itself
+        dm.add_demand_response_clusters(list(dr_clusters.index))
+        for dr_cluster in dr_clusters.index:
+            other_files[f"sinks_dr_el_{dr_cluster}"] = (
+                f"{dr_cluster}_potential_parameters_"
+                f"{dm.demand_response_scenario}%"
+            )
+            other_files[f"sinks_dr_el_{dr_cluster}_variable_costs"] = (
+                f"{dr_cluster}_variable_costs_parameters_"
+                f"{dm.demand_response_scenario}%"
+            )
+
+        time_series[
+            "sinks_dr_el_ts"
+        ] = f"sinks_demand_response_el_ts_{dm.demand_response_scenario}"
+
+        time_series["sinks_dr_el_ava_pos_ts"] = (
+            f"sinks_demand_response_el_ava_pos_ts_"
+            f"{dm.demand_response_scenario}"
+        )
+        time_series["sinks_dr_el_ava_neg_ts"] = (
+            f"sinks_demand_response_el_ava_neg_ts_"
+            f"{dm.demand_response_scenario}"
         )
 
     # Combine all files
@@ -125,8 +152,7 @@ def parse_input_data(dm):
     input_data = {
         key: load_input_data(
             filename=name,
-            path_folder_input=dm.path_folder_input,
-            countries=dm.countries,
+            dm=dm,
         )
         for key, name in input_files.items()
     }
@@ -172,13 +198,11 @@ def add_components(input_data, dispatch_model):
 
     # create sinks
     if dispatch_model.activate_demand_response:
-        node_dict, dr_overall_load_ts_df = create_demand_response_units(
+        node_dict = create_demand_response_units(
             input_data, dispatch_model, node_dict
         )
 
-        node_dict = create_demand(
-            input_data, dispatch_model, node_dict, dr_overall_load_ts_df
-        )
+        node_dict = create_demand(input_data, dispatch_model, node_dict)
     else:
         node_dict = create_demand(input_data, dispatch_model, node_dict)
 
