@@ -6,7 +6,7 @@ from pommesdispatch.model_funcs import subroutines, model_control, data_input
 from pommesdispatch.model_funcs.model_control import DispatchModel
 
 
-def create_inputs_model_and_nodes():
+def create_inputs_model_and_nodes(activate_demand_response=False):
     """Create and return input data, a dispatch model and a node dict"""
     dm = model_control.DispatchModel()
     dm.update_model_configuration(
@@ -20,7 +20,9 @@ def create_inputs_model_and_nodes():
             "freq": "60min",
             "emissions_pathway": "100_percent_linear",
             "aggregate_input": False,
-            "activate_demand_response": False,
+            "activate_demand_response": activate_demand_response,
+            "demand_response_approach": "DLR",
+            "demand_response_scenario": "50",
         },
         nolog=True,
     )
@@ -196,6 +198,25 @@ class TestSubroutines:
             )
             == 5
         )
+
+    def test_create_demand_response(self):
+        """test function create_demand_response"""
+        input_data, dm, node_dict = create_inputs_model_and_nodes(
+            activate_demand_response=True
+        )
+        node_dict = subroutines.create_buses(input_data, node_dict)
+        node_dict = subroutines.create_demand(input_data, dm, node_dict)
+        node_dict = subroutines.create_demand_response_units(
+            input_data, dm, node_dict
+        )
+
+        assert len(node_dict) == 14
+        assert (
+            type(node_dict["tcs+hoho_cluster_shift_only"])
+            == oemof.solph.components.experimental.SinkDSM
+        )
+        assert len(node_dict["tcs+hoho_cluster_shift_only"].capacity_up) == 5
+        assert node_dict["tcs+hoho_cluster_shift_only"].max_demand == 4473.0
 
     def test_create_excess_sinks(self):
         """test function create_excess_sinks"""
