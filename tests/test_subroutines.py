@@ -3,6 +3,7 @@ import oemof.solph
 import pandas as pd
 
 from pommesdispatch.model_funcs import subroutines, model_control, data_input
+from pommesdispatch.model_funcs.model_control import DispatchModel
 
 
 def create_inputs_model_and_nodes():
@@ -34,10 +35,12 @@ class TestSubroutines:
 
     def test_load_input_data(self):
         """test function load_input_data"""
+        dm = DispatchModel()
+        dm.path_folder_input = "tests/csv_files/"
+        dm.countries = ["DE", "AT", "FR"]
         csv_file = subroutines.load_input_data(
             filename="transformers_minload_ts_2017_w_nans",
-            path_folder_input="tests/csv_files/",
-            countries=["DE", "AT", "FR"],
+            dm=dm,
         )
 
         assert (
