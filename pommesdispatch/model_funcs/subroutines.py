@@ -369,6 +369,8 @@ def create_demand_response_units(input_data, dm, node_dict):
         dr_cluster_variable_costs_data = input_data[
             f"sinks_dr_el_{dr_cluster}_variable_costs"
         ]
+        # Use 2020 as a year for simulating 2017 etc.
+        simulation_year = max(2020, int(dm.start_time[:4]))
 
         # kwargs for all demand response modeling approaches
         kwargs_all = {
@@ -380,14 +382,14 @@ def create_demand_response_units(input_data, dm, node_dict):
             # max_capacity_up and max_capacity_down equal to potential
             # which assumed to be utilized
             "max_capacity_up": dr_cluster_potential_data.loc[
-                int(dm.start_time[:4]), "potential_neg_overall"
+                simulation_year, "potential_neg_overall"
             ],
             "max_capacity_down": min(
                 dr_cluster_potential_data.loc[
-                    int(dm.start_time[:4]), "potential_pos_overall"
+                    simulation_year, "potential_pos_overall"
                 ],
                 dr_cluster_potential_data.loc[
-                    int(dm.start_time[:4]), "max_cap"
+                    simulation_year, "max_cap"
                 ],
             ),
             "capacity_up": np.array(
@@ -401,7 +403,7 @@ def create_demand_response_units(input_data, dm, node_dict):
                 ]
             ),
             "max_demand": dr_cluster_potential_data.loc[
-                int(dm.start_time[:4]), "max_cap"
+                simulation_year, "max_cap"
             ],
             "delay_time": math.ceil(
                 dr_cluster_potential_data.at[2020, "shifting_duration"]
@@ -415,15 +417,15 @@ def create_demand_response_units(input_data, dm, node_dict):
                 dr_cluster_potential_data.at[2020, "regeneration_duration"]
             ),
             "cost_dsm_up": dr_cluster_variable_costs_data.loc[
-                f"{int(dm.start_time[:4])}-01-01", "variable_costs"
+                f"{simulation_year}-01-01", "variable_costs"
             ]
             / 2,
             "cost_dsm_down_shift": dr_cluster_variable_costs_data.loc[
-                f"{int(dm.start_time[:4])}-01-01", "variable_costs"
+                f"{simulation_year}-01-01", "variable_costs"
             ]
             / 2,
             "cost_dsm_down_shed": dr_cluster_variable_costs_data.loc[
-                f"{int(dm.start_time[:4])}-01-01", "variable_costs_shed"
+                f"{simulation_year}-01-01", "variable_costs_shed"
             ],
             "efficiency": 1,  # TODO: Replace hard-coded entries!
             "shed_eligibility": eligibility["shedding"],
