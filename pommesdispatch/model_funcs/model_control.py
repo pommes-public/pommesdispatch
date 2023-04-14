@@ -498,7 +498,7 @@ class DispatchModel(object):
 
         emission_flows = {}
 
-        for (i, o) in self.om.flows:
+        for i, o in self.om.flows:
             if any(x in o.label for x in emission_flow_labels):
                 emission_flows[(i, o)] = self.om.flows[(i, o)]
 
