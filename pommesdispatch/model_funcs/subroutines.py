@@ -472,40 +472,16 @@ def create_demand_response_units(input_data, dm, node_dict):
             "oemof": {"approach": "oemof", "shift_interval": 24},
         }
 
-        approach_dict = {
-            "DLR": solph.components.experimental.SinkDSM(
-                label=dr_cluster,
-                inputs={
-                    node_dict[
-                        dr_cluster_potential_data.at[2020, "from"]
-                    ]: solph.Flow(variable_costs=0)
-                },
-                **kwargs_all,
-                **kwargs_dict["DLR"],
-            ),
-            "DIW": solph.components.experimental.SinkDSM(
-                label=dr_cluster,
-                inputs={
-                    node_dict[
-                        dr_cluster_potential_data.at[2020, "from"]
-                    ]: solph.Flow(variable_costs=0)
-                },
-                **kwargs_all,
-                **kwargs_dict["DIW"],
-            ),
-            "oemof": solph.components.experimental.SinkDSM(
-                label=dr_cluster,
-                inputs={
-                    node_dict[
-                        dr_cluster_potential_data.at[2020, "from"]
-                    ]: solph.Flow(variable_costs=0)
-                },
-                **kwargs_all,
-                **kwargs_dict["oemof"],
-            ),
-        }
-
-        node_dict[dr_cluster] = approach_dict[dm.demand_response_approach]
+        node_dict[dr_cluster] = solph.components.experimental.SinkDSM(
+            label=dr_cluster,
+            inputs={
+                node_dict[
+                    dr_cluster_potential_data.at[2020, "from"]
+                ]: solph.Flow(variable_costs=0)
+            },
+            **kwargs_all,
+            **kwargs_dict[dm.demand_response_approach],
+        )
 
     return node_dict
 
@@ -707,7 +683,6 @@ def create_transformers_conventional(input_data, dm, node_dict):
         including the demand sink elements
     """
     for i, t in input_data["transformers"].iterrows():
-
         outflow_args_el = {
             "nominal_value": t["capacity"],
             "variable_costs": (
@@ -999,7 +974,6 @@ def create_storages(input_data, dm, node_dict):
         including the storage elements
     """
     for i, s in input_data["storages_el"].iterrows():
-
         if s["type"] == "phes":
             node_dict[i] = solph.components.GenericStorage(
                 label=i,
@@ -1095,7 +1069,6 @@ def create_storages_rolling_horizon(
     storage_labels = []
 
     for i, s in input_data["storages_el"].iterrows():
-
         storage_labels.append(i)
         if not iteration_results["storages_initial"].empty:
             initial_storage_level_last_iteration = (
