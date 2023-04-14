@@ -15,7 +15,6 @@ def process_demand_response_results(results):
     processed_results : pd.DataFrame
         Demand response results in a proper and harmonized format
     """
-    processed_results = pd.DataFrame(dtype="float64")
     upshift_columns = [
         col
         for col in results.columns
@@ -43,6 +42,16 @@ def process_demand_response_results(results):
     unique_keys = set([col[0][0] for col in results.columns])
     unique_keys.remove("DE_bus_el")
     cluster_identifier = unique_keys.pop()
+
+    processed_results = pd.DataFrame(
+        dtype="float64",
+        columns=[
+            (cluster_identifier, "dsm_up"),
+            (cluster_identifier, "dsm_do_shift"),
+            (cluster_identifier, "dsm_do_shed"),
+            (cluster_identifier, "dsm_storage_level"),
+        ],
+    )
 
     # Only upshift, downshift, shedding and storage level are required
     # Inflow is already considered in dispatch results
