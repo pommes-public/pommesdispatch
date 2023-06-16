@@ -902,16 +902,18 @@ def create_transformers_res(input_data, dm, node_dict):
         including the renewable transformer elements
     """
     for i, t in input_data["transformers_renewables"].iterrows():
-        outflow_args_el = {
-            "nominal_value": t["capacity"],
-            "variable_costs": (
-                input_data["costs_operation_renewables"].at[i, "costs"]
-                + np.array(
+        bid_limit = input_data["costs_operation_renewables"].at[i, "costs"]
+        if not t["fixed"]:
+            bid_limit += (
+                np.array(
                     input_data["costs_market_values"][t["from"]][
                         dm.start_time : dm.end_time
                     ]
                 )
-            ),
+            )
+        outflow_args_el = {
+            "nominal_value": t["capacity"],
+            "variable_costs": bid_limit,
             "min": t["min_load_factor"],
             "max": np.array(
                 input_data["sources_renewables_ts"][t["from"]][
