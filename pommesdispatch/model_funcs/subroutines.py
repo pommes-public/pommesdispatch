@@ -902,52 +902,32 @@ def create_transformers_res(input_data, dm, node_dict):
         including the renewable transformer elements
     """
     for i, t in input_data["transformers_renewables"].iterrows():
-        # endogeneous fRES
+        bid_limit = input_data["costs_operation_renewables"].at[i, "costs"]
         if not t["fixed"]:
-            outflow_args_el = {
-                "nominal_value": t["capacity"],
-                "variable_costs": (
-                    input_data["costs_operation_renewables"].at[i, "costs"]
-                    + np.array(
-                        input_data["costs_market_values"][t["from"]][
-                            dm.start_time : dm.end_time
-                        ]
-                    )
-                ),
-                "min": t["min_load_factor"],
-                "max": np.array(
-                    input_data["sources_renewables_ts"][t["from"]][
-                        dm.start_time : dm.end_time
-                    ]
-                ),
-                "positive_gradient": {"ub": t["grad_pos"]},
-                "negative_gradient": {"ub": t["grad_neg"]},
-            }
-
-            node_dict[i] = solph.components.Transformer(
-                label=i,
-                inputs={node_dict[t["from"]]: solph.Flow()},
-                outputs={node_dict[t["to_el"]]: solph.Flow(**outflow_args_el)},
-                conversion_factors={node_dict[t["to_el"]]: t["efficiency_el"]},
+            bid_limit += np.array(
+                input_data["costs_market_values"][t["from"]][
+                    dm.start_time : dm.end_time
+                ]
             )
+        outflow_args_el = {
+            "nominal_value": t["capacity"],
+            "variable_costs": bid_limit,
+            "min": t["min_load_factor"],
+            "max": np.array(
+                input_data["sources_renewables_ts"][t["from"]][
+                    dm.start_time : dm.end_time
+                ]
+            ),
+            "positive_gradient": {"ub": t["grad_pos"]},
+            "negative_gradient": {"ub": t["grad_neg"]},
+        }
 
-        # exogeneous fRES
-        else:
-            node_dict[i] = solph.components.Transformer(
-                label=i,
-                inputs={node_dict[t["from"]]: solph.Flow()},
-                outputs={
-                    node_dict[t["to_el"]]: solph.Flow(
-                        nominal_value=t["capacity"],
-                        fix=np.array(
-                            input_data["sources_renewables_ts"][t["from"]][
-                                dm.start_time : dm.end_time
-                            ]
-                        ),
-                    )
-                },
-                conversion_factors={node_dict[t["to_el"]]: t["efficiency_el"]},
-            )
+        node_dict[i] = solph.components.Transformer(
+            label=i,
+            inputs={node_dict[t["from"]]: solph.Flow()},
+            outputs={node_dict[t["to_el"]]: solph.Flow(**outflow_args_el)},
+            conversion_factors={node_dict[t["to_el"]]: t["efficiency_el"]},
+        )
 
     return node_dict
 
