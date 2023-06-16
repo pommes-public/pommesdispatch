@@ -904,12 +904,10 @@ def create_transformers_res(input_data, dm, node_dict):
     for i, t in input_data["transformers_renewables"].iterrows():
         bid_limit = input_data["costs_operation_renewables"].at[i, "costs"]
         if not t["fixed"]:
-            bid_limit += (
-                np.array(
-                    input_data["costs_market_values"][t["from"]][
-                        dm.start_time : dm.end_time
-                    ]
-                )
+            bid_limit += np.array(
+                input_data["costs_market_values"][t["from"]][
+                    dm.start_time : dm.end_time
+                ]
             )
         outflow_args_el = {
             "nominal_value": t["capacity"],
