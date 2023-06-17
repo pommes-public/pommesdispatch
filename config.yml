@@ -17,6 +17,7 @@ control_parameters:
     activate_demand_response: True
     demand_response_approach: "DLR"
     demand_response_scenario: "50"
+    eeg_clusters_per_technology: 20
     save_updated_market_values: True
     save_production_results: True
     save_price_results: True

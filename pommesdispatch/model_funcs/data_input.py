@@ -63,7 +63,10 @@ def parse_input_data(dm):
         "sources_renewables": "sources_renewables",
         "storages_el": "storages_el",
         "transformers": "transformers",
-        "transformers_renewables": "transformers_renewables",
+        "transformers_renewables": (
+            f"transformers_renewables_"
+            f"{dm.eeg_clusters_per_technology}_clusters"
+        ),
     }
 
     time_series = {
