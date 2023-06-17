@@ -179,6 +179,11 @@ class DispatchModel(object):
         Options: '25', '50', '75', whereby '25' is the lower,
         i.e. rather pessimistic estimate
 
+    eeg_clusters_per_technology : int
+        Maximum number of clusters per technology supported under the German
+        EEG and focused upon in pommesdispatch
+        (solar, wind onshore, wind offshore)
+
     save_updated_market_values : str
         boolean control variable indicating whether to save updated
         RES market values calculated from a previous model run
@@ -242,6 +247,7 @@ class DispatchModel(object):
         self.activate_demand_response = None
         self.demand_response_approach = None
         self.demand_response_scenario = None
+        self.eeg_clusters_per_technology = None
         self.save_updated_market_values = None
         self.save_production_results = None
         self.save_price_results = None
@@ -401,6 +407,9 @@ class DispatchModel(object):
             + "-days_"
             + rh
             + agg
+            + "_"
+            + str(self.eeg_clusters_per_technology)
+            + "_res-clusters"
         )
 
         setattr(self, "filename", filename)
