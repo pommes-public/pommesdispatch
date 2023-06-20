@@ -72,7 +72,9 @@ def parse_input_data(dm):
     time_series = {
         "linking_transformers_ts": "linking_transformers_ts",
         "sinks_demand_el_ts": "sinks_demand_el_ts_hourly",
-        "costs_market_values": "costs_market_values",
+        "costs_market_values": (
+            f"costs_market_values_{dm.eeg_clusters_per_technology}_clusters"
+        ),
         "sources_renewables_ts": "sources_renewables_ts",
         "transformers_minload_ts": "transformers_minload_ts",
         "transformers_availability_ts": "transformers_availability_ts",

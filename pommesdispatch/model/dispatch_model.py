@@ -214,7 +214,8 @@ def run_dispatch_model(config_file="./config.yml"):
         market_values.to_csv(
             dm.path_folder_output
             + getattr(dm, "filename")
-            + "_monthly_market_values.csv",
+            + "_monthly_market_values_"
+            + f"{dm.eeg_clusters_per_technology}_clusters.csv",
             sep=",",
             decimal=".",
         )
@@ -222,7 +223,7 @@ def run_dispatch_model(config_file="./config.yml"):
         market_values_hourly.to_csv(
             dm.path_folder_input
             + "costs_market_values"
-            + "_"
+            + f"_{dm.eeg_clusters_per_technology}_clusters_"
             + str(dm.year)
             + ".csv",
             sep=",",
