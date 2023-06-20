@@ -88,7 +88,10 @@ def parse_input_data(dm):
         ),
         "costs_emissions_ts": "costs_emissions_ts",
         "costs_operation": "costs_operation_nominal",
-        "costs_operation_renewables": "costs_operation_renewables",
+        "costs_operation_renewables": (
+            f"costs_operation_renewables_"
+            f"{dm.eeg_clusters_per_technology}_clusters"
+        ),
         "costs_operation_storages": "costs_operation_storages_nominal",
         "min_loads_dh": "min_loads_dh",
         "min_loads_ipp": "min_loads_ipp",
