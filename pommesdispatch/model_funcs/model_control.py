@@ -240,7 +240,6 @@ class DispatchModel(object):
         self.solver = None
         self.solver_commandline_options = None
         self.fuel_cost_pathway = None
-        self.fuel_price_shock = None
         self.emissions_cost_pathway = None
         self.activate_emissions_limit = None
         self.emissions_pathway = None

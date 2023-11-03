@@ -79,8 +79,7 @@ def parse_input_data(dm):
         "transformers_minload_ts": "transformers_minload_ts",
         "transformers_availability_ts": "transformers_availability_ts",
         "costs_fuel": (
-            f"costs_fuel_{dm.fuel_cost_pathway}"
-            + f"_{dm.fuel_price_shock}_nominal"
+            f"costs_fuel_{dm.fuel_cost_pathway}_nominal"
         ),
         "costs_fuel_ts": "costs_fuel_ts",
         "costs_emissions": (

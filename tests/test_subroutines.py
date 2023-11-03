@@ -13,7 +13,6 @@ def create_inputs_model_and_nodes(activate_demand_response=False):
         {
             "path_folder_input": "tests/csv_files/",
             "fuel_cost_pathway": "NZE",
-            "fuel_price_shock": "high",
             "emissions_cost_pathway": "long-term",
             "start_time": "2017-01-01 00:00:00",
             "end_time": "2017-01-02 00:00:00",
