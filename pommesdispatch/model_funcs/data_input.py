@@ -78,10 +78,7 @@ def parse_input_data(dm):
         "sources_renewables_ts": "sources_renewables_ts",
         "transformers_minload_ts": "transformers_minload_ts",
         "transformers_availability_ts": "transformers_availability_ts",
-        "costs_fuel": (
-            f"costs_fuel_{dm.fuel_cost_pathway}"
-            + f"_{dm.fuel_price_shock}_nominal"
-        ),
+        "costs_fuel": f"costs_fuel_{dm.fuel_cost_pathway}_nominal",
         "costs_fuel_ts": "costs_fuel_ts",
         "costs_emissions": (
             f"costs_emissions_{dm.emissions_cost_pathway}_nominal"
